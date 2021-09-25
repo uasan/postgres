@@ -11,17 +11,10 @@ const db = new Pool({
 });
 
 async function test() {
-  let sql = `
-    SELECT 'empty'::int4range
-  `;
-
+  const sql = `SELECT 'empty'::int4range`;
   const params = [];
 
-  try {
-    console.log(await db.query(sql, params, FETCH_ONE_VALUE));
-  } catch (error) {
-    console.error(error);
-  }
+  await db.query(sql, params, FETCH_ONE_VALUE)
 }
 
 test();

@@ -22,7 +22,7 @@ const parseError = (pid, reader) => {
 
   while ((code = uint8[reader.offset])) {
     reader.ending = uint8.indexOf(0, ++reader.offset);
-    error[fields[code] ?? code] = reader.getTextUTF8();
+    if (fields[code]) error[fields[code]] = reader.getTextUTF8();
     reader.offset = reader.ending + 1;
   }
 

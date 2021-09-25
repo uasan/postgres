@@ -28,9 +28,7 @@ let params = [
   null,
   false,
   Buffer.from('awesome'),
-  isPostgres
-    ? '[{ "some": "json" }, { "array": "object" }]'
-    : [{ "some": "json" }, { "array": "object" }]
+  '[{ "some": "json" }, { "array": "object" }]'
 ];
 
 async function test() {

@@ -18,16 +18,16 @@ const db2 = new Pool({
 
 async function test() {
   try {
-    await db2.query('TRUNCATE smartlibrary.locations CASCADE');
+    await db2.query(`CREATE TEMP TABLE temp_copy (LIKE pg_catalog.pg_statistic)`);
     await db2.query(`SET session_replication_role = 'replica'`);
 
     console.time('COPY');
 
     const readableStream = await db1.query(
-      `COPY smartlibrary.locations_copy TO STDOUT`
+      `COPY pg_catalog.pg_statistic TO STDOUT`
     );
     const writableStream = await db2.query(
-      `COPY smartlibrary.locations FROM STDIN`
+      `COPY temp_copy FROM STDIN`
     );
 
     await readableStream.pipeTo(writableStream);

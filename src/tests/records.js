@@ -13,9 +13,13 @@ const db = new Pool({
 async function test() {
   let sql = `SELECT _ FROM (values($1::int, $2::text)) _`;
 
-  const params = [10, 'abc'];
+  const params = [10, 'AAA'];
 
-  console.log(await db.query(sql, params, FETCH_ONE_VALUE));
+  try {
+    console.log(await db.query(sql, params, FETCH_ONE_VALUE));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-test();
+await test();
