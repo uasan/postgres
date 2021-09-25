@@ -1,8 +1,9 @@
 {
-  "parser": "eslint-parser",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaVersion": 2020,
-    "sourceType": "module"
+    "sourceType": "module",
+    "requireConfigFile": false
   },
   "globals": {
     "globalThis": false

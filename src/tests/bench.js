@@ -28,7 +28,7 @@ let params = [
   null,
   false,
   Buffer.from('awesome'),
-  '[{ "some": "json" }, { "array": "object" }]'
+  '[{ "some": "json" }, { "array": "object" }]',
 ];
 
 async function test() {
@@ -58,8 +58,7 @@ async function test() {
           'RPS',
           Math.round(max / sec),
           'IDLE',
-          100 -
-            Math.round(performance.eventLoopUtilization().utilization * 100),
+          100 - Math.round(performance.eventLoopUtilization().utilization * 100)
         );
         count = 0;
         time = now;
