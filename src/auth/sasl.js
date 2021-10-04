@@ -8,7 +8,7 @@ import {
 import { MESSAGE_PASSWORD } from '../protocol/messages.js';
 
 export const saslHandshake = (reader, writer, options) => {
-  const mechanisms = reader.getTextASCII().split('\x00');
+  const mechanisms = reader.getTextUTF8().split('\x00');
 
   if (mechanisms.includes('SCRAM-SHA-256') === false)
     throw new Error('Not supported SASL auth-mechanisms: ' + mechanisms);
@@ -31,7 +31,7 @@ const makeParams = (params, text) => {
 
 export const saslContinue = (reader, writer, options) => {
   const { password, nonce } = options;
-  const { r, s, i } = reader.getTextASCII().split(',').reduce(makeParams, {});
+  const { r, s, i } = reader.getTextUTF8().split(',').reduce(makeParams, {});
 
   const saltedPassword = pbkdf2Sync(
     password,
@@ -58,6 +58,6 @@ export const saslContinue = (reader, writer, options) => {
 };
 
 export const saslFinal = (reader, writer, { serverSignature }) => {
-  if (reader.getTextASCII().split('\x00', 1)[0].slice(2) !== serverSignature)
+  if (reader.getTextUTF8().split('\x00', 1)[0].slice(2) !== serverSignature)
     throw new Error('The server did not return the correct signature');
 };

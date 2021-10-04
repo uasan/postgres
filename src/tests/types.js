@@ -1,5 +1,6 @@
 import { Client } from '../client.js';
 import { FETCH_ONE } from '../constants.js';
+import { Duration, PlainTime, PlainDate, Instant } from '#native';
 
 const db = new Client({
   host: '127.0.0.1',
@@ -18,24 +19,29 @@ async function test() {
     $5::float4,
     $6::float8,
     $7::numeric,
-    $8::timestamptz,
-    $9::interval,
-    $10::uuid,
-    $11::json,
-    $12::int4[] AS "int4[]",
-    $13::text[] AS "text[]",
-    $14::uuid[] AS "uuid[]"`;
+    $8::time,
+    $9::date,
+    $10::timestamptz,
+    $11::interval,
+    $12::uuid,
+    $13::json,
+    $14::int4[] AS "int4[]",
+    $15::text[] AS "text[]",
+    $16::uuid[] AS "uuid[]",
+    '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest"`;
 
   const params = [
     true,
-    'Text',
+    'Text 👍',
     123456789,
-    BigInt('9223372036854775807'),
+    9223372036854775807n,
     Math.PI,
     Math.PI,
-    '9223372036854775807' + Math.PI,
-    new Date(),
-    '1 years 2 mons 3 days 4 hours 5 mins 6 secs',
+    '92233720368547758070.92233720368547758070',
+    PlainTime.from('23:59:59.999999'),
+    PlainDate.from('2021-10-03'),
+    Instant.from('2021-10-03T15:12:08.401928Z'),
+    Duration.from('P1Y2M3W4DT5H6M7.987654321S'),
     'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
     { key: 'value' },
     [1, 2, 3],
@@ -49,7 +55,7 @@ async function test() {
     ],
   ];
 
-  console.log(await db.query(sql, params, FETCH_ONE));
+  db.query(sql, params, FETCH_ONE).then(console.log, console.error);
 }
 
 test();

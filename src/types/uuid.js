@@ -1,5 +1,5 @@
 import { byteToHex, hexToByte } from '../utils/hex.js';
-import { decodeTextASCII, encodeTextASCII } from './text.js';
+import { decodeText, encodeText } from './text.js';
 
 const decodeBlobUUID = ({ uint8, offset: i }) =>
   byteToHex[uint8[i]] +
@@ -54,8 +54,8 @@ export const uuid = {
   decode: decodeBlobUUID,
   encode: encodeBlobUUID,
 
-  decodeText: decodeTextASCII,
-  encodeText: encodeTextASCII,
+  decodeText,
+  encodeText,
 
   decodeBlob: decodeBlobUUID,
   encodeBlob: encodeBlobUUID,

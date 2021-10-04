@@ -1,14 +1,14 @@
 import { createConnection } from 'net';
 import { Writer } from './writer.js';
 import { handshake } from '../request/init.js';
-import { randomTimeout } from '../utils/native.js';
+import { randomTimeout } from '#native';
 import { restoreListeners } from '../request/listen.js';
 
 const retryErrors = new Set(['ECONNREFUSED', 'ECONNRESET', 'EPIPE']);
 export class Connection {
   timeout = 0;
   stream = null;
-  readyForQuery = null;
+  promiseReadyForQuery = null;
 
   constructor(client) {
     this.client = client;
@@ -18,7 +18,6 @@ export class Connection {
       path: this.options.path,
       host: this.options.host,
       port: this.options.port,
-      highWaterMark: 131072,
       onread: {
         callback: client.reader.read,
         buffer: client.reader.getBuffer,
@@ -28,6 +27,7 @@ export class Connection {
 
   onConnect = () => {
     if (this.stream === null) return;
+    //console.log('ON-CONNECT');
 
     this.timeout = 0;
     this.writer = new Writer(this);
@@ -47,7 +47,7 @@ export class Connection {
 
     this.stream = null;
     this.writer = null;
-    this.readyForQuery = null;
+    this.promiseReadyForQuery = null;
     this.options.signal?.removeEventListener('abort', client.end);
 
     if (!client.isEnded && client.isKeepAlive()) this.reconnect();
@@ -76,19 +76,20 @@ export class Connection {
   };
 
   resolve = resolvePromise => {
+    //console.log('CONNECT-RESOLVE');
     const { client } = this;
 
     this.writer = null;
-    this.readyForQuery = null;
+    this.promiseReadyForQuery = null;
 
     client.isReady = true;
     client.isConnected = true;
+    client.stream = this.stream;
+    client.writer.unlock();
 
     if (client.listeners.size) restoreListeners.call(client);
 
     client.onReadyForQuery = client.constructor.prototype.onReadyForQuery;
-
-    client.writer.unlock();
     client.onReadyForQuery();
 
     resolvePromise();
@@ -103,8 +104,8 @@ export class Connection {
   };
 
   connect() {
-    if (this.stream) return this.stream;
-    //console.count('CONNECT');
+    if (this.stream) return this.promiseReadyForQuery;
+    //console.log('CONNECT');
 
     this.client.isEnded = false;
     this.stream = createConnection(this.params, this.onConnect)
@@ -115,24 +116,24 @@ export class Connection {
       .setKeepAlive(true, 60_000)
       .setTimeout(120_000, this.onTimeout);
 
-    if (this.client.task && this.client.task !== this.readyForQuery) {
+    if (this.client.task && this.client.task !== this.promiseReadyForQuery) {
       this.client.queue.unshift(this.client.task);
     }
 
     let resolveTask;
     let rejectTask;
 
-    this.readyForQuery = new Promise((resolve, reject) => {
+    this.promiseReadyForQuery = new Promise((resolve, reject) => {
       resolveTask = () => this.resolve(resolve);
       rejectTask = error => this.reject(error, reject);
     });
 
-    this.readyForQuery.reject = rejectTask;
+    this.promiseReadyForQuery.reject = rejectTask;
 
-    this.client.task = this.readyForQuery;
+    this.client.task = this.promiseReadyForQuery;
     this.client.onReadyForQuery = resolveTask;
 
-    return this.stream;
+    return this.promiseReadyForQuery;
   }
 
   onTimeout = () => {

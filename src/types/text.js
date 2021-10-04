@@ -1,47 +1,37 @@
-export const decodeTextUTF8 = reader => reader.getTextUTF8();
-export const decodeTextASCII = reader => reader.getTextASCII();
-
-export const encodeTextUTF8 = (writer, value) => {
+export const decodeText = reader => reader.getTextUTF8();
+export const encodeText = (writer, value) => {
   writer.setUTF8(value);
 };
 
-export { encodeTextUTF8 as encodeTextASCII };
-
 export const text = {
   id: 25,
+  decode: decodeText,
+  encode: encodeText,
 
-  decode: decodeTextUTF8,
-  encode: encodeTextUTF8,
-
-  decodeText: decodeTextUTF8,
-  encodeText: encodeTextUTF8,
-
-  decodeBlob: decodeTextUTF8,
-  encodeBlob: encodeTextUTF8,
+  decodeText,
+  encodeText,
+  decodeBlob: decodeText,
+  encodeBlob: encodeText,
 };
 
 export const tsquery = {
   id: 3615,
+  decode: decodeText,
+  encode: encodeText,
 
-  decode: decodeTextUTF8,
-  encode: encodeTextUTF8,
-
-  decodeText: decodeTextUTF8,
-  encodeText: encodeTextUTF8,
-
+  decodeText,
+  encodeText,
   decodeBlob: null,
   encodeBlob: null,
 };
 
 export const tsvector = {
   id: 3614,
+  decode: decodeText,
+  encode: encodeText,
 
-  decode: decodeTextUTF8,
-  encode: encodeTextUTF8,
-
-  decodeText: decodeTextUTF8,
-  encodeText: encodeTextUTF8,
-
+  decodeText,
+  encodeText,
   decodeBlob: null,
   encodeBlob: null,
 };

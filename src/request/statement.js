@@ -8,7 +8,7 @@ import {
   VALUE_DESCRIBE_STATEMENT,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
-import { encodeTextInto } from '../utils/string.js';
+import { textEncoder } from '../utils/string.js';
 
 export class Statement {
   constructor({ statements, writer }, task) {
@@ -30,7 +30,7 @@ export class Statement {
     this.decoders = [];
     this.encoders = new Array(length);
 
-    encodeTextInto(name, params.subarray(1));
+    textEncoder.encodeInto(name, params.subarray(1));
     const view = new DataView(params.buffer);
     view.setInt16(name.length + 2, length);
     view.setInt16(name.length + 4 + length * 2, length);

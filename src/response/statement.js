@@ -31,7 +31,7 @@ export const rowDescription = ({ task, reader }) => {
 
   for (let i = 0; i < length; ++i) {
     reader.ending = reader.uint8.indexOf(0, reader.offset);
-    columns.push(reader.getTextASCII());
+    columns.push(reader.getTextUTF8());
     reader.offset = reader.ending;
 
     reader.offset += 7;
@@ -57,7 +57,7 @@ export const commandComplete = ({ task, reader }) => {
   if (statement.columns.length === 0) {
     reader.offset = reader.uint8.indexOf(32, reader.offset) + 1;
     reader.ending = reader.uint8.indexOf(0, reader.offset) - 1;
-    resolve({ count: +reader.getTextASCII() });
+    resolve({ count: +reader.getTextUTF8() });
   } else resolve(task.data);
 };
 

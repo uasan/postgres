@@ -1,65 +1,134 @@
-import { decodeTextASCII, encodeTextASCII } from './text.js';
+import {
+  Number,
+  BigInt,
+  Instant,
+  Duration,
+  PlainTime,
+  PlainDate,
+} from '#native';
+import { decodeText, encodeText } from './text.js';
 
-const decodeBlobTimestamp = ({ view, offset }) =>
-  new Date(Number(view.getBigUint64(offset)) / 1000 + 946684800000);
+const plainTime = PlainTime.from('00:00');
+const plainDate = PlainDate.from('2000-01-01');
 
-const encodeBlobTimestamp = (writer, value) => {
+const decodeTimestamp = ({ view, offset }) =>
+  Instant.fromEpochMicroseconds(view.getBigInt64(offset) + 946684800000000n);
+
+const decodeDate = ({ view, offset }) =>
+  plainDate.add({ days: ~~(view.getInt32(offset) / 86400) });
+
+const decodeTime = ({ view, offset }) =>
+  plainTime.add({ microseconds: Number(view.getBigInt64(offset)) });
+
+const decodeInterval = ({ view, offset }) =>
+  new Duration(
+    0,
+    view.getInt32(offset + 12),
+    0,
+    view.getInt32(offset + 8),
+    0,
+    0,
+    0,
+    0,
+    Number(view.getBigInt64(offset))
+  );
+
+const encodeInterval = (writer, value) => {
   const { view, length } = writer;
 
+  const months = value.years * 12 + value.months;
+  const days = value.weeks * 7 + value.days;
+  const time =
+    value.hours * 3600000000 +
+    value.minutes * 60000000 +
+    value.seconds * 1000000 +
+    value.milliseconds * 1000 +
+    value.microseconds;
+
+  writer.alloc(20);
+  view.setInt32(length, 16);
+
+  view.setBigInt64(length + 4, BigInt(time));
+  view.setInt32(length + 12, days);
+  view.setInt32(length + 16, months);
+};
+
+const encodeTime = (writer, value) => {
+  const { view, length } = writer;
   writer.alloc(12);
   view.setInt32(length, 8);
-  view.setBigUint64(
+  view.setBigInt64(
     length + 4,
-    BigInt(value.getTime()) * BigInt(1000) - BigInt('946684800000000')
+    BigInt(
+      value.hour * 3600000000 +
+        value.minute * 60000000 +
+        value.second * 1000000 +
+        value.millisecond * 1000 +
+        value.microsecond
+    )
   );
+};
+
+const encodeDate = (writer, value) => {
+  const { view, length } = writer;
+  writer.alloc(8);
+  view.setInt32(length, 4);
+  view.setInt32(length + 4, value.epochSeconds - 946684800);
+};
+
+const encodeTimestamp = (writer, value) => {
+  const { view, length } = writer;
+  writer.alloc(12);
+  view.setInt32(length, 8);
+  view.setBigInt64(length + 4, value.epochMicroseconds - 946684800000000n);
 };
 
 export const date = {
   id: 1082,
-  decode: decodeTextASCII,
-  encode: encodeTextASCII,
+  decode: decodeDate,
+  encode: encodeDate,
 
-  decodeBlob: null,
-  encodeBlob: null,
+  decodeBlob: decodeDate,
+  encodeBlob: encodeDate,
 
-  decodeText: decodeTextASCII,
-  encodeText: encodeTextASCII,
+  decodeText,
+  encodeText,
 };
 
 export const time = {
   id: 1083,
-  decode: decodeTextASCII,
-  encode: encodeTextASCII,
+  decode: decodeTime,
+  encode: encodeTime,
 
-  decodeBlob: null,
-  encodeBlob: null,
+  decodeBlob: decodeTime,
+  encodeBlob: encodeTime,
 
-  decodeText: decodeTextASCII,
-  encodeText: encodeTextASCII,
+  decodeText,
+  encodeText,
 };
 
 export const interval = {
   id: 1186,
-  decode: decodeTextASCII,
-  encode: encodeTextASCII,
+  decode: decodeInterval,
+  encode: encodeInterval,
 
-  decodeBlob: null,
-  encodeBlob: null,
+  decodeBlob: decodeInterval,
+  encodeBlob: encodeInterval,
 
-  decodeText: decodeTextASCII,
-  encodeText: encodeTextASCII,
+  decodeText,
+  encodeText,
 };
 
 export const timestamp = {
   id: 1114,
-  decode: decodeBlobTimestamp,
-  encode: encodeBlobTimestamp,
+  decode: decodeTimestamp,
+  encode: encodeTimestamp,
 
-  decodeBlob: decodeBlobTimestamp,
-  encodeBlob: encodeBlobTimestamp,
+  decodeBlob: decodeTimestamp,
+  encodeBlob: encodeTimestamp,
 
   decodeText: null,
-  encodeText: encodeTextASCII,
+  encodeText,
 };
 
 export const timestamptz = {

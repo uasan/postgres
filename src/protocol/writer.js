@@ -1,4 +1,4 @@
-import { encodeTextInto } from '../utils/string.js';
+import { textEncoder } from '../utils/string.js';
 import { Queue } from '../utils/queue.js';
 
 export class Writer {
@@ -25,6 +25,7 @@ export class Writer {
   }
 
   async unlock() {
+    //console.log('UNLOCK');
     await (this.promise ??= this.write());
 
     if (this.queue.length) this.queue.dequeue()();
@@ -48,31 +49,32 @@ export class Writer {
   async write() {
     let length = 0;
     let offset = 0;
-    const client = this.client;
+    const { client } = this;
 
     const promise = {
       then: (resolve, reject) => {
         length = this.length;
         this.reject = reject;
-        client.stream?.write(
+
+        client.stream.write(
           this.uint8.subarray(offset, length),
-          'binary',
+          undefined,
           resolve
         );
       },
     };
 
     try {
-      do {
-        await promise;
-      } while (this.length && this.length !== (offset = length));
+      do await promise;
+      while (this.length && this.length !== (offset = length));
 
       this.length = 0;
       this.offset = 0;
-    } finally {
-      this.reject = null;
-      this.promise = null;
+    } catch {
+      //
     }
+    this.reject = null;
+    this.promise = null;
   }
 
   clear() {
@@ -82,6 +84,7 @@ export class Writer {
   }
 
   type(code) {
+    //console.log('WRITE_TYPE', code);
     this.offset = this.length;
     this.alloc(5)[this.offset] = code;
     return this;
@@ -95,7 +98,7 @@ export class Writer {
 
   text(value) {
     try {
-      this.length += encodeTextInto(
+      this.length += textEncoder.encodeInto(
         value,
         this.uint8.subarray(this.length)
       ).written;

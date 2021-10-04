@@ -1,5 +1,7 @@
-const decodeTextInt = reader => +reader.getTextASCII();
-const decodeTextNumeric = reader => reader.getTextASCII();
+const { BigInt } = globalThis;
+
+const decodeTextInt = reader => +reader.getTextUTF8();
+const decodeTextNumeric = reader => reader.getTextUTF8();
 const decodeBlobInt2 = ({ view, offset }) => view.getInt16(offset);
 const decodeBlobInt4 = ({ view, offset }) => view.getInt32(offset);
 const decodeBlobUint4 = ({ view, offset }) => view.getUint32(offset);

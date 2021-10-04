@@ -1,8 +1,14 @@
+import { Temporal } from '@js-temporal/polyfill';
+
 export const //
   noop = () => {},
   { seal } = Object,
+  { random } = Math,
+  { Number, BigInt } = globalThis,
+  { floor } = Math,
   nullArray = Object.freeze([]),
-  nullObject = Object.freeze(Object.create(null));
+  nullObject = Object.freeze(Object.create(null)),
+  { Now, Instant, Duration, PlainDateTime, PlainDate, PlainTime } = Temporal;
 
 export const setTimeout = delay => ({
   then(resolve) {

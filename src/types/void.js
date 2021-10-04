@@ -1,4 +1,4 @@
-import { noop } from '../utils/native.js';
+import { noop } from '#native';
 
 export const voidType = {
   id: 2278,

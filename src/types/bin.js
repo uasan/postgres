@@ -1,4 +1,4 @@
-import { decodeTextASCII, encodeTextASCII } from './text.js';
+import { decodeText, encodeText } from './text.js';
 
 export const decodeBlob = reader =>
   reader.uint8.subarray(reader.offset, reader.ending);
@@ -27,8 +27,8 @@ export const bit = {
   decode: decodeBlob,
   encode: encodeBlob,
 
-  decodeText: decodeTextASCII,
-  encodeText: encodeTextASCII,
+  decodeText,
+  encodeText,
 };
 
 export const varbit = { ...bit, id: 1562 };

@@ -1,4 +1,4 @@
-import { seal } from './native.js';
+import { seal } from '#native';
 
 export const byteToHex = seal(
   Array.from({ length: 256 }, (_, i) => (i + 0x100).toString(16).substr(1))

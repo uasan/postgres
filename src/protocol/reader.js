@@ -1,4 +1,4 @@
-import { asciiSlice, utf8Slice } from '../utils/string.js';
+import { decodeUTF8 } from '../utils/string.js';
 import { handlers } from './handlers.js';
 
 export class Reader {
@@ -29,7 +29,7 @@ export class Reader {
     let offset = 0;
     let { client, uint8, view } = this;
 
-    if (client.stream === null) return;
+    if (client.connection.stream === null) return;
     length += this.length;
 
     while (length > 4) {
@@ -49,7 +49,7 @@ export class Reader {
         handle(client);
       } catch (error) {
         console.error(error);
-        client.close();
+        client.end();
         return;
       }
 
@@ -84,11 +84,7 @@ export class Reader {
     return int32;
   }
 
-  getTextASCII() {
-    return asciiSlice.call(this.uint8.subarray(this.offset, this.ending));
-  }
-
   getTextUTF8() {
-    return utf8Slice.call(this.uint8.subarray(this.offset, this.ending));
+    return decodeUTF8(this.uint8, this.offset, this.ending);
   }
 }

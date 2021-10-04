@@ -5,12 +5,11 @@ import { Reader } from './protocol/reader.js';
 import { Writer } from './protocol/writer.js';
 import { AbortError } from './utils/errors.js';
 import { Connection } from './protocol/connection.js';
-import { setTimeout } from './utils/native.js';
 import { getConnectionOptions } from './utils/options.js';
 import { transaction } from './request/transaction.js';
 import { listen, unlisten, notify } from './request/listen.js';
 import { MESSAGE_TERMINATE } from './protocol/messages.js';
-import { then, nullArray } from './utils/native.js';
+import { then, nullArray } from '#native';
 import { Statement } from './request/statement.js';
 import {
   putData,
@@ -45,8 +44,7 @@ export class Client {
   }
 
   connect() {
-    this.stream ??= this.connection.connect();
-    return this.connection.readyForQuery;
+    return this.connection.connect();
   }
 
   async clear() {
@@ -74,11 +72,12 @@ export class Client {
   }
 
   onReadyForQuery() {
+    //console.log('onReadyForQuery');
     this.task = this.queue.dequeue();
   }
 
   async query(sql, values = nullArray, options = FETCH_ALL | TYPE_NATIVE) {
-    this.stream ??= this.connection.connect();
+    if (this.connection.stream === null) this.connection.connect();
     await this.writer.ready;
 
     const task = {
@@ -131,31 +130,23 @@ export class Client {
   };
 
   isKeepAlive() {
-    return this.queue.length || this.listeners.size;
+    return this.queue.length || this.writer.queue.length || this.listeners.size;
   }
 
-  end = async (timeout = 1000) => {
+  end = () => {
     if (this.isConnected) {
       this.isEnded = true;
       this.isReady = false;
       this.isIsolated = true;
       this.isConnected = false;
 
-      if (timeout && this.task) {
-        await setTimeout(timeout);
-      }
-
       const { stream } = this;
       this.stream = null;
 
       if (this.task) this.cancelRequest();
       stream.end(MESSAGE_TERMINATE);
-
-      console.log('ENDED');
     }
   };
-
-  close = () => this.end(0);
 }
 
 Client.prototype.notify = notify;

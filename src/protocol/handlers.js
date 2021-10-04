@@ -20,8 +20,13 @@ import {
   copyBothResponse,
 } from '../response/copy.js';
 
-const // noop
-  parameterStatus = () => {},
+const parameterStatus = ({ reader }) => {
+    const [name, value] = reader.getTextUTF8().split('\x00');
+
+    if (name === 'server_version' && +value < 14) {
+      throw new Error(`Minimum supported version PostgreSQL 14`);
+    }
+  },
   closeComplete = () => {},
   portalSuspended = () => {},
   negotiateProtocolVersion = () => {};

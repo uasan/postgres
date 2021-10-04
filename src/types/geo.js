@@ -1,4 +1,4 @@
-import { noop } from '../utils/native.js';
+import { noop } from '#native';
 
 const decodeBlob = reader => reader.uint8.slice(reader.offset, reader.ending);
 

@@ -5,7 +5,7 @@ export const notificationResponse = async ({ reader, listeners }) => {
   let i = reader.uint8.indexOf(0, reader.offset) + 1;
 
   reader.ending = i - 1;
-  const handlers = listeners.get(reader.getTextASCII());
+  const handlers = listeners.get(reader.getTextUTF8());
 
   if (handlers) {
     reader.offset = i;

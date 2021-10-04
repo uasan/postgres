@@ -9,10 +9,14 @@
   "engines": {
     "node": ">=16.10.0"
   },
+  "imports": {
+    "#native": "./src/utils/native.js"
+  },
   "scripts": {},
   "dependencies": {},
   "devDependencies": {
     "postgres": "git://github.com/porsager/postgres.git#master",
+    "@js-temporal/polyfill": "js-temporal/temporal-polyfill",
     "@babel/eslint-parser": "latest",
     "eslint": "latest",
     "eslint-config-prettier": "latest",
