@@ -1,6 +1,4 @@
-import { decodeText, encodeText } from './text.js';
-
-const decodeBlobRange = ({ view, uint8, offset }) => {
+const decodeRange = ({ view, uint8, offset }) => {
   switch (uint8[offset]) {
     case 1:
       return [];
@@ -15,135 +13,76 @@ const decodeBlobRange = ({ view, uint8, offset }) => {
   }
 };
 
-const encodeBlobRange = reader => {};
+const encodeRange = () => {};
 
 export const int4range = {
   id: 3904,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const numrange = {
   id: 3906,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const tsrange = {
   id: 3908,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const tstzrange = {
   id: 3910,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const daterange = {
   id: 3912,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const int8range = {
   id: 3926,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const nummultirange = {
   id: 4532,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const int4multirange = {
   id: 4451,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const datemultirange = {
   id: 4535,
-
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+  decode: decodeRange,
+  encode: encodeRange,
 };
 
 export const int8multirange = {
   id: 4536,
-  name: 'int8multirange',
+  decode: decodeRange,
+  encode: encodeRange,
+};
 
-  decode: decodeBlobRange,
-  encode: encodeBlobRange,
+export const tsmultirange = {
+  id: 4533,
+  decode: decodeRange,
+  encode: encodeRange,
+};
 
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobRange,
-  encodeBlob: encodeBlobRange,
+export const tstzmultirange = {
+  id: 4534,
+  decode: decodeRange,
+  encode: encodeRange,
 };

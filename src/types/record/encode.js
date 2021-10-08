@@ -1,1 +1,1 @@
-export const encodeBlobRecord = (writer, values) => {};
+export const encodeRecord = (writer, values) => {};

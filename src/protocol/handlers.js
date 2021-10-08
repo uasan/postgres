@@ -1,14 +1,21 @@
-import { authentication, backendKeyData } from '../request/init.js';
+import {
+  authentication,
+  backendKeyData,
+  parameterStatus,
+  negotiateProtocolVersion,
+} from '../request/init.js';
 import { errorResponse, noticeResponse } from '../response/error.js';
 import { notificationResponse } from '../response/notify.js';
 import {
   noData,
   dataRow,
   bindComplete,
+  closeComplete,
   readyForQuery,
   parseComplete,
   rowDescription,
   commandComplete,
+  portalSuspended,
   emptyQueryResponse,
   parameterDescription,
 } from '../response/statement.js';
@@ -19,17 +26,6 @@ import {
   copyOutResponse,
   copyBothResponse,
 } from '../response/copy.js';
-
-const parameterStatus = ({ reader }) => {
-    const [name, value] = reader.getTextUTF8().split('\x00');
-
-    if (name === 'server_version' && +value < 14) {
-      throw new Error(`Minimum supported version PostgreSQL 14`);
-    }
-  },
-  closeComplete = () => {},
-  portalSuspended = () => {},
-  negotiateProtocolVersion = () => {};
 
 export const handlers = {
   49: parseComplete,

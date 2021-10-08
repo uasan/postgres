@@ -1,8 +1,9 @@
-export const VALUE_NULL = new Uint8Array([255, 255, 255, 255]);
-export const VALUE_INT16_ZERO = new Uint8Array([0, 0]);
-export const VALUE_DESCRIBE_PORTAL = 80;
-export const VALUE_DESCRIBE_STATEMENT = 83;
+export const NULL = new Uint8Array([255, 255, 255, 255]);
+export const INT16_ONE_ONE = new Uint8Array([0, 1, 0, 1]);
+export const DESCRIBE_PORTAL = 80;
+export const DESCRIBE_STATEMENT = 83;
 
+export const MESSAGE_FLUSH_END = new Uint8Array([72, 0, 0, 0, 4]);
 export const MESSAGES_EXEC_SYNC_FLUSH = new Uint8Array([
   69, 0, 0, 0, 9, 0, 0, 0, 0, 0, 83, 0, 0, 0, 4, 72, 0, 0, 0, 4,
 ]);

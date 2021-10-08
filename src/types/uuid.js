@@ -1,7 +1,6 @@
 import { byteToHex, hexToByte } from '../utils/hex.js';
-import { decodeText, encodeText } from './text.js';
 
-const decodeBlobUUID = ({ uint8, offset: i }) =>
+const decodeUUID = ({ uint8, offset: i }) =>
   byteToHex[uint8[i]] +
   byteToHex[uint8[i + 1]] +
   byteToHex[uint8[i + 2]] +
@@ -23,7 +22,7 @@ const decodeBlobUUID = ({ uint8, offset: i }) =>
   byteToHex[uint8[i + 14]] +
   byteToHex[uint8[i + 15]];
 
-const encodeBlobUUID = (writer, uuid) => {
+const encodeUUID = (writer, uuid) => {
   const i = writer.length;
   const uint8 = writer.alloc(20);
   uint8[i] = 0;
@@ -50,13 +49,6 @@ const encodeBlobUUID = (writer, uuid) => {
 
 export const uuid = {
   id: 2950,
-
-  decode: decodeBlobUUID,
-  encode: encodeBlobUUID,
-
-  decodeText,
-  encodeText,
-
-  decodeBlob: decodeBlobUUID,
-  encodeBlob: encodeBlobUUID,
+  decode: decodeUUID,
+  encode: encodeUUID,
 };

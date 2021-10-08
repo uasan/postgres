@@ -1,5 +1,5 @@
 import { Pool } from '../pool.js';
-import { Now } from '#native';
+//import { Now } from '#native';
 import Postgres from 'postgres';
 
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
@@ -25,21 +25,20 @@ let time = performance.now();
 let params = [
   1337,
   'wat',
-  isPostgres ? new Date().toISOString() : Now.instant(),
+  //isPostgres ? new Date().toISOString() : Now.instant(),
   null,
   false,
   Buffer.from('awesome'),
-  '[{ "some": "json" }, { "array": "object" }]',
+  'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
 ];
 
 const sql = `SELECT
   $1::int AS int,
   $2::text AS string,
-  $3::timestamp AS timestamp,
-  $4::text AS null,
-  $5::boolean AS boolean,
-  $6::bytea AS bytea,
-  $7::json AS json`;
+  $3::text AS null,
+  $4::boolean AS boolean,
+  $5::bytea AS bytea,
+  $6::uuid AS uuid`;
 
 const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })

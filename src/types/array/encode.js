@@ -1,14 +1,6 @@
-import { stringify } from '../../utils/string.js';
 const { isArray } = Array;
 
-export const toTextArray = data =>
-  isArray(data) ? '{' + data.map(toTextArray).join(',') + '}' : stringify(data);
-
-export const encodeTextArray = (writer, array) => {
-  writer.setUTF8(toTextArray(array));
-};
-
-export const encodeBlobArray = (writer, encode, id, values) => {
+export const encodeArray = (writer, encode, id, values) => {
   let offset = writer.length;
   const { view } = writer;
   writer.alloc(24);
@@ -37,7 +29,7 @@ export const encodeBlobArray = (writer, encode, id, values) => {
   for (let i = 0; i < values.length; i++) {
     const value = values[i];
 
-    if (value === null) writer.setInt32(-1);
+    if (value == null) writer.setInt32(-1);
     else encode(writer, value);
   }
 

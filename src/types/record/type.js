@@ -1,11 +1,8 @@
-import { decodeBlobRecord } from './decode.js';
-import { encodeBlobRecord } from './encode.js';
+import { decodeRecord } from './decode.js';
+import { encodeRecord } from './encode.js';
 
 export const record = {
-  decode: decodeBlobRecord,
-  encode: encodeBlobRecord,
-  decodeText: null,
-  encodeText: null,
-  decodeBlob: decodeBlobRecord,
-  encodeBlob: encodeBlobRecord,
+  id: 2249,
+  decode: decodeRecord,
+  encode: encodeRecord,
 };

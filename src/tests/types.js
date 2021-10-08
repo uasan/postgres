@@ -18,7 +18,7 @@ async function test() {
     $4::int8,
     $5::float4,
     $6::float8,
-    $7::numeric,
+    $7::text::numeric,
     $8::time,
     $9::date,
     $10::timestamptz,

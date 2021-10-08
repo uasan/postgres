@@ -1,3 +1,4 @@
+export const { String } = globalThis;
 export const { fromCharCode } = String;
 export const { stringify, parse: parseJSON } = JSON;
 

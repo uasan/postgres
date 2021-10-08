@@ -1,14 +1,14 @@
+import { textEncoder } from '../utils/string.js';
 import {
-  VALUE_NULL,
+  NULL,
   MESSAGE_BIND,
   MESSAGE_PARSE,
-  MESSAGE_FLUSH,
   MESSAGE_DESCRIBE,
-  VALUE_INT16_ZERO,
-  VALUE_DESCRIBE_STATEMENT,
+  MESSAGE_FLUSH_END,
+  INT16_ONE_ONE,
+  DESCRIBE_STATEMENT,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
-import { textEncoder } from '../utils/string.js';
 
 export class Statement {
   constructor({ statements, writer }, task) {
@@ -20,22 +20,17 @@ export class Statement {
       values: { length },
     } = task;
 
-    const params = new Uint8Array(name.length + 6 + length * 2);
+    statements.set(sql, this);
 
     this.name = name;
     this.writer = writer;
-    this.params = params;
     this.columns = [];
-    this.formats = VALUE_INT16_ZERO;
     this.decoders = [];
     this.encoders = new Array(length);
-
-    textEncoder.encodeInto(name, params.subarray(1));
-    const view = new DataView(params.buffer);
-    view.setInt16(name.length + 2, length);
-    view.setInt16(name.length + 4 + length * 2, length);
-
-    statements.set(sql, this);
+    this.params = new Uint8Array([
+      /* eslint-disable */
+      0, ...textEncoder.encode(name), 0, 0, 1, 0, 1, (length >>> 8) & 0xff, (length >>> 0) & 0xff
+    ]);
 
     task.reject = error => {
       statements.delete(sql);
@@ -43,22 +38,17 @@ export class Statement {
       reject(error);
     };
 
-    const count = writer
+    writer
       .type(MESSAGE_PARSE)
       .string(name)
       .string(sql)
-      .setInt16(length).length;
-
-    writer.alloc(length * 4).fill(0, count, writer.length);
-
-    writer
+      .setInt16(0)
       .end()
       .type(MESSAGE_DESCRIBE)
-      .setInt8(VALUE_DESCRIBE_STATEMENT)
+      .setInt8(DESCRIBE_STATEMENT)
       .string(name)
       .end()
-      .type(MESSAGE_FLUSH)
-      .end();
+      .binary(MESSAGE_FLUSH_END);
   }
 
   execute(values) {
@@ -68,14 +58,14 @@ export class Statement {
     for (let i = 0; i < values.length; i++) {
       const value = values[i];
 
-      if (value === null) writer.binary(VALUE_NULL);
+      if (value === null) writer.binary(NULL);
       else {
         const encode = encoders[i];
         encode(writer, value);
       }
     }
 
-    writer.binary(this.formats).end().binary(MESSAGES_EXEC_SYNC_FLUSH).unlock();
+    writer.binary(INT16_ONE_ONE).end().binary(MESSAGES_EXEC_SYNC_FLUSH).unlock();
     return this;
   }
 }

@@ -1,18 +1,16 @@
 import { types, blob, unknown } from '../protocol/types.js';
 import { TYPE_BLOB } from '../constants.js';
 
-const decodeAsBlob = blob.decodeBlob;
+const decodeAsBlob = blob.decode;
 
 export const parameterDescription = ({ task, reader }) => {
   reader.offset += 2;
-  const { name, params, encoders } = task.statement;
+  const { encoders } = task.statement;
 
   for (let i = 0; i < encoders.length; i++) {
     //console.log(reader.view.getInt32(reader.offset));
-    const { encode, encodeBlob } = types[reader.getInt32()] ?? unknown;
-
+    const { encode } = types[reader.getInt32()] ?? unknown;
     encoders[i] = encode;
-    if (encode === encodeBlob) params[name.length + 5 + i * 2] = 1;
   }
 };
 
@@ -25,11 +23,7 @@ export const rowDescription = ({ task, reader }) => {
   const { columns, decoders } = task.statement;
   const isBlob = task.options & TYPE_BLOB;
 
-  const formats = new Uint8Array(2 + length * 2);
-  new DataView(formats.buffer).setInt16(0, length);
-  task.statement.formats = formats;
-
-  for (let i = 0; i < length; ++i) {
+  for (let i = 0; i < length; i++) {
     reader.ending = reader.uint8.indexOf(0, reader.offset);
     columns.push(reader.getTextUTF8());
     reader.offset = reader.ending;
@@ -38,10 +32,9 @@ export const rowDescription = ({ task, reader }) => {
 
     //console.log(reader.view.getInt32(reader.offset));
 
-    const { decode, decodeBlob } = types[reader.getInt32()] ?? unknown;
+    const { decode } = types[reader.getInt32()] ?? unknown;
     reader.offset += 8;
     decoders.push(isBlob ? decodeAsBlob : decode);
-    if (decode === decodeBlob) formats[3 + i * 2] = 1;
   }
 
   task.statement.execute(task.values);
@@ -71,3 +64,5 @@ export const readyForQuery = client => {
 
 export const bindComplete = () => {};
 export const parseComplete = () => {};
+export const closeComplete = () => {};
+export const portalSuspended = () => {};

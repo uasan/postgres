@@ -1,5 +1,5 @@
-import { textEncoder } from '../utils/string.js';
 import { Queue } from '../utils/queue.js';
+import { String, textEncoder } from '../utils/string.js';
 
 export class Writer {
   length = 0;
@@ -92,7 +92,7 @@ export class Writer {
 
   binary(value) {
     const { length } = this;
-    this.alloc(value.byteLength).set(value, length);
+    this.alloc(value.length).set(value, length);
     return this;
   }
 

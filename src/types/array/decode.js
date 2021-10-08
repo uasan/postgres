@@ -11,7 +11,7 @@ const decodeBlobValues = (reader, decode, values) => {
   }
 };
 
-export const decodeBlobArray = (reader, decode) => {
+export const decodeArray = (reader, decode) => {
   let levels = reader.getInt32() - 1;
   reader.offset += 8;
 
@@ -50,5 +50,3 @@ export const decodeBlobArray = (reader, decode) => {
 
   return values;
 };
-
-export const decodeTextArray = reader => reader.getTextUTF8();

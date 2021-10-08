@@ -1,10 +1,6 @@
 import { md5Password } from '../auth/md5.js';
 import { saslHandshake, saslContinue, saslFinal } from '../auth/sasl.js';
-
-export const backendKeyData = connect => {
-  connect.pid = connect.reader.getInt32();
-  connect.secret = connect.reader.getInt32();
-};
+import { TimeZone } from '#native';
 
 export const handshake = (writer, { username, database, params }) => {
   const keys = Object.keys(params);
@@ -40,3 +36,25 @@ export const authentication = ({ reader, connection: { options, writer } }) => {
   }
   throw new Error('Not supported authentication method');
 };
+
+export const backendKeyData = client => {
+  client.pid = client.reader.getInt32();
+  client.secret = client.reader.getInt32();
+};
+
+export const parameterStatus = client => {
+  const [name, value] = client.reader.getTextUTF8().split('\x00');
+
+  switch (name) {
+    case 'server_version':
+      if (+value < 14)
+        throw new Error(`Minimum supported version PostgreSQL 14`);
+      break;
+
+    case 'TimeZone':
+      client.timeZone = new TimeZone(value);
+      break;
+  }
+};
+
+export const negotiateProtocolVersion = () => {};

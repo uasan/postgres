@@ -14,12 +14,13 @@ export class Pool {
     const { clients } = this;
     let client = clients[0];
 
-    for (let i = 1; client.queue.length && i < clients.length; i++)
-      if (
-        clients[i].isIsolated === false &&
-        clients[i].queue.length < client.queue.length
-      )
-        client = clients[i];
+    if (client.queue.length)
+      for (let i = 1; i < clients.length; i++)
+        if (
+          clients[i].isIsolated === false &&
+          clients[i].queue.length < client.queue.length
+        )
+          client = clients[i];
 
     return client.query(sql, values, options);
   }

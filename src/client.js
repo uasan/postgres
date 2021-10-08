@@ -17,14 +17,21 @@ import {
   setDataValue,
   setDataFields,
 } from './response/data.js';
-import { FETCH_ALL, FETCH_ONE_VALUE, TYPE_NATIVE } from './constants.js';
+import {
+  FETCH_ALL,
+  TYPE_NATIVE,
+  FETCH_ONE_VALUE,
+  TRANSACTION_INACTIVE,
+} from './constants.js';
 
 export class Client {
   pid = 0;
   secret = 0;
+  transactionState = TRANSACTION_INACTIVE;
 
   task = null;
   stream = null;
+  timeZone = null;
 
   isEnded = false;
   isReady = false;
@@ -51,6 +58,7 @@ export class Client {
     this.pid = 0;
     this.secret = 0;
     this.stream = null;
+    this.transactionState = TRANSACTION_INACTIVE;
 
     this.reader.clear();
     this.statements.clear();
@@ -74,6 +82,7 @@ export class Client {
   onReadyForQuery() {
     //console.log('onReadyForQuery');
     this.task = this.queue.dequeue();
+    this.transactionState = this.reader.uint8[this.reader.offset];
   }
 
   async query(sql, values = nullArray, options = FETCH_ALL | TYPE_NATIVE) {

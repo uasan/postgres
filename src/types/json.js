@@ -1,40 +1,32 @@
 import { parseJSON, stringify } from '../utils/string.js';
 
-const decodeTextJson = reader => parseJSON(reader.getTextUTF8());
-const encodeTextJson = (writer, value) => {
-  writer.setUTF8(stringify(value));
-};
-
-const decodeBlobJsonb = reader => (
+const decodeJson = reader => parseJSON(reader.getTextUTF8());
+const decodeJsonb = reader => (
   ++reader.offset, parseJSON(reader.getTextUTF8())
 );
 
-const encodeBlobJsonb = (writer, value) => {
+const encodeJson = (writer, value) => {
+  writer.setUTF8(stringify(value));
+};
+
+const encodeJsonb = (writer, value) => {
   writer.setUTF8('\x01' + stringify(value));
 };
 
 export const json = {
   id: 114,
-
-  decode: decodeTextJson,
-  encode: encodeTextJson,
-
-  decodeText: decodeTextJson,
-  encodeText: encodeTextJson,
-
-  decodeBlob: decodeTextJson,
-  encodeBlob: encodeTextJson,
+  decode: decodeJson,
+  encode: encodeJson,
 };
 
 export const jsonb = {
   id: 3802,
+  decode: decodeJsonb,
+  encode: encodeJsonb,
+};
 
-  decode: decodeTextJson,
-  encode: encodeTextJson,
-
-  decodeText: decodeTextJson,
-  encodeText: encodeTextJson,
-
-  decodeBlob: decodeBlobJsonb,
-  encodeBlob: encodeBlobJsonb,
+export const jsonpath = {
+  id: 4072,
+  decode: decodeJsonb,
+  encode: encodeJsonb,
 };

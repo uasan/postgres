@@ -6,16 +6,19 @@ const db = new Client({
   username: 'postgres',
   password: 'pass',
   database: 'postgres',
+  // params: {
+  //   timezone: 'Europe/Kiev',
+  // },
 });
 
 async function test() {
   await db.transaction(async db => {
     const { pid } = db;
-    console.log(await db.query(`SELECT 1 AS q`));
+    console.log(await db.query(`SELECT to_json(now()::timestamptz) AS q`));
 
-    await db
-      .query(`SELECT pg_terminate_backend($1::int)`, [pid])
-      .catch(() => console.log('terminate'));
+    //pg_terminate_backend($1::int)
+
+    await db.query(`SELECT $1::int / 0`, [pid]).catch(() => {});
 
     console.log(await db.query(`SELECT 2 AS q`));
   });

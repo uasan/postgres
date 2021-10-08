@@ -3,12 +3,21 @@ import { Temporal } from '@js-temporal/polyfill';
 export const //
   noop = () => {},
   { seal } = Object,
-  { random } = Math,
-  { Number, BigInt } = globalThis,
-  { floor } = Math,
+  { random, floor } = Math,
+  { Number, String, BigInt } = globalThis,
+  { isNaN, NEGATIVE_INFINITY, POSITIVE_INFINITY } = Number,
   nullArray = Object.freeze([]),
   nullObject = Object.freeze(Object.create(null)),
-  { Now, Instant, Duration, PlainDateTime, PlainDate, PlainTime } = Temporal;
+  {
+    Now,
+    Instant,
+    Duration,
+    PlainDateTime,
+    PlainDate,
+    PlainTime,
+    ZonedDateTime,
+    TimeZone,
+  } = Temporal;
 
 export const setTimeout = delay => ({
   then(resolve) {

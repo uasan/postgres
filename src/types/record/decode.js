@@ -3,7 +3,7 @@ import('../../protocol/types.js').then(module => {
   types = module.types;
 });
 
-export const decodeBlobRecord = reader => {
+export const decodeRecord = reader => {
   const values = new Array(reader.getInt32());
 
   for (let ending = 0, i = 0; i < values.length; i++) {

@@ -1,18 +1,9 @@
-import { decodeBlobArray, decodeTextArray } from './decode.js';
-import { encodeBlobArray, encodeTextArray } from './encode.js';
+import { decodeArray } from './decode.js';
+import { encodeArray } from './encode.js';
 
-export const typeArrayOf = ({ id, decodeBlob, encodeBlob }) => {
-  const decode = reader => decodeBlobArray(reader, decodeBlob);
-  const encode = (writer, values) => {
-    encodeBlobArray(writer, encodeBlob, id, values);
-  };
-
-  return {
-    decode,
-    encode,
-    decodeBlob: decode,
-    encodeBlob: encode,
-    decodeText: decodeTextArray,
-    encodeText: encodeTextArray,
-  };
-};
+export const typeArrayOf = ({ id, decode, encode }) => ({
+  decode: reader => decodeArray(reader, decode),
+  encode: (writer, values) => {
+    encodeArray(writer, encode, id, values);
+  },
+});

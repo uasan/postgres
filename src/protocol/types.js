@@ -2,14 +2,15 @@ import { uuid } from '../types/uuid.js';
 import { bool } from '../types/bool.js';
 import { bit, varbit, bytea } from '../types/bin.js';
 import { unknown } from '../types/unknown.js';
-import { json, jsonb } from '../types/json.js';
 import { record } from '../types/record/type.js';
 import { voidType } from '../types/void.js';
 import * as date from '../types/date.js';
 import * as text from '../types/text.js';
 import * as number from '../types/number.js';
+import { numeric } from '../types/numeric.js';
 import * as range from '../types/range.js';
 import * as geo from '../types/geo.js';
+import { json, jsonb, jsonpath } from '../types/json.js';
 import { typeArrayOf } from '../types/array/type.js';
 
 export { unknown };
@@ -59,6 +60,7 @@ export const types = {
   1009: typeArrayOf(text.text),
   1011: typeArrayOf(number.xid),
   1012: typeArrayOf(number.cid),
+  1014: typeArrayOf(text.bpchar),
   1015: typeArrayOf(text.varchar),
   1016: typeArrayOf(number.int8),
   1017: typeArrayOf(geo.point),
@@ -70,6 +72,7 @@ export const types = {
   1028: typeArrayOf(number.oid),
   1033: text.aclitem,
   1034: typeArrayOf(text.aclitem),
+  1042: text.bpchar,
   1043: text.varchar,
   1082: date.date,
   1083: date.time,
@@ -82,12 +85,14 @@ export const types = {
   1185: typeArrayOf(date.timestamptz),
   1186: date.interval,
   1187: typeArrayOf(date.interval),
-  1231: typeArrayOf(number.numeric),
+  1231: typeArrayOf(numeric),
+  1266: date.timetz,
+  1270: typeArrayOf(date.timetz),
   1560: bit,
   1561: typeArrayOf(bit),
   1562: varbit,
   1563: typeArrayOf(varbit),
-  1700: number.numeric,
+  1700: numeric,
   2249: record,
   2278: voidType,
   2287: typeArrayOf(record),
@@ -95,8 +100,10 @@ export const types = {
   2951: typeArrayOf(uuid),
   3614: text.tsvector,
   3615: text.tsquery,
+  3734: text.regconfig,
   3643: typeArrayOf(text.tsvector),
   3645: typeArrayOf(text.tsquery),
+  3735: typeArrayOf(text.regconfig),
   3802: jsonb,
   3807: typeArrayOf(jsonb),
   3904: range.int4range,
@@ -111,12 +118,18 @@ export const types = {
   3913: typeArrayOf(range.daterange),
   3926: range.int8range,
   3927: typeArrayOf(range.int8range),
+  4072: jsonpath,
+  4073: typeArrayOf(jsonpath),
   4532: range.nummultirange,
   4451: range.int4multirange,
+  4533: range.tsmultirange,
+  4534: range.tstzmultirange,
   4535: range.datemultirange,
   4536: range.int8multirange,
   6150: typeArrayOf(range.int4multirange),
   6151: typeArrayOf(range.nummultirange),
+  6152: typeArrayOf(range.tsmultirange),
+  6153: typeArrayOf(range.tstzmultirange),
   6155: typeArrayOf(range.datemultirange),
   6157: typeArrayOf(range.int8multirange),
   16385: geo.cube,
