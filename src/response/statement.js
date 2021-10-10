@@ -15,7 +15,7 @@ export const parameterDescription = ({ task, reader }) => {
 };
 
 export const noData = ({ task }) => {
-  task.statement.execute(task.values);
+  task.onDescribe();
 };
 
 export const rowDescription = ({ task, reader }) => {
@@ -37,7 +37,7 @@ export const rowDescription = ({ task, reader }) => {
     decoders.push(isBlob ? decodeAsBlob : decode);
   }
 
-  task.statement.execute(task.values);
+  task.onDescribe();
 };
 
 export const dataRow = ({ task, reader }) => {

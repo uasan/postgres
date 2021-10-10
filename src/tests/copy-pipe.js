@@ -1,6 +1,6 @@
-import { Pool } from '../pool.js';
+import { Client } from '../client.js';
 
-const db1 = new Pool({
+const db1 = new Client({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',
@@ -8,7 +8,7 @@ const db1 = new Pool({
   database: 'smartapps',
 });
 
-const db2 = new Pool({
+const db2 = new Client({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',

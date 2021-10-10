@@ -1,4 +1,4 @@
-import { decodeUTF8 } from '../utils/string.js';
+import { textDecoder } from '../utils/string.js';
 import { handlers } from './handlers.js';
 
 export class Reader {
@@ -29,7 +29,7 @@ export class Reader {
     let offset = 0;
     let { client, uint8, view } = this;
 
-    if (client.connection.stream === null) return;
+    if (client.stream === null) return;
     length += this.length;
 
     while (length > 4) {
@@ -41,15 +41,14 @@ export class Reader {
       }
 
       const handle = handlers[uint8[offset]];
-      //console.log(handle?.name);
+      //if (client.pid) console.log(handle?.name);
 
       try {
         this.offset = offset + 5;
         this.ending = offset + size;
         handle(client);
       } catch (error) {
-        console.error(error);
-        client.end();
+        client.end(error);
         return;
       }
 
@@ -85,6 +84,6 @@ export class Reader {
   }
 
   getTextUTF8() {
-    return decodeUTF8(this.uint8, this.offset, this.ending);
+    return textDecoder.decode(this.uint8.subarray(this.offset, this.ending));
   }
 }

@@ -5,7 +5,7 @@ import Postgres from 'postgres';
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
 
 const db = new (isPostgres ? Postgres : Pool)({
-  max: 1,
+  max: 4,
   port: 5432,
   host: '127.0.0.1',
   username: 'postgres',
@@ -22,23 +22,14 @@ let count = 0;
 let max = 100000;
 let time = performance.now();
 
-let params = [
-  1337,
-  'wat',
-  //isPostgres ? new Date().toISOString() : Now.instant(),
-  null,
-  false,
-  Buffer.from('awesome'),
-  'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
-];
+let params = ['A', 'B', 'C'];
 
 const sql = `SELECT
-  $1::int AS int,
-  $2::text AS string,
-  $3::text AS null,
-  $4::boolean AS boolean,
-  $5::bytea AS bytea,
-  $6::uuid AS uuid`;
+  $1::text AS "1",
+  $2::text AS "2",
+  $3::text AS "3"`;
+
+//const sql = `SELECT 1`;
 
 const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })

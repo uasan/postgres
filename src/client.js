@@ -9,29 +9,16 @@ import { getConnectionOptions } from './utils/options.js';
 import { transaction } from './request/transaction.js';
 import { listen, unlisten, notify } from './request/listen.js';
 import { MESSAGE_TERMINATE } from './protocol/messages.js';
-import { then, nullArray } from '#native';
-import { Statement } from './request/statement.js';
-import {
-  putData,
-  pushData,
-  setDataValue,
-  setDataFields,
-} from './response/data.js';
-import {
-  FETCH_ALL,
-  TYPE_NATIVE,
-  FETCH_ONE_VALUE,
-  TRANSACTION_INACTIVE,
-} from './constants.js';
+import { Task } from './request/task.js';
+import { TRANSACTION_INACTIVE } from './constants.js';
 
 export class Client {
   pid = 0;
   secret = 0;
-  transactionState = TRANSACTION_INACTIVE;
 
   task = null;
+  state = TRANSACTION_INACTIVE;
   stream = null;
-  timeZone = null;
 
   isEnded = false;
   isReady = false;
@@ -58,7 +45,7 @@ export class Client {
     this.pid = 0;
     this.secret = 0;
     this.stream = null;
-    this.transactionState = TRANSACTION_INACTIVE;
+    this.state = TRANSACTION_INACTIVE;
 
     this.reader.clear();
     this.statements.clear();
@@ -80,37 +67,12 @@ export class Client {
   }
 
   onReadyForQuery() {
-    //console.log('onReadyForQuery');
     this.task = this.queue.dequeue();
-    this.transactionState = this.reader.uint8[this.reader.offset];
+    this.state = this.reader.uint8[this.reader.offset];
   }
 
-  async query(sql, values = nullArray, options = FETCH_ALL | TYPE_NATIVE) {
-    if (this.connection.stream === null) this.connection.connect();
-    await this.writer.ready;
-
-    const task = {
-      sql,
-      then,
-      values,
-      options,
-      reject: null,
-      resolve: null,
-      statement: null,
-      controller: null,
-      data: options & FETCH_ALL ? [] : null,
-      addData: options & FETCH_ALL ? pushData : putData,
-      setData: options & FETCH_ONE_VALUE ? setDataValue : setDataFields,
-    };
-
-    if (this.task) {
-      this.queue.enqueue(task);
-    } else this.task = task;
-
-    task.statement =
-      this.statements.get(sql)?.execute(values) ?? new Statement(this, task);
-
-    return await task;
+  async query(sql, values, options) {
+    return await new Task(this, sql, values, options);
   }
 
   cancelQueue(reason = new AbortError()) {
@@ -139,20 +101,21 @@ export class Client {
   };
 
   isKeepAlive() {
-    return this.queue.length || this.writer.queue.length || this.listeners.size;
+    return this.queue.length || this.listeners.size;
   }
 
-  end = () => {
-    if (this.isConnected) {
+  end = error => {
+    if (this.stream) {
       this.isEnded = true;
       this.isReady = false;
       this.isIsolated = true;
-      this.isConnected = false;
 
       const { stream } = this;
       this.stream = null;
 
+      if (error) this.cancelQueue(error);
       if (this.task) this.cancelRequest();
+
       stream.end(MESSAGE_TERMINATE);
     }
   };

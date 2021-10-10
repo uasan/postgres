@@ -1,6 +1,6 @@
-import { isNaN, POSITIVE_INFINITY, NEGATIVE_INFINITY } from '#native';
+import { ceil, isNaN, POSITIVE_INFINITY, NEGATIVE_INFINITY } from '#native';
 
-const decodeNumeric = ({ view, offset, ending, uint8 }) => {
+const decodeNumeric = ({ view, offset, ending }) => {
   let value = '';
   let digits = view.getUint16(offset);
   let weight = view.getInt16(offset + 2);
@@ -21,24 +21,25 @@ const decodeNumeric = ({ view, offset, ending, uint8 }) => {
   }
 
   offset += 8;
-  let length = (ending - offset) / 2 - dscale;
+  let length = ceil((ending - offset) / 2);
+  let floats = ceil(dscale / 4);
+  let integers = length - floats;
 
-  for (; offset < ending; offset += 2) {
+  console.log({ digits, weight, dscale, length, integers, floats });
+
+  for (; integers--; offset += 2) {
     const digit = view.getUint16(offset);
     value += digit;
   }
 
-  if (dscale) {
+  if (floats) {
     value += '.';
-    do {
-      const digit = view.getUint16(offset);
-      value += digit;
-    } while ((offset += 2) < ending);
+    for (; floats--; offset += 2) {
+      value += (view.getUint16(offset) + 10000).toString().slice(1);
+    }
   }
 
-  console.log({ digits, weight, dscale, value });
-
-  return uint8.slice(offset - ending, ending);
+  return value;
 };
 
 const encodeNumeric = (writer, value) => {

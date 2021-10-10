@@ -1,6 +1,7 @@
 import { textEncoder } from '../utils/string.js';
 import {
   NULL,
+  MESSAGE_SYNC,
   MESSAGE_BIND,
   MESSAGE_PARSE,
   MESSAGE_DESCRIBE,
@@ -13,13 +14,14 @@ import {
 export class Statement {
   constructor({ statements, writer }, task) {
     const { size } = statements;
-    const name = size.toString(32);
+    const name = size.toString(36);
     const {
       sql,
       reject,
       values: { length },
     } = task;
 
+    writer.lock();
     statements.set(sql, this);
 
     this.name = name;
@@ -28,13 +30,19 @@ export class Statement {
     this.decoders = [];
     this.encoders = new Array(length);
     this.params = new Uint8Array([
-      /* eslint-disable */
+      /* eslint-disable-next-line */
       0, ...textEncoder.encode(name), 0, 0, 1, 0, 1, (length >>> 8) & 0xff, (length >>> 0) & 0xff
     ]);
 
-    task.reject = error => {
-      statements.delete(sql);
+    task.onDescribe = () => {
+      task.reject = reject;
+      this.execute(task.values);
       writer.unlock();
+    };
+
+    task.reject = error => {
+      writer.type(MESSAGE_SYNC).end().unlock();
+      statements.delete(sql);
       reject(error);
     };
 
@@ -65,7 +73,7 @@ export class Statement {
       }
     }
 
-    writer.binary(INT16_ONE_ONE).end().binary(MESSAGES_EXEC_SYNC_FLUSH).unlock();
+    writer.binary(INT16_ONE_ONE).end().binary(MESSAGES_EXEC_SYNC_FLUSH);
     return this;
   }
 }

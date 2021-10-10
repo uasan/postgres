@@ -8,6 +8,7 @@ import {
 export const copyBothResponse = () => {};
 
 export const copyInResponse = ({ task, writer }) => {
+  writer.lock();
   task.resolve(
     new WritableStream({
       start(controller) {
@@ -18,7 +19,7 @@ export const copyInResponse = ({ task, writer }) => {
           ? writer.type(MESSAGE_COPY_DATA).text(chunk).end().promise
           : writer.type(MESSAGE_COPY_DATA).binary(chunk).end().promise,
       close: async () => {
-        await writer.binary(MESSAGE_COPY_DONE).unlock();
+        writer.binary(MESSAGE_COPY_DONE).unlock();
         await task;
       },
       abort: (reason = 'abort') =>

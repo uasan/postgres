@@ -1,5 +1,4 @@
 import { createConnection } from 'net';
-import { Writer } from './writer.js';
 import { handshake } from '../request/init.js';
 import { randomTimeout } from '#native';
 import { restoreListeners } from '../request/listen.js';
@@ -7,17 +6,17 @@ import { restoreListeners } from '../request/listen.js';
 const retryErrors = new Set(['ECONNREFUSED', 'ECONNRESET', 'EPIPE']);
 export class Connection {
   timeout = 0;
-  stream = null;
   promiseReadyForQuery = null;
 
   constructor(client) {
     this.client = client;
-    this.options = client.options;
+    const { path, host, port } = client.options;
 
     this.params = {
-      path: this.options.path,
-      host: this.options.host,
-      port: this.options.port,
+      path,
+      host,
+      port,
+      //highWaterMark: 65535,
       onread: {
         callback: client.reader.read,
         buffer: client.reader.getBuffer,
@@ -26,18 +25,16 @@ export class Connection {
   }
 
   onConnect = () => {
-    if (this.stream === null) return;
+    if (this.client.stream === null) return;
     //console.log('ON-CONNECT');
 
     this.timeout = 0;
-    this.writer = new Writer(this);
-    this.options.signal?.addEventListener('abort', this.client.end);
-    handshake(this.writer, this.options);
+    this.client.options.signal?.addEventListener('abort', this.client.end);
+    handshake(this.client);
   };
 
   onEnd = () => {
     //console.log('ONEND');
-    this.stream = null;
     this.client.clear();
   };
 
@@ -45,10 +42,8 @@ export class Connection {
     //console.log('ONCLOSE');
     const { client } = this;
 
-    this.stream = null;
-    this.writer = null;
     this.promiseReadyForQuery = null;
-    this.options.signal?.removeEventListener('abort', client.end);
+    this.client.options.signal?.removeEventListener('abort', client.end);
 
     if (!client.isEnded && client.isKeepAlive()) this.reconnect();
   };
@@ -79,18 +74,18 @@ export class Connection {
     //console.log('CONNECT-RESOLVE');
     const { client } = this;
 
-    this.writer = null;
     this.promiseReadyForQuery = null;
 
     client.isReady = true;
     client.isConnected = true;
-    client.stream = this.stream;
-    client.writer.unlock();
 
     if (client.listeners.size) restoreListeners.call(client);
 
     client.onReadyForQuery = client.constructor.prototype.onReadyForQuery;
-    client.onReadyForQuery();
+    client.task = client.queue.dequeue();
+
+    client.writer.unlock();
+    client.task?.send(client);
 
     resolvePromise();
   };
@@ -104,11 +99,11 @@ export class Connection {
   };
 
   connect() {
-    if (this.stream) return this.promiseReadyForQuery;
+    if (this.client.stream) return this.promiseReadyForQuery;
     //console.log('CONNECT');
 
     this.client.isEnded = false;
-    this.stream = createConnection(this.params, this.onConnect)
+    this.client.stream = createConnection(this.params, this.onConnect)
       .on('error', this.onError)
       .once('end', this.onEnd)
       .once('close', this.onClose)

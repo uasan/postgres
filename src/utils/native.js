@@ -3,7 +3,7 @@ import { Temporal } from '@js-temporal/polyfill';
 export const //
   noop = () => {},
   { seal } = Object,
-  { random, floor } = Math,
+  { ceil, floor, random } = Math,
   { Number, String, BigInt } = globalThis,
   { isNaN, NEGATIVE_INFINITY, POSITIVE_INFINITY } = Number,
   nullArray = Object.freeze([]),
@@ -24,11 +24,6 @@ export const setTimeout = delay => ({
     globalThis.setTimeout(resolve, delay);
   },
 });
-
-export function then(resolve, reject) {
-  this.resolve = resolve;
-  this.reject = reject;
-}
 
 export const randomTimeout = {
   then(resolve) {

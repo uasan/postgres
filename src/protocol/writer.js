@@ -1,4 +1,3 @@
-import { Queue } from '../utils/queue.js';
 import { String, textEncoder } from '../utils/string.js';
 
 export class Writer {
@@ -6,30 +5,24 @@ export class Writer {
   offset = 0;
   reject = null;
   promise = null;
-  queue = new Queue();
+  isLocked = true;
+
   uint8 = new Uint8Array(131072);
   view = new DataView(this.uint8.buffer);
-
-  isReady = false;
-  ready = {
-    then: resolve => {
-      if (this.isReady) {
-        this.isReady = false;
-        resolve();
-      } else this.queue.enqueue(resolve);
-    },
-  };
 
   constructor(client) {
     this.client = client;
   }
 
-  async unlock() {
-    //console.log('UNLOCK');
-    await (this.promise ??= this.write());
+  lock() {
+    //console.log('LOCK');
+    this.isLocked = true;
+  }
 
-    if (this.queue.length) this.queue.dequeue()();
-    else this.isReady = true;
+  unlock() {
+    //console.log('UNLOCK');
+    this.isLocked = false;
+    this.promise ??= this.write();
   }
 
   alloc(length) {
@@ -51,12 +44,14 @@ export class Writer {
     let offset = 0;
     const { client } = this;
 
+    let task = client.queue?.head;
+
     const promise = {
       then: (resolve, reject) => {
         length = this.length;
         this.reject = reject;
 
-        client.stream.write(
+        client.stream._write(
           this.uint8.subarray(offset, length),
           undefined,
           resolve
@@ -64,15 +59,37 @@ export class Writer {
       },
     };
 
-    try {
-      do await promise;
-      while (this.length && this.length !== (offset = length));
+    do {
+      length = this.length;
 
-      this.length = 0;
-      this.offset = 0;
-    } catch {
-      //
-    }
+      try {
+        await promise;
+      } catch {
+        break;
+      }
+
+      if (this.isLocked === false && (task ??= client.queue.head)) {
+        while (task?.statement) task = task.next;
+
+        if (task) {
+          length = 0;
+          offset = 0;
+
+          this.length = 0;
+          this.offset = 0;
+
+          while (
+            this.isLocked === false &&
+            (task = task.send(client)) &&
+            this.length < 65536
+          );
+        }
+      }
+    } while (this.length && this.length !== (offset = length));
+
+    this.length = 0;
+    this.offset = 0;
+
     this.reject = null;
     this.promise = null;
   }

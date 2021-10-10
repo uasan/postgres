@@ -15,7 +15,7 @@ async function test() {
       SELECT *
       FROM smartlibrary.trainings
       JOIN smartlibrary.training_skills USING(course_id)
-      LIMIT 100000
+      LIMIT 1
     `);
     console.timeEnd('trainings');
   } catch (error) {

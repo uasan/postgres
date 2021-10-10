@@ -7,12 +7,12 @@ const db = new Client({
   password: 'pass',
   database: 'postgres',
   // params: {
-  //   timezone: 'Europe/Kiev',
+  //   timezone: 'America/New_York',
   // },
 });
 
 async function test() {
-  await db.query(`SET TimeZone = 'America/New_York'`);
+  //await db.query(`SET TimeZone = 'America/New_York'`);
 
   console.log(
     await db.query(`SELECT
