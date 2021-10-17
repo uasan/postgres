@@ -77,7 +77,6 @@ export class Connection {
     this.promiseReadyForQuery = null;
 
     client.isReady = true;
-    client.isConnected = true;
 
     if (client.listeners.size) restoreListeners.call(client);
 
@@ -93,7 +92,6 @@ export class Connection {
   reject = (error, rejectPromise) => {
     this.client.isReady = false;
     this.client.isEnded = true;
-    this.client.isConnected = false;
 
     rejectPromise(error);
   };
@@ -140,7 +138,7 @@ export class Connection {
     this.tokenReconnect = token;
     this.timeout += await randomTimeout;
 
-    if (token === this.tokenReconnect && this.client.isConnected === false) {
+    if (token === this.tokenReconnect && this.client.stream === null) {
       console.log('RETRY');
       this.connect();
     }

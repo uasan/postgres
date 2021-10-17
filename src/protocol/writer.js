@@ -146,6 +146,13 @@ export class Writer {
     return this;
   }
 
+  setUint16(value) {
+    const { length } = this;
+    this.alloc(2);
+    this.view.setUint16(length, value);
+    return this;
+  }
+
   setInt32(value) {
     const { length } = this;
     this.alloc(4);

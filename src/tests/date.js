@@ -12,7 +12,7 @@ const db = new Client({
 });
 
 async function test() {
-  //await db.query(`SET TimeZone = 'America/New_York'`);
+  await db.query(`SET TimeZone = 'America/New_York'`);
 
   console.log(
     await db.query(`SELECT

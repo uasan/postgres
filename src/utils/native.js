@@ -3,7 +3,7 @@ import { Temporal } from '@js-temporal/polyfill';
 export const //
   noop = () => {},
   { seal } = Object,
-  { ceil, floor, random } = Math,
+  { max, ceil, floor, random } = Math,
   { Number, String, BigInt } = globalThis,
   { isNaN, NEGATIVE_INFINITY, POSITIVE_INFINITY } = Number,
   nullArray = Object.freeze([]),

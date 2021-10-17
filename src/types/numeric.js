@@ -1,10 +1,24 @@
-import { ceil, isNaN, POSITIVE_INFINITY, NEGATIVE_INFINITY } from '#native';
+import { ceil, POSITIVE_INFINITY, NEGATIVE_INFINITY } from '#native';
 
-const decodeNumeric = ({ view, offset, ending }) => {
+const countZeros = (text, start, step) => {
+  let count = 0;
+  let { length } = text;
+
+  for (let i = start; i < length; i += step)
+    if (text[i] === '0') count++;
+    else break;
+
+  return count;
+};
+
+const decodeNumeric = ({ view, offset }) => {
   let value = '';
+
   let digits = view.getUint16(offset);
   let weight = view.getInt16(offset + 2);
   let dscale = view.getUint16(offset + 6);
+
+  //console.log({ digits, weight, dscale });
 
   switch (view.getUint16(offset + 4)) {
     case 0:
@@ -20,38 +34,112 @@ const decodeNumeric = ({ view, offset, ending }) => {
       return NEGATIVE_INFINITY;
   }
 
-  offset += 8;
-  let length = ceil((ending - offset) / 2);
-  let floats = ceil(dscale / 4);
-  let integers = length - floats;
+  let integers = weight < 0 ? 0 : weight < digits ? weight + 1 : digits;
+  let floats = digits - integers;
 
-  console.log({ digits, weight, dscale, length, integers, floats });
+  if (integers) {
+    value += view.getUint16((offset += 8));
 
-  for (; integers--; offset += 2) {
-    const digit = view.getUint16(offset);
-    value += digit;
+    while (--integers)
+      value += (view.getUint16((offset += 2)) + 10000 + '').slice(1);
+
+    if (weight >= digits) value += '0000'.repeat(1 + weight - digits);
+  } else {
+    offset += 6;
+    value += '0';
   }
 
-  if (floats) {
+  if (dscale) {
     value += '.';
-    for (; floats--; offset += 2) {
-      value += (view.getUint16(offset) + 10000).toString().slice(1);
-    }
+    let { length } = value;
+
+    if (weight < -1) value += '0000'.repeat(weight * -1 - 1);
+
+    while (floats--)
+      value += (view.getUint16((offset += 2)) + 10000 + '').slice(1);
+
+    length = value.length - length;
+
+    if (length < dscale) value += '0'.repeat(dscale - length);
+    else if (length > dscale) value = value.slice(0, dscale - length);
   }
 
   return value;
 };
 
 const encodeNumeric = (writer, value) => {
-  if (isNaN(value)) {
-    writer.setInt32(8).binary([0, 0, 0, 0, 192, 0, 0, 0]);
-  } else if (value === POSITIVE_INFINITY) {
-    writer.setInt32(8).binary([0, 0, 0, 0, 208, 0, 0, 32]);
-  } else if (value === NEGATIVE_INFINITY) {
-    writer.setInt32(8).binary([0, 0, 0, 0, 240, 0, 0, 32]);
-  } else {
-    writer.setUTF8(value);
+  let text = value + '';
+
+  switch (text) {
+    case 'NaN':
+      writer.setInt32(8).binary([0, 0, 0, 0, 192, 0, 0, 0]);
+      return;
+    case 'Infinity':
+      writer.setInt32(8).binary([0, 0, 0, 0, 208, 0, 0, 32]);
+      return;
+    case '-Infinity':
+      writer.setInt32(8).binary([0, 0, 0, 0, 240, 0, 0, 32]);
+      return;
   }
+
+  let digits = 0;
+  let weight = 0;
+  let sign = 0;
+  let dscale = 0;
+  let { view, length: i } = writer;
+
+  switch (text[0]) {
+    case '-':
+      text = text.slice(1);
+      sign = 0x4000;
+      break;
+    case '+':
+      text = text.slice(1);
+  }
+
+  let count = countZeros(text, 0, 1);
+  if (count) text = text.slice(count);
+
+  let { length } = text;
+  let point = text.indexOf('.');
+
+  if (point === -1) {
+    weight = ceil(length / 4) - 1;
+  } else {
+    length--;
+    dscale = length - point;
+    weight = ceil(point / 4) - 1;
+
+    text = text.slice(0, point) + text.slice(point + 1);
+
+    if (dscale % 4) {
+      text += '0'.repeat(4 - (dscale % 4));
+      ({ length } = text);
+    }
+  }
+
+  count = countZeros(text, length - 1, -1);
+  if (count >= 4) {
+    length -= count - (count % 4);
+    text = text.slice(0, length);
+  }
+
+  digits = ceil(length / 4);
+
+  //console.log({ digits, weight, dscale, text });
+
+  writer.alloc(12 + digits * 2);
+  view.setInt32(i, 8 + digits * 2);
+
+  view.setUint16((i += 4), digits);
+  view.setInt16((i += 2), weight);
+  view.setInt16((i += 2), sign);
+  view.setUint16((i += 2), dscale);
+
+  let n = (point > 0 ? point : length) % 4 || 4;
+  view.setUint16((i += 2), +text.substr(0, n));
+
+  for (; n < length; n += 4) view.setUint16((i += 2), +text.substr(n, 4));
 };
 
 export const numeric = {

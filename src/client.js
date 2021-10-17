@@ -17,13 +17,13 @@ export class Client {
   secret = 0;
 
   task = null;
+  error = null;
   state = TRANSACTION_INACTIVE;
   stream = null;
 
   isEnded = false;
   isReady = false;
   isIsolated = false;
-  isConnected = false;
 
   queue = new Queue();
   listeners = new Map();
@@ -41,43 +41,13 @@ export class Client {
     return this.connection.connect();
   }
 
-  async clear() {
-    this.pid = 0;
-    this.secret = 0;
-    this.stream = null;
-    this.state = TRANSACTION_INACTIVE;
-
-    this.reader.clear();
-    this.statements.clear();
-
-    //console.log('CLEAR');
-
-    this.isReady = false;
-    this.isIsolated = false;
-    this.isConnected = false;
-
-    if (this.task) {
-      this.task.reject(new AbortError());
-      this.task = null;
-    }
-
-    if (this.queue.length) {
-      await this.cancelQueue();
-    }
+  async query(sql, values, options) {
+    return await new Task(this, sql, values, options);
   }
 
   onReadyForQuery() {
     this.task = this.queue.dequeue();
     this.state = this.reader.uint8[this.reader.offset];
-  }
-
-  async query(sql, values, options) {
-    return await new Task(this, sql, values, options);
-  }
-
-  cancelQueue(reason = new AbortError()) {
-    while (this.queue.length) this.queue.dequeue().reject?.(reason);
-    return this.writer.clear();
   }
 
   cancelRequest = async ({ pid, secret } = this) => {
@@ -104,19 +74,38 @@ export class Client {
     return this.queue.length || this.listeners.size;
   }
 
+  clear(error = this.error ?? new AbortError()) {
+    this.pid = 0;
+    this.secret = 0;
+    this.error = null;
+    this.stream = null;
+    this.isReady = false;
+    this.isIsolated = false;
+    this.state = TRANSACTION_INACTIVE;
+
+    this.reader.clear();
+    this.writer.clear();
+    this.statements.clear();
+
+    //console.log('CLEAR');
+
+    if (this.task) {
+      this.task.reject(error);
+      this.task = null;
+    }
+
+    for (let task = this.queue.head; task; task = task.next)
+      task.statement = null;
+  }
+
   end = error => {
-    if (this.stream) {
+    if (this.isEnded === false) {
+      this.error = error;
       this.isEnded = true;
       this.isReady = false;
       this.isIsolated = true;
 
-      const { stream } = this;
-      this.stream = null;
-
-      if (error) this.cancelQueue(error);
-      if (this.task) this.cancelRequest();
-
-      stream.end(MESSAGE_TERMINATE);
+      this.stream.end(MESSAGE_TERMINATE);
     }
   };
 }

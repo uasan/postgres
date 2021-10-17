@@ -11,12 +11,18 @@ const db = new Pool({
 async function test() {
   try {
     console.time('trainings');
-    await db.query(`
+
+    await db.query(
+      `
       SELECT *
       FROM smartlibrary.trainings
       JOIN smartlibrary.training_skills USING(course_id)
-      LIMIT 1
-    `);
+      --LIMIT 1000000
+    `,
+      [],
+      4
+    );
+
     console.timeEnd('trainings');
   } catch (error) {
     console.error(error);

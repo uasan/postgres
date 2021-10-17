@@ -43,6 +43,7 @@ export class Statement {
     task.reject = error => {
       writer.type(MESSAGE_SYNC).end().unlock();
       statements.delete(sql);
+      task.reject = reject;
       reject(error);
     };
 

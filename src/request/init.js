@@ -50,13 +50,13 @@ export const backendKeyData = client => {
 export const parameterStatus = client => {
   const [name, value] = client.reader.getTextUTF8().split('\x00');
 
-  switch (name) {
+  switch (name.toLowerCase()) {
     case 'server_version':
       if (+value < 14)
         client.end(new Error(`Minimum supported version PostgreSQL 14`));
       break;
 
-    case 'TimeZone':
+    case 'timezone':
       if (value !== 'UTC')
         client.end(new Error(`Only time zone UTC supported`));
       break;
