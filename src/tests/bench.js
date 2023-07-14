@@ -5,7 +5,7 @@ import Postgres from 'postgres';
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
 
 const db = new (isPostgres ? Postgres : Pool)({
-  max: 4,
+  max: 1,
   port: 5432,
   host: '127.0.0.1',
   username: 'postgres',

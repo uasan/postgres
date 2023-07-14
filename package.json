@@ -1,22 +1,23 @@
 {
-  "name": "@drivers/postgres",
-  "author": "uasan",
+  "name": "@uah/postgres",
+  "author": "uah",
   "description": "Postgres client",
   "version": "0.0.1",
   "license": "ISC",
   "private": false,
   "type": "module",
   "engines": {
-    "node": ">=16.10.0"
+    "node": ">=20.4.0"
   },
   "imports": {
     "#native": "./src/utils/native.js"
   },
   "scripts": {},
-  "dependencies": {},
+  "dependencies": {
+    "@js-temporal/polyfill": "js-temporal/temporal-polyfill"
+  },
   "devDependencies": {
     "postgres": "git://github.com/porsager/postgres.git#master",
-    "@js-temporal/polyfill": "js-temporal/temporal-polyfill",
     "@babel/eslint-parser": "latest",
     "eslint": "latest",
     "eslint-config-prettier": "latest",
