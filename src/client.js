@@ -11,6 +11,7 @@ import { listen, unlisten, notify } from './request/listen.js';
 import { MESSAGE_TERMINATE } from './protocol/messages.js';
 import { Task } from './request/task.js';
 import { TRANSACTION_INACTIVE } from './constants.js';
+import { PostgresError } from './response/error.js';
 
 export class Client {
   pid = 0;
@@ -42,7 +43,11 @@ export class Client {
   }
 
   async query(sql, values, options) {
-    return await new Task(this, sql, values, options);
+    try {
+      return await new Task(this, sql, values, options);
+    } catch (error) {
+      throw new PostgresError(error);
+    }
   }
 
   onReadyForQuery() {
@@ -99,6 +104,7 @@ export class Client {
   }
 
   end = error => {
+    console.log('END POSTGRES');
     if (this.isEnded === false) {
       this.error = error;
       this.isEnded = true;
