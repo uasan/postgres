@@ -104,7 +104,6 @@ export class Client {
   }
 
   end = error => {
-    console.log('END POSTGRES');
     if (this.isEnded === false) {
       this.error = error;
       this.isEnded = true;
