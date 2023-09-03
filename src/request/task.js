@@ -7,6 +7,7 @@ import {
   setDataValue,
   setDataFields,
 } from '../response/data.js';
+import { noop } from '../utils/native.js';
 
 export class Task {
   reject = null;
@@ -20,7 +21,7 @@ export class Task {
     values = nullArray,
     options = FETCH_ALL | TYPE_NATIVE
   ) {
-    if (client.stream === null) client.connect();
+    if (client.stream === null) client.connect().catch(noop);
 
     this.client = client;
     this.sql = sql;
@@ -44,8 +45,9 @@ export class Task {
       if (
         this.client.writer.promise === null &&
         this.client.writer.isLocked === false
-      )
+      ) {
         this.send();
+      }
     } else {
       this.resolve = resolve;
       this.reject = reject;
@@ -60,4 +62,6 @@ export class Task {
 
     return this.next;
   }
+
+  onReady() {}
 }

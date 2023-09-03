@@ -11,6 +11,8 @@ export const //
   TRANSACTION_ACTIVE = 84,
   TRANSACTION_INACTIVE = 73;
 
+export const HIGH_WATER_MARK = 65535;
+
 export const DEFAULT_PARAMS = {
   // compute_query_id: 'on',
   // client_connection_check_interval: 10000,

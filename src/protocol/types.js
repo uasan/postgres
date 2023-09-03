@@ -1,7 +1,6 @@
 import { uuid } from '../types/uuid.js';
 import { bool } from '../types/bool.js';
 import { bit, varbit, bytea } from '../types/bin.js';
-import { unknown } from '../types/unknown.js';
 import { record } from '../types/record/type.js';
 import { voidType } from '../types/void.js';
 import * as date from '../types/date.js';
@@ -13,10 +12,11 @@ import * as geo from '../types/geo.js';
 import { json, jsonb, jsonpath } from '../types/json.js';
 import { typeArrayOf } from '../types/array/type.js';
 
-export { unknown };
+export { unknown } from '../types/text.js';
 export { bytea as blob };
 
 export const types = {
+  0: text.unknown,
   16: bool,
   17: bytea,
   18: text.char,
@@ -45,7 +45,7 @@ export const types = {
   629: typeArrayOf(geo.line),
   700: number.float4,
   701: number.float8,
-  705: unknown,
+  705: text.unknown,
   718: geo.circle,
   719: typeArrayOf(geo.circle),
   790: number.money,

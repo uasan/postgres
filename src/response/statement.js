@@ -50,8 +50,10 @@ export const commandComplete = ({ task, reader }) => {
   if (statement.columns.length === 0) {
     reader.offset = reader.uint8.indexOf(32, reader.offset) + 1;
     reader.ending = reader.uint8.indexOf(0, reader.offset) - 1;
-    resolve({ count: +reader.getTextUTF8() });
-  } else resolve(task.data);
+    resolve(+reader.getTextUTF8());
+  } else {
+    resolve(task.data);
+  }
 };
 
 export const emptyQueryResponse = ({ task }) => {
@@ -59,7 +61,10 @@ export const emptyQueryResponse = ({ task }) => {
 };
 
 export const readyForQuery = client => {
-  client.onReadyForQuery();
+  client.task.onReady();
+
+  client.task = client.queue.dequeue();
+  client.state = client.reader.uint8[client.reader.offset];
 };
 
 export const bindComplete = () => {};

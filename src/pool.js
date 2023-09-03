@@ -5,7 +5,7 @@ export class Pool extends Array {
   constructor(options) {
     options = getConnectionOptions(options);
 
-    super(options.max);
+    super(options.maxConnections);
     this.options = options;
 
     for (let i = 0; i < this.length; i++) this[i] = new Client(options);
@@ -55,7 +55,7 @@ export class Pool extends Array {
     return client.transaction(action, params);
   }
 
-  async end() {
-    await Promise.all(this.map(client => client.end()));
+  async disconnect() {
+    await Promise.all(this.map(client => client.disconnect()));
   }
 }

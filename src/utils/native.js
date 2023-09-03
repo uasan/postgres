@@ -19,15 +19,9 @@ export const //
     TimeZone,
   } = Temporal;
 
-export const setTimeout = delay => ({
-  then(resolve) {
-    globalThis.setTimeout(resolve, delay);
-  },
-});
-
 export const randomTimeout = {
   then(resolve) {
     const delay = 500 + random() * 5000;
-    setTimeout(resolve, delay, delay);
+    globalThis.setTimeout(resolve, delay, delay);
   },
 };

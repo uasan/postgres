@@ -4,18 +4,25 @@ import Postgres from 'postgres';
 
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
 
-const db = new (isPostgres ? Postgres : Pool)({
-  max: 10,
-  port: 5432,
-  host: '127.0.0.1',
-  username: 'postgres',
-  password: 'pass',
-  database: 'postgres',
-});
+const db = isPostgres
+  ? new Postgres({
+      max: 10,
+      port: 5432,
+      host: '127.0.0.1',
+      username: 'postgres',
+      password: 'pass',
+      database: 'postgres',
+    })
+  : new Pool({
+      maxConnections: 10,
+      port: 5432,
+      host: '127.0.0.1',
+      username: 'postgres',
+      password: 'pass',
+      database: 'postgres',
+    });
 
 const { performance } = globalThis;
-const getUtilization = () =>
-  100 - Math.round(performance.eventLoopUtilization().utilization * 100);
 
 let tasks = 0;
 let count = 0;
@@ -29,29 +36,39 @@ const sql = `SELECT
   $2::text AS "2",
   $3::text AS "3"`;
 
-//const sql = `SELECT 1`;
+const sqlTerminate = 'SELECT pg_terminate_backend(pg_backend_pid())';
 
 const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })
   : () => db.query(sql, params);
 
+const queryTerminate = isPostgres
+  ? () => db.unsafe(sqlTerminate).catch(console.error)
+  : () => db.query(sqlTerminate).catch(console.error);
+
 async function test() {
   const sendQuery = async () => {
     do {
       ++tasks;
-      await query();
 
-      if (++count === max) {
-        const now = performance.now();
-        const sec = (now - time) / 1000;
+      try {
+        await query();
+        count++;
+      } catch (error) {
+        console.error(error);
+      }
 
-        console.log('RPS', Math.round(max / sec), 'IDLE', getUtilization());
+      if (performance.now() - time >= 1000) {
+        console.log('RPS', count);
+
         count = 0;
-        time = now;
+        time = performance.now();
       }
     } while (--tasks > max || sendQuery());
   };
-  sendQuery();
+
+  //setInterval(queryTerminate, 500);
+  await sendQuery();
 }
 
 await test();

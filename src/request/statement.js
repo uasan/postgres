@@ -30,8 +30,15 @@ export class Statement {
     this.decoders = [];
     this.encoders = new Array(length);
     this.params = new Uint8Array([
-      /* eslint-disable-next-line */
-      0, ...textEncoder.encode(name), 0, 0, 1, 0, 1, (length >>> 8) & 0xff, (length >>> 0) & 0xff
+      0,
+      ...textEncoder.encode(name),
+      0,
+      0,
+      1,
+      0,
+      1,
+      (length >>> 8) & 0xff,
+      (length >>> 0) & 0xff,
     ]);
 
     task.onDescribe = () => {
@@ -69,8 +76,7 @@ export class Statement {
 
       if (value === null) writer.binary(NULL);
       else {
-        const encode = encoders[i];
-        encode(writer, value);
+        encoders[i](writer, value);
       }
     }
 

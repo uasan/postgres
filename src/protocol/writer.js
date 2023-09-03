@@ -1,4 +1,5 @@
-import { String, textEncoder } from '../utils/string.js';
+import { HIGH_WATER_MARK } from '../constants.js';
+import { textEncoder } from '../utils/string.js';
 
 export class Writer {
   length = 0;
@@ -22,7 +23,10 @@ export class Writer {
   unlock() {
     //console.log('UNLOCK');
     this.isLocked = false;
-    this.promise ??= this.write();
+
+    if (this.length) {
+      this.promise ??= this.write();
+    }
   }
 
   alloc(length) {
@@ -33,7 +37,7 @@ export class Writer {
       uint8.set(this.uint8);
       this.uint8 = uint8;
       this.view = new DataView(uint8.buffer);
-      console.log('ALLOC-WRITER', uint8.byteLength);
+      //console.log('ALLOC-WRITER', uint8.byteLength);
     }
 
     return this.uint8;
@@ -45,6 +49,8 @@ export class Writer {
     const { client } = this;
 
     let task = client.queue?.head;
+
+    //if (client.pid) console.trace('WRITE', this.uint8.subarray(0, this.length));
 
     const promise = {
       then: (resolve, reject) => {
@@ -60,8 +66,6 @@ export class Writer {
     };
 
     do {
-      length = this.length;
-
       try {
         await promise;
       } catch {
@@ -72,16 +76,13 @@ export class Writer {
         while (task?.statement) task = task.next;
 
         if (task) {
-          length = 0;
-          offset = 0;
-
-          this.length = 0;
-          this.offset = 0;
+          this.length = length = 0;
+          this.offset = offset = 0;
 
           while (
             this.isLocked === false &&
-            (task = task.send(client)) &&
-            this.length < 65536
+            (task = task.send()) &&
+            this.length < HIGH_WATER_MARK
           );
         }
       }
@@ -97,11 +98,12 @@ export class Writer {
   clear() {
     this.length = 0;
     this.offset = 0;
-    return this.promise;
+
+    this.reject?.();
+    this.promise = null;
   }
 
   type(code) {
-    //console.log('WRITE_TYPE', code);
     this.offset = this.length;
     this.alloc(5)[this.offset] = code;
     return this;
@@ -191,16 +193,14 @@ export class Writer {
   setUTF8(value) {
     const { length } = this;
     this.alloc(4);
-    return this.text(String(value)).view.setInt32(
-      length,
-      this.length - length - 4
-    );
+    return this.text(value).view.setInt32(length, this.length - length - 4);
   }
 
   end() {
     const { offset, length } = this;
 
     this.view.setInt32(offset + 1, length - offset - 1);
+
     this.promise ??= this.write();
 
     return this;

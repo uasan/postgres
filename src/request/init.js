@@ -15,10 +15,14 @@ export const handshake = ({
     text += '\x00' + keys[i] + '\x00' + params[keys[i]];
 
   writer.alloc(8);
+  writer.uint8[6] = 0;
   writer.text(text);
   writer.alloc(2);
+  writer.uint8[writer.length - 2] = 0;
+  writer.uint8[writer.length - 1] = 0;
   writer.view.setUint32(0, writer.length);
   writer.view.setUint16(4, 3);
+
   writer.promise = writer.write();
 };
 
@@ -53,17 +57,17 @@ export const parameterStatus = client => {
   switch (name.toLowerCase()) {
     case 'server_version':
       if (+value < 14)
-        client.end(new Error(`Minimum supported version PostgreSQL 14`));
+        client.abort(new Error(`Minimum supported version PostgreSQL 14`));
       break;
 
     case 'timezone':
       if (value !== 'UTC')
-        client.end(new Error(`Only time zone UTC supported`));
+        client.abort(new Error(`Only time zone UTC supported`));
       break;
 
     case 'client_encoding':
       if (value !== 'UTF8')
-        client.end(new Error(`Only client encoding UTF8 supported`));
+        client.abort(new Error(`Only client encoding UTF8 supported`));
       break;
   }
 };

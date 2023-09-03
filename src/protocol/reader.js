@@ -16,7 +16,7 @@ export class Reader {
     if (length - this.uint8.byteLength > 1024) {
       this.uint8 = new Uint8Array(this.uint8.byteLength + length + 1024);
       this.view = new DataView(this.uint8.buffer);
-      console.log('ALLOC-READER', this.uint8.byteLength);
+      //console.log('ALLOC-READER', this.uint8.byteLength);
     }
     return this.uint8;
   }
@@ -48,7 +48,7 @@ export class Reader {
         this.ending = offset + size;
         handle(client);
       } catch (error) {
-        client.end(error);
+        client.abort(error);
         return;
       }
 

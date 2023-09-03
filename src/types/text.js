@@ -1,6 +1,6 @@
 export const decodeText = reader => reader.getTextUTF8();
 export const encodeText = (writer, value) => {
-  writer.setUTF8(value);
+  writer.setUTF8(String(value));
 };
 
 export const text = {
@@ -8,24 +8,58 @@ export const text = {
   decode: decodeText,
   encode: encodeText,
 };
-
 export const tsquery = {
   id: 3615,
   decode: decodeText,
   encode: encodeText,
 };
-
 export const tsvector = {
   id: 3614,
   decode: decodeText,
   encode: encodeText,
 };
-
-export const xml = { ...text, id: 142 };
-export const char = { ...text, id: 18 };
-export const name = { ...text, id: 19 };
-export const varchar = { ...text, id: 1043 };
-export const bpchar = { ...text, id: 1042 };
-export const regconfig = { ...text, id: 3734 };
-export const aclitem = { ...text, id: 1033 };
-export const pgNodeTree = { ...text, id: 194 };
+export const xml = {
+  id: 142,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const char = {
+  id: 18,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const name = {
+  id: 19,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const varchar = {
+  id: 1043,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const bpchar = {
+  id: 1042,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const regconfig = {
+  id: 3734,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const aclitem = {
+  id: 1033,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const pgNodeTree = {
+  id: 194,
+  decode: decodeText,
+  encode: encodeText,
+};
+export const unknown = {
+  id: 0,
+  decode: decodeText,
+  encode: encodeText,
+};
