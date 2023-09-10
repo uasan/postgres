@@ -23,3 +23,8 @@ export const DEFAULT_PARAMS = {
   client_min_messages: 'WARNING',
   idle_in_transaction_session_timeout: 0,
 };
+
+export const ERRORS = {
+  DATABASE_NOT_EXIST: '3D000',
+  RELATION_NOT_EXIST: '42P01',
+};

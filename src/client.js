@@ -5,7 +5,6 @@ import { Reader } from './protocol/reader.js';
 import { Writer } from './protocol/writer.js';
 import { Connection } from './protocol/connection.js';
 import { getConnectionOptions } from './utils/options.js';
-import { transaction } from './request/transaction.js';
 import { listen, unlisten, notify } from './request/listen.js';
 import { Task } from './request/task.js';
 import { TRANSACTION_INACTIVE } from './constants.js';
@@ -71,7 +70,7 @@ export class Client {
     return this.queue.length > 0 || this.listeners.size > 0;
   }
 
-  async setOptions(options) {
+  async reset(options) {
     await this.connection.disconnect();
     this.options = getConnectionOptions(options);
     await this.connection.connect();
@@ -114,4 +113,3 @@ export class Client {
 Client.prototype.notify = notify;
 Client.prototype.listen = listen;
 Client.prototype.unlisten = unlisten;
-Client.prototype.transaction = transaction;

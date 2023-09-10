@@ -6,12 +6,10 @@ export async function listen(name, handler) {
   const handlers = this.listeners.get(name);
 
   if (handlers) {
-    if (handlers.includes(handler) === false) {
-      handlers.push(handler);
-    }
+    handlers.add(handler);
   } else {
     await this.query(`LISTEN ${name}`);
-    this.listeners.set(name, [handler]);
+    this.listeners.set(name, new Set().add(handler));
   }
 }
 

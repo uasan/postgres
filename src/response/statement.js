@@ -1,5 +1,5 @@
 import { types, blob, unknown } from '../protocol/types.js';
-import { TYPE_BLOB } from '../constants.js';
+import { TRANSACTION_INACTIVE, TYPE_BLOB } from '../constants.js';
 
 const decodeAsBlob = blob.decode;
 
@@ -60,12 +60,17 @@ export const emptyQueryResponse = ({ task }) => {
   task.resolve(null);
 };
 
-export const readyForQuery = client => {
-  client.task.onReady();
+export function readyForQuery(client) {
+  const state = client.reader.uint8[client.reader.offset];
 
+  if (state !== client.state) {
+    client.state = state;
+    client.isIsolated ||= state !== TRANSACTION_INACTIVE;
+  }
+
+  client.task.onReady();
   client.task = client.queue.dequeue();
-  client.state = client.reader.uint8[client.reader.offset];
-};
+}
 
 export const bindComplete = () => {};
 export const parseComplete = () => {};

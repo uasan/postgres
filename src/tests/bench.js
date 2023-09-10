@@ -1,5 +1,5 @@
 import { Pool } from '../pool.js';
-//import { Now } from '#native';
+//import { Client } from '../client.js';
 import Postgres from 'postgres';
 
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
@@ -67,7 +67,7 @@ async function test() {
     } while (--tasks > max || sendQuery());
   };
 
-  //setInterval(queryTerminate, 500);
+  setInterval(queryTerminate, 500);
   await sendQuery();
 }
 
