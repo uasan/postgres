@@ -37,8 +37,8 @@ export class Connection {
   };
 
   onConnect = () => {
+    //console.log('ON-CONNECTED', this.client.options.database);
     if (this.client.stream === null) return;
-    //console.log('ON-CONNECT');
 
     this.timeout = 0;
     this.client.options.signal?.addEventListener('abort', this.onAbort);
@@ -56,6 +56,8 @@ export class Connection {
 
     if (this.promiseDisconnect) {
       this.resolveDisconnect();
+
+      this.promiseDisconnect = null;
       this.resolveDisconnect = noop;
       this.rejectDisconnect = noop;
     } else if (!this.client.isEnded && this.client.isKeepAlive()) {
@@ -82,6 +84,7 @@ export class Connection {
   };
 
   async connect() {
+    //console.log('CONNECT', !!this.promiseConnect);
     if (this.promiseConnect) return await this.promiseConnect;
 
     this.client.isEnded = false;
@@ -129,7 +132,9 @@ export class Connection {
   }
 
   disconnect() {
-    if (this.promiseDisconnect === null) {
+    //console.log('DISCONNECT');
+
+    if (this.client.stream && this.promiseDisconnect === null) {
       this.client.isEnded = true;
       this.client.isReady = false;
       this.client.isIsolated = true;

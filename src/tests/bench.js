@@ -67,7 +67,7 @@ async function test() {
     } while (--tasks > max || sendQuery());
   };
 
-  setInterval(queryTerminate, 500);
+  //setInterval(queryTerminate, 500);
   await sendQuery();
 }
 
