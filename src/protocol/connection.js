@@ -131,31 +131,27 @@ export class Connection {
     }
   }
 
-  disconnect() {
+  async disconnect() {
     //console.log('DISCONNECT');
 
     if (this.client.stream && this.promiseDisconnect === null) {
+      this.promiseDisconnect = new Promise((resolve, reject) => {
+        this.resolveDisconnect = resolve;
+        this.rejectDisconnect = reject;
+      });
+
       this.client.isEnded = true;
       this.client.isReady = false;
       this.client.isIsolated = true;
 
       this.rejectConnect();
 
-      this.promiseDisconnect = new Promise((resolve, reject) => {
-        this.resolveDisconnect = resolve;
-        this.rejectDisconnect = reject;
-      });
-
-      if (this.client.stream) {
-        this.client.writer.lock();
-        this.client.writer.reject?.();
-        this.client.stream.end(MESSAGE_TERMINATE);
-      } else {
-        this.onClose();
-      }
+      this.client.writer.lock();
+      this.client.writer.reject?.();
+      this.client.stream.end(MESSAGE_TERMINATE);
     }
 
-    return this.promiseDisconnect;
+    await this.promiseDisconnect;
   }
 
   async reconnect() {
