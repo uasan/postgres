@@ -1,5 +1,5 @@
 export const decodeBlob = reader =>
-  reader.uint8.subarray(reader.offset, reader.ending);
+  reader.uint8.slice(reader.offset, reader.ending);
 
 export const encodeBlob = (writer, uint8) => {
   writer.setInt32(uint8.byteLength).binary(uint8);
