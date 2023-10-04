@@ -15,6 +15,8 @@ import { typeArrayOf } from '../types/array/type.js';
 export { unknown } from '../types/text.js';
 export { bytea as blob };
 
+//https://github.com/npgsql/doc/blob/main/dev/types.md/#L1
+
 export const types = {
   0: text.unknown,
   16: bool,
