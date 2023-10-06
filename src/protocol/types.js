@@ -1,6 +1,7 @@
 import { uuid } from '../types/uuid.js';
 import { bool } from '../types/bool.js';
-import { bit, varbit, bytea } from '../types/bin.js';
+import { bytea } from '../types/bytea.js';
+import { bit, varbit } from '../types/bit.js';
 import { record } from '../types/record/type.js';
 import { voidType } from '../types/void.js';
 import * as date from '../types/date.js';

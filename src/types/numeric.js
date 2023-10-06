@@ -72,13 +72,13 @@ const encodeNumeric = (writer, value) => {
 
   switch (text) {
     case 'NaN':
-      writer.setInt32(8).binary([0, 0, 0, 0, 192, 0, 0, 0]);
+      writer.setInt32(8).setBytes([0, 0, 0, 0, 192, 0, 0, 0]);
       return;
     case 'Infinity':
-      writer.setInt32(8).binary([0, 0, 0, 0, 208, 0, 0, 32]);
+      writer.setInt32(8).setBytes([0, 0, 0, 0, 208, 0, 0, 32]);
       return;
     case '-Infinity':
-      writer.setInt32(8).binary([0, 0, 0, 0, 240, 0, 0, 32]);
+      writer.setInt32(8).setBytes([0, 0, 0, 0, 240, 0, 0, 32]);
       return;
   }
 

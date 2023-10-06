@@ -64,23 +64,23 @@ export class Statement {
       .setInt8(DESCRIBE_STATEMENT)
       .string(name)
       .end()
-      .binary(MESSAGE_FLUSH_END);
+      .setBytes(MESSAGE_FLUSH_END);
   }
 
   execute(values) {
     const { writer, encoders } = this;
-    writer.type(MESSAGE_BIND).binary(this.params);
+    writer.type(MESSAGE_BIND).setBytes(this.params);
 
     for (let i = 0; i < values.length; i++) {
       const value = values[i];
 
-      if (value === null) writer.binary(NULL);
+      if (value === null) writer.setBytes(NULL);
       else {
         encoders[i](writer, value);
       }
     }
 
-    writer.binary(INT16_ONE_ONE).end().binary(MESSAGES_EXEC_SYNC_FLUSH);
+    writer.setBytes(INT16_ONE_ONE).end().setBytes(MESSAGES_EXEC_SYNC_FLUSH);
     return this;
   }
 }

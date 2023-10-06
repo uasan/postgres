@@ -109,7 +109,7 @@ export class Writer {
     return this;
   }
 
-  binary(value) {
+  setBytes(value) {
     const { length } = this;
     this.alloc(value.length).set(value, length);
     return this;

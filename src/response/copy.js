@@ -5,7 +5,9 @@ import {
   MESSAGE_COPY_FAIL,
 } from '../protocol/messages.js';
 
-export const copyBothResponse = () => {};
+export const copyBothResponse = () => {
+  //
+};
 
 export const copyInResponse = ({ task, writer }) => {
   writer.lock();
@@ -17,9 +19,9 @@ export const copyInResponse = ({ task, writer }) => {
       write: chunk =>
         typeof chunk === 'string'
           ? writer.type(MESSAGE_COPY_DATA).text(chunk).end().promise
-          : writer.type(MESSAGE_COPY_DATA).binary(chunk).end().promise,
+          : writer.type(MESSAGE_COPY_DATA).setBytes(chunk).end().promise,
       close: async () => {
-        writer.binary(MESSAGE_COPY_DONE).unlock();
+        writer.setBytes(MESSAGE_COPY_DONE).unlock();
         await task;
       },
       abort: (reason = 'abort') =>
