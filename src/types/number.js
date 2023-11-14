@@ -5,7 +5,7 @@ const decodeInt4 = ({ view, offset }) => view.getInt32(offset);
 const decodeUint4 = ({ view, offset }) => view.getUint32(offset);
 const decodeFloat4 = ({ view, offset }) => view.getFloat32(offset);
 const decodeFloat8 = ({ view, offset }) => view.getFloat64(offset);
-const decodeInt8 = ({ view, offset }) => view.getBigInt64(offset).toString();
+const decodeInt8 = ({ view, offset }) => view.getBigInt64(offset);
 
 const encodeInt2 = (writer, value) => {
   writer.setInt32(2).setInt16(value);
@@ -19,16 +19,16 @@ const encodeUint4 = (writer, value) => {
   writer.setInt32(4).setUint4(value);
 };
 
+const encodeInt8 = (writer, value) => {
+  writer.setInt32(8).setBigInt64(BigInt(value));
+};
+
 const encodeFloat4 = (writer, value) => {
   writer.setInt32(4).setFloat32(value);
 };
 
 const encodeFloat8 = (writer, value) => {
   writer.setInt32(8).setFloat64(value);
-};
-
-const encodeInt8 = (writer, value) => {
-  writer.setInt32(8).setBigInt64(BigInt(value));
 };
 
 export const int2 = {
