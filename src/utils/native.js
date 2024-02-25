@@ -1,4 +1,4 @@
-import { Temporal } from '@js-temporal/polyfill';
+import 'temporal-polyfill/global';
 
 export const //
   noop = () => {},

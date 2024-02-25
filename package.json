@@ -15,7 +15,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "@js-temporal/polyfill": "js-temporal/temporal-polyfill"
+    "temporal-polyfill": "latest"
   },
   "devDependencies": {
     "postgres": "git://github.com/porsager/postgres.git#master",
