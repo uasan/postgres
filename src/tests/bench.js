@@ -6,7 +6,7 @@ const isPostgres = process.argv.slice(2)[0] === 'postgres';
 
 const db = isPostgres
   ? new Postgres({
-      max: 10,
+      max: 4,
       port: 5432,
       host: '127.0.0.1',
       username: 'postgres',
@@ -14,7 +14,7 @@ const db = isPostgres
       database: 'postgres',
     })
   : new Pool({
-      maxConnections: 10,
+      maxConnections: 4,
       port: 5432,
       host: '127.0.0.1',
       username: 'postgres',
