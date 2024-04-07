@@ -81,7 +81,7 @@ export class PostgresError extends Error {
   }
 }
 
-export const errorResponse = ({ pid, task, reader }) => {
+export function errorResponse({ pid, task, reader }) {
   const error = makeError(pid, reader);
 
   if (task) {
@@ -90,8 +90,8 @@ export const errorResponse = ({ pid, task, reader }) => {
   } else {
     console.error(new PostgresError(error));
   }
-};
+}
 
-export const noticeResponse = ({ pid, reader, options: { onMessage } }) => {
+export function noticeResponse({ pid, reader, options: { onMessage } }) {
   onMessage(makeError(pid, reader));
-};
+}

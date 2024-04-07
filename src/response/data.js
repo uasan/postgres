@@ -38,6 +38,7 @@ export function setDataValue(reader) {
   if (length !== -1) {
     const decode = this.statement.decoders[0];
     reader.ending = reader.offset + length;
+
     this.data = decode(reader);
   }
 }

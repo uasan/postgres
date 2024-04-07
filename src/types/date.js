@@ -22,7 +22,7 @@ const decodeTime = ({ view, offset }) =>
 const decodeInterval = ({ view, offset }) /* eslint-disable */ =>
   new Duration(0, view.getInt32(offset + 12), 0, view.getInt32(offset + 8), 0, 0, 0, 0, Number(view.getBigInt64(offset)));
 
-const encodeTime = (writer, value) => {
+function encodeTime (writer, value) {
   const { view, length } = writer;
 
   writer.alloc(12);
@@ -38,27 +38,25 @@ const encodeTime = (writer, value) => {
         value.microsecond
     )
   );
-};
+}
 
-const encodeDate = (writer, value) => {
+function encodeDate  (writer, value) {
   const { view, length } = writer;
 
   writer.alloc(8);
   view.setInt32(length, 4);
-
   view.setInt32(length + 4, value.since(plainDate).days * 86400);
-};
+}
 
-const encodeTimestamp = (writer, value) => {
+function encodeTimestamp  (writer, value) {
   const { view, length } = writer;
 
   writer.alloc(12);
   view.setInt32(length, 8);
+  view.setBigInt64(length + 4, (value.epochMicroseconds ?? Instant.from(value).epochMicroseconds) - 946684800000000n);
+}
 
-  view.setBigInt64(length + 4, value.epochMicroseconds - 946684800000000n);
-};
-
-const encodeInterval = (writer, value) => {
+function encodeInterval(writer, value) {
   const { view, length } = writer;
 
   writer.alloc(20);

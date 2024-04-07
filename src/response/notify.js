@@ -1,4 +1,4 @@
-export const notificationResponse = async ({ reader, listeners }) => {
+export async function notificationResponse({ reader, listeners }) {
   let { ending } = reader;
 
   reader.offset += 4;
@@ -21,4 +21,4 @@ export const notificationResponse = async ({ reader, listeners }) => {
       }
     }
   }
-};
+}

@@ -3,7 +3,7 @@ import { TRANSACTION_INACTIVE, TYPE_BLOB } from '../constants.js';
 
 const decodeAsBlob = blob.decode;
 
-export const parameterDescription = ({ task, reader }) => {
+export function parameterDescription({ task, reader }) {
   reader.offset += 2;
   const { encoders } = task.statement;
 
@@ -12,13 +12,13 @@ export const parameterDescription = ({ task, reader }) => {
     const { encode } = types[reader.getInt32()] ?? unknown;
     encoders[i] = encode;
   }
-};
+}
 
-export const noData = ({ task }) => {
+export function noData({ task }) {
   task.onDescribe();
-};
+}
 
-export const rowDescription = ({ task, reader }) => {
+export function rowDescription({ task, reader }) {
   const length = reader.getInt16();
   const { columns, decoders } = task.statement;
   const isBlob = task.options & TYPE_BLOB;
@@ -38,13 +38,13 @@ export const rowDescription = ({ task, reader }) => {
   }
 
   task.onDescribe();
-};
+}
 
-export const dataRow = ({ task, reader }) => {
+export function dataRow({ task, reader }) {
   task.setData(reader);
-};
+}
 
-export const commandComplete = ({ task, reader }) => {
+export function commandComplete({ task, reader }) {
   const { resolve, statement } = task;
 
   if (statement.columns.length === 0) {
@@ -54,11 +54,11 @@ export const commandComplete = ({ task, reader }) => {
   } else {
     resolve(task.data);
   }
-};
+}
 
-export const emptyQueryResponse = ({ task }) => {
+export function emptyQueryResponse({ task }) {
   task.resolve(null);
-};
+}
 
 export function readyForQuery(client) {
   const state = client.reader.uint8[client.reader.offset];

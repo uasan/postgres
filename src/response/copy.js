@@ -5,11 +5,11 @@ import {
   MESSAGE_COPY_FAIL,
 } from '../protocol/messages.js';
 
-export const copyBothResponse = () => {
+export function copyBothResponse() {
   //
-};
+}
 
-export const copyInResponse = ({ task, writer }) => {
+export function copyInResponse({ task, writer }) {
   writer.lock();
   task.resolve(
     new WritableStream({
@@ -28,9 +28,9 @@ export const copyInResponse = ({ task, writer }) => {
         writer.type(MESSAGE_COPY_FAIL).string(reason).end(),
     })
   );
-};
+}
 
-export const copyOutResponse = ({ task, cancelRequest }) => {
+export function copyOutResponse({ task, cancelRequest }) {
   task.resolve(
     new ReadableStream({
       type: 'bytes',
@@ -50,13 +50,13 @@ export const copyOutResponse = ({ task, cancelRequest }) => {
       },
     })
   );
-};
+}
 
-export const copyData = ({ task, reader }) => {
+export function copyData({ task, reader }) {
   task.controller?.enqueue(reader.uint8.slice(reader.offset, reader.ending));
-};
+}
 
-export const copyDone = ({ task, writer }) => {
+export function copyDone({ task, writer }) {
   writer.unlock();
   task.controller = null;
-};
+}
