@@ -1,10 +1,11 @@
 export const //
   FETCH_ALL = 2,
   FETCH_ONE = 4,
-  FETCH_STREAM = 64,
-  FETCH_ONE_VALUE = 8,
-  TYPE_BLOB = 16,
-  TYPE_NATIVE = 32;
+  FETCH_STREAM = 8,
+  FETCH_VALUES = 16,
+  FETCH_ONE_VALUE = 32,
+  TYPE_BLOB = 64,
+  TYPE_NATIVE = 128;
 
 export const //
   TRANSACTION_ERROR = 69,

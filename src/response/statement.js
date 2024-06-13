@@ -26,9 +26,7 @@ export function rowDescription({ task, reader }) {
   for (let i = 0; i < length; i++) {
     reader.ending = reader.uint8.indexOf(0, reader.offset);
     columns.push(reader.getTextUTF8());
-    reader.offset = reader.ending;
-
-    reader.offset += 7;
+    reader.offset = reader.ending + 7;
 
     //console.log(reader.view.getInt32(reader.offset));
 

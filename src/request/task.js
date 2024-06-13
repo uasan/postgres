@@ -1,11 +1,17 @@
 import { nullArray } from '#native';
 import { Statement } from './statement.js';
-import { TYPE_NATIVE, FETCH_ALL, FETCH_ONE_VALUE } from '../constants.js';
+import {
+  TYPE_NATIVE,
+  FETCH_ALL,
+  FETCH_ONE_VALUE,
+  FETCH_VALUES,
+} from '../constants.js';
 import {
   putData,
   pushData,
   setDataValue,
   setDataFields,
+  setValueToArray,
 } from '../response/data.js';
 import { noop } from '../utils/native.js';
 
@@ -19,17 +25,22 @@ export class Task {
     client,
     sql,
     values = nullArray,
-    options = FETCH_ALL | TYPE_NATIVE
+    flags = FETCH_ALL | TYPE_NATIVE
   ) {
     if (client.stream === null) client.connect().catch(noop);
 
     this.client = client;
     this.sql = sql;
     this.values = values;
-    this.options = options;
-    this.data = options & FETCH_ALL ? [] : null;
-    this.addData = options & FETCH_ALL ? pushData : putData;
-    this.setData = options & FETCH_ONE_VALUE ? setDataValue : setDataFields;
+    this.options = flags;
+    this.data = flags & FETCH_ALL || flags & FETCH_VALUES ? [] : null;
+    this.addData = flags & FETCH_ALL ? pushData : putData;
+    this.setData =
+      flags & FETCH_ONE_VALUE
+        ? setDataValue
+        : flags & FETCH_VALUES
+          ? setValueToArray
+          : setDataFields;
 
     //console.log('TASK', sql);
 

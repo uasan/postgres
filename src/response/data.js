@@ -42,3 +42,15 @@ export function setDataValue(reader) {
     this.data = decode(reader);
   }
 }
+
+export function setValueToArray(reader) {
+  reader.offset += 2;
+  const length = reader.getInt32();
+
+  if (length !== -1) {
+    const decode = this.statement.decoders[0];
+    reader.ending = reader.offset + length;
+
+    this.data.push(decode(reader));
+  }
+}
