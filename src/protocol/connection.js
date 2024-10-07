@@ -76,7 +76,10 @@ export class Connection {
 
   async connect() {
     //console.log('CONNECT', !!this.connecting);
-    if (this.connecting) return await this.connecting.promise;
+    if (this.connecting) {
+      await this.connecting.promise;
+      return;
+    }
 
     this.client.isEnded = false;
     this.disconnecting?.reject();
