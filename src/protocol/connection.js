@@ -32,12 +32,12 @@ export class Connection {
 
   onConnect = () => {
     //console.log('ON-CONNECTED', this.client.options.database);
-    if (this.client.stream === null) return;
+    if (this.client.stream) {
+      this.timeout = 0;
+      this.client.options.signal?.addEventListener('abort', this.onAbort);
 
-    this.timeout = 0;
-    this.client.options.signal?.addEventListener('abort', this.onAbort);
-
-    handshake(this.client);
+      handshake(this.client);
+    }
   };
 
   onClose = () => {
