@@ -1,6 +1,6 @@
-import { Client } from '../client.js';
+import { PostgresClient } from '../client.js';
 
-const db1 = new Client({
+const db1 = new PostgresClient({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',
@@ -8,7 +8,7 @@ const db1 = new Client({
   database: 'smartapps',
 });
 
-const db2 = new Client({
+const db2 = new PostgresClient({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',
@@ -26,15 +26,20 @@ async function test() {
     console.time('COPY');
 
     const readableStream = await db1.query(
-      `COPY smartlibrary.locations TO STDOUT (FORMAT 'binary')`
+      `COPY smartlibrary.locations TO STDOUT (FORMAT 'binary')`,
+      []
     );
     const writableStream = await db2.query(
-      `COPY temp_copy FROM STDIN (FORMAT 'binary')`
+      `COPY temp_copy FROM STDIN (FORMAT 'binary')`,
+      []
     );
 
     await readableStream.pipeTo(writableStream);
 
     console.timeEnd('COPY');
+
+    await db1.disconnect();
+    await db2.disconnect();
   } catch (error) {
     console.error(error);
   }

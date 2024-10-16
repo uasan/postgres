@@ -51,7 +51,7 @@ export class Connection {
     if (this.disconnecting) {
       this.disconnecting.resolve();
       this.disconnecting = null;
-    } else if (!this.client.isEnded && this.client.isKeepAlive()) {
+    } else if (this.isNeedReconnect()) {
       this.reconnect();
     }
   };
@@ -61,8 +61,6 @@ export class Connection {
   };
 
   onError = error => {
-    this.client.isReady = false;
-
     if (this.client.task) {
       this.client.task.reject(error);
       this.client.task = null;
@@ -75,10 +73,12 @@ export class Connection {
   };
 
   async connect() {
-    //console.log('CONNECT', !!this.connecting);
     if (this.connecting) {
       await this.connecting.promise;
       return;
+    } else if (this.client.stream) {
+      if (this.disconnecting) await this.disconnecting.promise;
+      else return;
     }
 
     this.client.isEnded = false;
@@ -88,8 +88,8 @@ export class Connection {
       .on('error', this.onError)
       .once('close', this.onClose)
       .setNoDelay(true)
-      .setKeepAlive(true, 60_000)
-      .setTimeout(120_000, this.onTimeout);
+      .setKeepAlive(true, 60_000);
+    //.setTimeout(120_000, this.onTimeout);
 
     this.connecting = Promise.withResolvers();
 
@@ -98,6 +98,7 @@ export class Connection {
     }
 
     this.client.task = this.connecting.promise;
+    this.client.task.onError = noop;
     this.client.task.reject = this.connecting.reject;
     this.client.task.onReady = this.connecting.resolve;
 
@@ -105,9 +106,8 @@ export class Connection {
 
     try {
       await this.connecting.promise;
-      this.client.isReady = true;
 
-      //console.log('ON-READY');
+      //console.log('ON-READY', this.client.queue.length, this.client.isReady);
 
       if (this.client.listeners.size) {
         restoreListeners.call(this.client);
@@ -115,6 +115,19 @@ export class Connection {
 
       this.client.writer.unlock();
       this.client.task?.send();
+    } catch (error) {
+      this.connecting = null;
+      this.client.task = null;
+      await this.disconnect();
+
+      if (PostgresError.is(error) || !this.isNeedReconnect()) {
+        const postgresError = new PostgresError(error);
+
+        while (this.client.queue.length)
+          this.client.queue.dequeue().reject(postgresError);
+
+        throw postgresError;
+      }
     } finally {
       this.connecting = null;
     }
@@ -127,7 +140,6 @@ export class Connection {
       this.disconnecting = Promise.withResolvers();
 
       this.client.isEnded = true;
-      this.client.isReady = false;
       this.client.isIsolated = true;
 
       this.connecting?.reject();
@@ -140,12 +152,20 @@ export class Connection {
     await this.disconnecting?.promise;
   }
 
+  isNeedReconnect() {
+    return !this.client.isEnded && this.client.isKeepAlive();
+  }
+
   async reconnect() {
-    //console.log('RETRY');
+    //console.log('RECONNECT', this.timeout);
     this.timeout += await randomTimeout;
 
     if (this.client.stream === null) {
       this.connect().catch(noop);
     }
+  }
+
+  async [Symbol.asyncDispose]() {
+    await this.disconnect();
   }
 }

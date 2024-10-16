@@ -73,7 +73,7 @@ export class Writer {
       }
 
       if (this.isLocked === false && (task ??= client.queue.head)) {
-        while (task?.statement) task = task.next;
+        while (task?.isSent) task = task.next;
 
         if (task) {
           this.length = length = 0;
@@ -194,6 +194,11 @@ export class Writer {
     const { length } = this;
     this.alloc(4);
     return this.text(value).view.setInt32(length, this.length - length - 4);
+  }
+
+  clearLastMessage() {
+    this.length = this.offset;
+    return this;
   }
 
   end() {

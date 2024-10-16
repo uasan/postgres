@@ -7,16 +7,24 @@ import { Connection } from './protocol/connection.js';
 import { getConnectionOptions } from './utils/options.js';
 import { listen, unlisten, notify } from './request/listen.js';
 import { Task } from './request/task.js';
-import { TRANSACTION_INACTIVE } from './constants.js';
+import {
+  TRANSACTION_ACTIVE,
+  TRANSACTION_ERROR,
+  TRANSACTION_INACTIVE,
+} from './constants.js';
 import { PostgresError } from './response/error.js';
 
-export class Client {
+export class PostgresClient {
   pid = 0;
   secret = 0;
+  transactions = 0;
 
   task = null;
   state = TRANSACTION_INACTIVE;
+
+  pool = null;
   stream = null;
+  waitReady = null;
 
   isEnded = false;
   isReady = false;
@@ -29,8 +37,14 @@ export class Client {
   reader = new Reader(this);
   writer = new Writer(this);
 
-  constructor(options) {
-    this.options = getConnectionOptions(options);
+  constructor(options, pool = null) {
+    if (pool) {
+      this.pool = pool;
+      this.options = options;
+    } else {
+      this.options = getConnectionOptions(options);
+    }
+
     this.connection = new Connection(this);
   }
 
@@ -38,11 +52,99 @@ export class Client {
     return this.connection.connect();
   }
 
-  async query(sql, values, options) {
+  prepare() {
+    return new Task(this);
+  }
+
+  query(sql, values) {
+    return new Task(this).execute(sql, values);
+  }
+
+  async ready() {
+    if (this.isReady === false) {
+      this.waitReady ??= Promise.withResolvers();
+      await this.waitReady.promise;
+    }
+  }
+
+  isolate() {
+    this.isolated = true;
+    return this;
+  }
+
+  unIsolate() {
+    this.isIsolated = false;
+    return this.pool ?? this;
+  }
+
+  isTransaction() {
+    return this.state === TRANSACTION_ACTIVE;
+  }
+
+  async begin() {
+    await this.ready();
+
+    switch (this.state) {
+      case TRANSACTION_INACTIVE:
+        await this.query('BEGIN');
+        break;
+
+      case TRANSACTION_ACTIVE:
+        await this.query(`SAVEPOINT _${this.transactions++}`);
+        break;
+
+      case TRANSACTION_ERROR:
+        await this.query('ROLLBACK');
+        throw PostgresError.transactionAborted(this);
+    }
+  }
+
+  async commit() {
+    await this.ready();
+
+    switch (this.state) {
+      case TRANSACTION_ACTIVE:
+        if (this.transactions > 1) {
+          await this.query(`RELEASE SAVEPOINT _${--this.transactions}`);
+        } else {
+          await this.query('COMMIT');
+        }
+        break;
+
+      case TRANSACTION_ERROR:
+        await this.query('ROLLBACK');
+        throw PostgresError.transactionAborted(this);
+    }
+  }
+
+  async rollback() {
+    await this.ready();
+
+    switch (this.state) {
+      case TRANSACTION_ACTIVE:
+        if (this.transactions > 1) {
+          await this.query(`ROLLBACK TO SAVEPOINT _${--this.transactions}`);
+        } else {
+          await this.query('ROLLBACK');
+        }
+        break;
+
+      case TRANSACTION_ERROR:
+        await this.query('ROLLBACK');
+    }
+  }
+
+  async startTransaction(action, payload) {
     try {
-      return await new Task(this, sql, values, options);
+      await this.query('BEGIN');
+      const result = await action(this, payload);
+
+      await this.commit();
+
+      return result;
     } catch (error) {
-      throw new PostgresError(error);
+      await this.rollback();
+      throw error;
     }
   }
 
@@ -79,6 +181,8 @@ export class Client {
   clear() {
     this.pid = 0;
     this.secret = 0;
+    this.transactions = 0;
+
     this.stream = null;
     this.isReady = false;
     this.isIsolated = false;
@@ -87,6 +191,11 @@ export class Client {
     this.reader.clear();
     this.writer.clear();
     this.statements.clear();
+
+    if (this.waitReady) {
+      this.waitReady.reject();
+      this.waitReady = null;
+    }
 
     //console.log('CLEAR');
 
@@ -110,6 +219,6 @@ export class Client {
   }
 }
 
-Client.prototype.notify = notify;
-Client.prototype.listen = listen;
-Client.prototype.unlisten = unlisten;
+PostgresClient.prototype.notify = notify;
+PostgresClient.prototype.listen = listen;
+PostgresClient.prototype.unlisten = unlisten;

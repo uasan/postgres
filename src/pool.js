@@ -1,14 +1,15 @@
-import { Client } from './client.js';
+import { PostgresClient } from './client.js';
 import { getConnectionOptions } from './utils/options.js';
 
-export class Pool extends Array {
+export class PostgresPool extends Array {
   constructor(options) {
     options = getConnectionOptions(options);
 
     super(options.maxConnections);
     this.options = options;
 
-    for (let i = 0; i < this.length; i++) this[i] = new Client(options);
+    for (let i = 0; i < this.length; i++)
+      this[i] = new PostgresClient(options, this);
   }
 
   connect() {
@@ -44,15 +45,8 @@ export class Pool extends Array {
     return this[0].notify(name, value);
   }
 
-  transaction(action, params) {
-    let client = this.getClient(1);
-
-    if (client.isIsolated) {
-      client = new Client(this.options);
-      this.push(client);
-    }
-
-    return client.transaction(action, params);
+  isolate() {
+    return this.getClient(1).isolate();
   }
 
   async disconnect() {

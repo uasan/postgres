@@ -1,8 +1,8 @@
-import { Pool } from '../pool.js';
+import { PostgresPool } from '../pool.js';
 import { getRelationNames } from '../cache/relation.js';
 import { FETCH_ONE_VALUE } from '../constants.js';
 
-const db = new Pool({
+const db = new PostgresPool({
   max: 1,
   host: '127.0.0.1',
   port: 5432,

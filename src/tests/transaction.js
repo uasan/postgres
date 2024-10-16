@@ -1,34 +1,44 @@
-import { Client } from '../client.js';
+import { noop } from '#native';
+import { PostgresPool } from '../pool.js';
 
-const db = new Client({
-  size: 1,
+const options = {
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',
   password: 'pass',
   database: 'postgres',
-  // params: {
-  //   timezone: 'Europe/Kiev',
-  // },
-});
+  maxConnections: 10,
+};
+
+const pool = new PostgresPool(options);
 
 async function test() {
   try {
-    await db.transaction(async db => {
-      const { pid } = db;
-      console.log(await db.query(`SELECT 'INNER TRANSACTION'::text`));
+    let db = pool.isolate();
 
-      //pg_terminate_backend($1::int)
+    await db.reset({ ...options, database: 'A' }).catch(noop);
+    await db.reset(options);
+    await db.reset({ ...options, database: 'B' }).catch(noop);
+    await db.reset(options);
+    await db.reset({ ...options, database: 'C' }).catch(noop);
+    await db.reset(options);
 
-      await db.query(`SELECT $1::int / 0`, [pid]).catch(() => {});
+    await db.begin();
 
-      console.log(await db.query(`SELECT 2 AS q`));
-    });
+    //await db.query('SELECT 1::int / 0::int').catch(console.error);
+
+    await db.query('SAVEPOINT _1');
+    //await db.query('ROLLBACK TO SAVEPOINT _1');
+    await db.query('RELEASE SAVEPOINT _1');
+
+    await db.commit();
+
+    db = db.unIsolate();
   } catch (error) {
     console.error(error);
   }
 
-  console.log(await db.query(`SELECT 'AFTER TRANSACTION'::text`));
+  await pool.disconnect();
 }
 
 test();

@@ -1,23 +1,31 @@
-import { textEncoder } from '../utils/string.js';
 import {
   NULL,
   MESSAGE_SYNC,
   MESSAGE_BIND,
   MESSAGE_PARSE,
+  INT16_ONE_ONE,
   MESSAGE_DESCRIBE,
   MESSAGE_FLUSH_END,
-  INT16_ONE_ONE,
   DESCRIBE_STATEMENT,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
 
+import { textEncoder } from '../utils/string.js';
+
+function onErrorParse() {
+  this.client.writer.type(MESSAGE_SYNC).end().unlock();
+  this.client.statements.delete(this.sql);
+}
+
 export class Statement {
+  columns = [];
+  decoders = [];
+
   constructor({ statements, writer }, task) {
     const { size } = statements;
     const name = size.toString(36);
     const {
       sql,
-      reject,
       values: { length },
     } = task;
 
@@ -26,8 +34,6 @@ export class Statement {
 
     this.name = name;
     this.writer = writer;
-    this.columns = [];
-    this.decoders = [];
     this.encoders = new Array(length);
     this.params = new Uint8Array([
       0,
@@ -41,18 +47,7 @@ export class Statement {
       (length >>> 0) & 0xff,
     ]);
 
-    task.onDescribe = () => {
-      task.reject = reject;
-      this.execute(task.values);
-      writer.unlock();
-    };
-
-    task.reject = error => {
-      writer.type(MESSAGE_SYNC).end().unlock();
-      statements.delete(sql);
-      task.reject = reject;
-      reject(error);
-    };
+    task.onError = onErrorParse;
 
     writer
       .type(MESSAGE_PARSE)
@@ -67,17 +62,22 @@ export class Statement {
       .setBytes(MESSAGE_FLUSH_END);
   }
 
-  execute(values) {
+  execute({ values, reject }) {
     const { writer, encoders } = this;
     writer.type(MESSAGE_BIND).setBytes(this.params);
 
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i];
+    try {
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        const encode = encoders[i];
 
-      if (value === null) writer.setBytes(NULL);
-      else {
-        encoders[i](writer, value);
+        if (value == null) writer.setBytes(NULL);
+        else encode(writer, value);
       }
+    } catch (error) {
+      writer.clearLastMessage().type(MESSAGE_SYNC).end();
+      reject(error);
+      return this;
     }
 
     writer.setBytes(INT16_ONE_ONE).end().setBytes(MESSAGES_EXEC_SYNC_FLUSH);

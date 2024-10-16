@@ -1,7 +1,7 @@
-import { Client } from '../client.js';
+import { PostgresClient } from '../client.js';
 import { FETCH_ONE } from '../constants.js';
 
-const db = new Client({
+const db = new PostgresClient({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',

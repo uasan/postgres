@@ -41,7 +41,7 @@ export class Reader {
       }
 
       const handle = handlers[uint8[offset]];
-      //if (client.pid) console.log(handle?.name);
+      //if (!handle) console.log('Not Handle', uint8[offset]);
 
       try {
         this.offset = offset + 5;
@@ -85,5 +85,15 @@ export class Reader {
 
   getTextUTF8() {
     return textDecoder.decode(this.uint8.subarray(this.offset, this.ending));
+  }
+
+  getString() {
+    let text = '';
+    const length = this.ending - 1;
+
+    for (let i = this.offset; i < length; i++)
+      text += String.fromCharCode(this.uint8[i]);
+
+    return text;
   }
 }

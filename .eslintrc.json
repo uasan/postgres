@@ -15,5 +15,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended"
-  ]
+  ],
+  "rules": {
+    "no-unreachable": "off"
+  }
 }

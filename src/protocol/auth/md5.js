@@ -1,6 +1,7 @@
-import { md5 } from '../utils/hash.js';
-import { MESSAGE_PASSWORD } from '../protocol/messages.js';
-import { textEncoder } from '../utils/string.js';
+import { md5 } from '../../utils/hash.js';
+import { textEncoder } from '../../utils/string.js';
+
+import { MESSAGE_PASSWORD } from '../messages.js';
 
 export const md5Password = (reader, writer, { username, password }) => {
   const buffer = new Uint8Array(36);

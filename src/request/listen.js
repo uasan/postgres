@@ -14,7 +14,7 @@ export async function listen(name, handler) {
 }
 
 export async function notify(name, value) {
-  await this.query(`SELECT pg_catalog.pg_notify($1::text, $2::text)`, [
+  await this.query('SELECT pg_catalog.pg_notify($1::text, $2::text)', [
     name,
     value,
   ]);

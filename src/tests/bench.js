@@ -1,5 +1,5 @@
-import { Pool } from '../pool.js';
-//import { Client } from '../client.js';
+import { PostgresPool } from '../pool.js';
+//import { PostgresClient } from '../client.js';
 import Postgres from 'postgres';
 
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
@@ -13,7 +13,7 @@ const db = isPostgres
       password: 'pass',
       database: 'postgres',
     })
-  : new Pool({
+  : new PostgresPool({
       maxConnections: 4,
       port: 5432,
       host: '127.0.0.1',

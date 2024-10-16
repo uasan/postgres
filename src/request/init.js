@@ -1,10 +1,11 @@
-import { md5Password } from '../auth/md5.js';
-import { saslHandshake, saslContinue, saslFinal } from '../auth/sasl.js';
+import { md5Password } from '../protocol/auth/md5.js';
+import {
+  saslFinal,
+  saslContinue,
+  saslHandshake,
+} from '../protocol/auth/sasl.js';
 
-export const handshake = ({
-  writer,
-  options: { username, database, params },
-}) => {
+export function handshake({ writer, options: { username, database, params } }) {
   const keys = Object.keys(params);
   let text = 'user\x00' + username + '\x00database\x00' + database;
 
@@ -24,9 +25,9 @@ export const handshake = ({
   writer.view.setUint16(4, 3);
 
   writer.promise = writer.write();
-};
+}
 
-export const authentication = ({ reader, writer, options }) => {
+export function authentication({ reader, writer, options }) {
   switch (reader.getInt32()) {
     case 5:
       md5Password(reader, writer, options);
@@ -44,14 +45,14 @@ export const authentication = ({ reader, writer, options }) => {
       return;
   }
   throw new Error('Not supported authentication method');
-};
+}
 
-export const backendKeyData = client => {
+export function backendKeyData(client) {
   client.pid = client.reader.getInt32();
   client.secret = client.reader.getInt32();
-};
+}
 
-export const parameterStatus = client => {
+export function parameterStatus(client) {
   const [name, value] = client.reader.getTextUTF8().split('\x00');
 
   switch (name.toLowerCase()) {
@@ -70,6 +71,6 @@ export const parameterStatus = client => {
         client.abort(new Error(`Only client encoding UTF8 supported`));
       break;
   }
-};
+}
 
-export const negotiateProtocolVersion = () => {};
+export function negotiateProtocolVersion() {}

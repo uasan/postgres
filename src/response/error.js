@@ -1,6 +1,8 @@
 //https://www.postgresql.org/docs/current/protocol-error-fields.html
 //https://www.postgresql.org/docs/current/errcodes-appendix.html
 
+const isPostgresError = Symbol('isPostgresError');
+
 const fields = {
   67: 'code',
   68: 'detail',
@@ -21,7 +23,7 @@ function makeError(pid, reader) {
   const { uint8 } = reader;
 
   let code = 0;
-  const error = { pid };
+  const error = { pid, [isPostgresError]: true };
 
   while ((code = uint8[reader.offset])) {
     reader.ending = uint8.indexOf(0, ++reader.offset);
@@ -37,16 +39,16 @@ function makeError(pid, reader) {
 }
 
 export class PostgresError extends Error {
-  constructor({ sql, hint, where, message, position, detail, ...fields }) {
+  constructor({
+    sql,
+    message,
+    position,
+    [isPostgresError]: isPostgres,
+    ...fields
+  }) {
     super(message);
 
-    let stack = 'PostgresError: ' + message;
-
-    if (detail) stack += '\n' + detail;
-    if (where) stack += '\n' + where;
-    if (hint) stack += '\n' + hint;
-
-    if (sql && position) {
+    if (isPostgres && sql && position) {
       let max = 60;
 
       let left = sql
@@ -71,13 +73,24 @@ export class PostgresError extends Error {
 
       let length = right.indexOf(' ') > 0 ? right.indexOf(' ') : right.length;
 
-      stack += '\n' + left + right;
-      stack += '\n' + ' '.repeat(left.length) + '^'.repeat(length);
+      this.stack =
+        left + right + '\n' + ' '.repeat(left.length) + '^'.repeat(length);
     }
+    //this.stack = sql;
+    Object.assign(this, fields);
+  }
 
-    stack += '\n' + this.stack.split('\n').slice(2).join('\n');
+  static is(error) {
+    return !!error?.[isPostgresError];
+  }
 
-    Object.assign(this, fields).stack = stack;
+  static transactionAborted({ pid }) {
+    return new this({
+      pid,
+      code: '25P02',
+      severity: 'ERROR',
+      message: 'Current transaction is aborted',
+    });
   }
 }
 
@@ -85,7 +98,10 @@ export function errorResponse({ pid, task, reader }) {
   const error = makeError(pid, reader);
 
   if (task) {
-    error.sql = task.sql;
+    if (task.sql) {
+      error.sql ??= task.sql;
+    }
+    task.onError(error);
     task.reject(error);
   } else {
     console.error(new PostgresError(error));

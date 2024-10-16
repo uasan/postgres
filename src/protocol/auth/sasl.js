@@ -4,8 +4,8 @@ import {
   sha256,
   pbkdf2Sync,
   randomBytesBase64,
-} from '../utils/hash.js';
-import { MESSAGE_PASSWORD } from '../protocol/messages.js';
+} from '../../utils/hash.js';
+import { MESSAGE_PASSWORD } from '../messages.js';
 
 export const saslHandshake = (reader, writer, options) => {
   const mechanisms = reader.getTextUTF8().split('\x00');
@@ -41,7 +41,7 @@ export const saslContinue = (reader, writer, options) => {
     'sha256'
   );
 
-  const clientKey = hmac(saltedPassword, 'Client Key');
+  const clientKey = hmac(saltedPassword, 'PostgresClient Key');
   const message = `n=*,r=${nonce},r=${r},s=${s},i=${i},c=biws,r=${r}`;
 
   options.serverSignature = hmac(

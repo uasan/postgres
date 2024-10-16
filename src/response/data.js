@@ -35,7 +35,9 @@ export function setDataValue(reader) {
   reader.offset += 2;
   const length = reader.getInt32();
 
-  if (length !== -1) {
+  if (length === -1) {
+    this.data = null;
+  } else {
     const decode = this.statement.decoders[0];
     reader.ending = reader.offset + length;
 
@@ -47,7 +49,9 @@ export function setValueToArray(reader) {
   reader.offset += 2;
   const length = reader.getInt32();
 
-  if (length !== -1) {
+  if (length === -1) {
+    this.data.push(null);
+  } else {
     const decode = this.statement.decoders[0];
     reader.ending = reader.offset + length;
 

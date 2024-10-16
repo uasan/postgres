@@ -1,6 +1,6 @@
-import { Pool } from '../pool.js';
+import { PostgresPool } from '../pool.js';
 
-const db = new Pool({
+const db = new PostgresPool({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',

@@ -58,6 +58,7 @@ function encodeTimestamp  (writer, value) {
 
 function encodeInterval(writer, value) {
   const { view, length } = writer;
+  const data = typeof value === 'string' ? Duration.from(value) : value;
 
   writer.alloc(20);
   view.setInt32(length, 16);
@@ -65,15 +66,15 @@ function encodeInterval(writer, value) {
   view.setBigInt64(
     length + 4,
     BigInt(
-      value.hours * 3600000000 +
-        value.minutes * 60000000 +
-        value.seconds * 1000000 +
-        value.milliseconds * 1000 +
-        value.microseconds
+      data.hours * 3600000000 +
+        data.minutes * 60000000 +
+        data.seconds * 1000000 +
+        data.milliseconds * 1000 +
+        data.microseconds
     )
   );
-  view.setInt32(length + 12, value.weeks * 7 + value.days);
-  view.setInt32(length + 16, value.years * 12 + value.months);
+  view.setInt32(length + 12, data.weeks * 7 + data.days);
+  view.setInt32(length + 16, data.years * 12 + data.months);
 };
 
 export const date = {
