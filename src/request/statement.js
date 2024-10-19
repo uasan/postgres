@@ -1,43 +1,57 @@
 import {
   NULL,
-  MESSAGE_SYNC,
   MESSAGE_BIND,
   MESSAGE_PARSE,
   INT16_ONE_ONE,
   MESSAGE_DESCRIBE,
   MESSAGE_FLUSH_END,
-  DESCRIBE_STATEMENT,
+  PREPARED_QUERY,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
 
 import { textEncoder } from '../utils/string.js';
 
 function onErrorParse() {
-  this.client.writer.type(MESSAGE_SYNC).end().unlock();
+  this.client.writer.sync().unlock();
   this.client.statements.delete(this.sql);
 }
 
 export class Statement {
   columns = [];
   decoders = [];
+  encoders = [];
+
+  countParams = 0;
 
   constructor({ statements, writer }, task) {
-    const { size } = statements;
-    const name = size.toString(36);
-    const {
-      sql,
-      values: { length },
-    } = task;
-
-    writer.lock();
-    statements.set(sql, this);
+    const name = statements.size.toString(36);
 
     this.name = name;
     this.writer = writer;
-    this.encoders = new Array(length);
+
+    writer.lock();
+    task.onError = onErrorParse;
+
+    statements.set(task.sql, this);
+
+    writer
+      .type(MESSAGE_PARSE)
+      .string(name)
+      .string(task.sql)
+      .setInt16(0)
+      .end()
+      .type(MESSAGE_DESCRIBE)
+      .setUint8(PREPARED_QUERY)
+      .string(name)
+      .end()
+      .setBytes(MESSAGE_FLUSH_END);
+  }
+
+  setParams(length) {
+    this.countParams = length;
     this.params = new Uint8Array([
       0,
-      ...textEncoder.encode(name),
+      ...textEncoder.encode(this.name),
       0,
       0,
       1,
@@ -47,35 +61,24 @@ export class Statement {
       (length >>> 0) & 0xff,
     ]);
 
-    task.onError = onErrorParse;
-
-    writer
-      .type(MESSAGE_PARSE)
-      .string(name)
-      .string(sql)
-      .setInt16(0)
-      .end()
-      .type(MESSAGE_DESCRIBE)
-      .setInt8(DESCRIBE_STATEMENT)
-      .string(name)
-      .end()
-      .setBytes(MESSAGE_FLUSH_END);
+    return this;
   }
 
   execute({ values, reject }) {
-    const { writer, encoders } = this;
+    const { writer, encoders, countParams } = this;
+
     writer.type(MESSAGE_BIND).setBytes(this.params);
 
     try {
-      for (let i = 0; i < values.length; i++) {
-        const value = values[i];
-        const encode = encoders[i];
-
-        if (value == null) writer.setBytes(NULL);
-        else encode(writer, value);
+      for (let i = 0; i < countParams; i++) {
+        if (values[i] == null) {
+          writer.setBytes(NULL);
+        } else {
+          encoders[i].encode(writer, values[i]);
+        }
       }
     } catch (error) {
-      writer.clearLastMessage().type(MESSAGE_SYNC).end();
+      writer.clearLastMessage().sync();
       reject(error);
       return this;
     }

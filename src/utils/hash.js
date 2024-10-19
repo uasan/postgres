@@ -11,11 +11,11 @@ export const hmac = (key, data) =>
 
 export const sha256 = data => createHash('sha256').update(data).digest();
 
-export const xor = (a, b) => {
+export function xor(a, b) {
   const length = Math.max(a.length, b.length);
   const buffer = Buffer.allocUnsafe(length);
 
   for (let i = 0; i < length; i++) buffer[i] = a[i] ^ b[i];
 
   return buffer;
-};
+}

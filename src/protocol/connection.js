@@ -20,7 +20,7 @@ export class Connection {
       port: client.options.port,
       highWaterMark: HIGH_WATER_MARK,
       onread: {
-        callback: client.reader.read,
+        callback: client.reader.read.bind(client.reader),
         buffer: client.reader.getBuffer,
       },
     };
@@ -118,7 +118,9 @@ export class Connection {
     } catch (error) {
       this.connecting = null;
       this.client.task = null;
-      await this.disconnect();
+
+      this.disconnecting ??= Promise.withResolvers();
+      await this.disconnecting?.promise;
 
       if (PostgresError.is(error) || !this.isNeedReconnect()) {
         const postgresError = new PostgresError(error);
@@ -128,6 +130,9 @@ export class Connection {
 
         throw postgresError;
       }
+
+      await this.reconnect();
+      await this.connecting?.promise;
     } finally {
       this.connecting = null;
     }

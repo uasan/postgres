@@ -2,6 +2,8 @@ import { PostgresClient } from './client.js';
 import { getConnectionOptions } from './utils/options.js';
 
 export class PostgresPool extends Array {
+  types = new Map();
+
   constructor(options) {
     options = getConnectionOptions(options);
 

@@ -17,6 +17,7 @@
     "plugin:prettier/recommended"
   ],
   "rules": {
-    "no-unreachable": "off"
+    "no-unreachable": "off",
+    "no-useless-catch": "off"
   }
 }

@@ -1,23 +1,16 @@
-import { types, blob, unknown } from '../protocol/types.js';
-import { TRANSACTION_ACTIVE, TRANSACTION_INACTIVE } from '../constants.js';
 import { noop } from '#native';
+import { blob } from '../protocol/types.js';
 import { setCountData, setNoData } from './state.js';
-
-const decodeAsBlob = blob.decode;
+import { getType, resolveTypes } from '../request/types.js';
+import { TRANSACTION_ACTIVE, TRANSACTION_INACTIVE } from '../constants.js';
 
 export function parameterDescription({ task, reader }) {
-  const { encoders } = task.statement;
+  const length = reader.getInt16();
+  const { encoders } = task.statement.setParams(length);
 
-  reader.offset += 2;
-  for (let i = 0; i < encoders.length; i++) {
-    const { encode } = types[reader.getInt32()] ?? unknown;
-
-    encoders[i] = encode;
+  for (let i = 0; i < length; i++) {
+    encoders.push(getType(task, reader.getInt32()));
   }
-}
-
-export function noData({ task }) {
-  task.onDescribe();
 }
 
 export function rowDescription({ task, reader }) {
@@ -30,17 +23,26 @@ export function rowDescription({ task, reader }) {
       columns.push(reader.getTextUTF8());
       reader.offset = reader.ending + 7;
 
-      //console.log(reader.view.getInt32(reader.offset));
+      decoders.push(task.isNoDecode ? blob : getType(task, reader.getInt32()));
 
-      const { decode } = types[reader.getInt32()] ?? unknown;
       reader.offset += 8;
-      decoders.push(task.isNoDecode ? decodeAsBlob : decode);
     }
 
-    task.onDescribe();
+    if (task.unknownTypes) {
+      resolveTypes(task);
+    } else {
+      task.onDescribe();
+    }
   } else {
     task.setData = noop;
-    //task.reject({ message: 'Not return data in simple query' });
+  }
+}
+
+export function noData({ task }) {
+  if (task.unknownTypes) {
+    resolveTypes(task);
+  } else {
+    task.onDescribe();
   }
 }
 
@@ -59,8 +61,6 @@ export function commandComplete(client) {
     resolve(task.data);
   } else {
     const words = reader.getString().split(' ');
-
-    //console.log(words);
 
     switch (words[0]) {
       case 'UPDATE':
@@ -92,6 +92,7 @@ export function emptyQueryResponse({ task }) {
 
 export function readyForQuery(client) {
   const state = client.reader.uint8[client.reader.offset];
+  const { task } = client;
 
   if (client.state !== state) {
     client.state = state;
@@ -100,7 +101,10 @@ export function readyForQuery(client) {
   }
 
   client.task.onReady();
-  client.task = client.queue.dequeue();
+
+  if (client.task === task) {
+    client.task = client.queue.dequeue();
+  }
 
   if (client.task === null) {
     client.isReady = true;
@@ -112,7 +116,7 @@ export function readyForQuery(client) {
   }
 }
 
-export const bindComplete = () => {};
-export const parseComplete = () => {};
-export const closeComplete = () => {};
-export const portalSuspended = () => {};
+export function bindComplete() {}
+export function parseComplete() {}
+export function closeComplete() {}
+export function portalSuspended() {}

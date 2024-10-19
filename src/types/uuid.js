@@ -22,7 +22,7 @@ const decodeUUID = ({ uint8, offset: i }) =>
   byteToHex[uint8[i + 14]] +
   byteToHex[uint8[i + 15]];
 
-const encodeUUID = (writer, uuid) => {
+function encodeUUID(writer, uuid) {
   const i = writer.length;
   const uint8 = writer.alloc(20);
   uint8[i] = 0;
@@ -50,7 +50,7 @@ const encodeUUID = (writer, uuid) => {
     uint8[i + 18] = hexToByte[uuid[32]][uuid[33]];
     uint8[i + 19] = hexToByte[uuid[34]][uuid[35]];
   }
-};
+}
 
 export const uuid = {
   id: 2950,

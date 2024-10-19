@@ -1,7 +1,7 @@
 export const decodeText = reader => reader.getTextUTF8();
-export const encodeText = (writer, value) => {
+export function encodeText(writer, value) {
   writer.setUTF8(String(value));
-};
+}
 
 export const text = {
   id: 25,

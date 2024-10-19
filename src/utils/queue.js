@@ -19,6 +19,7 @@ export class Queue {
     else this.head = null;
 
     task.next = null;
+
     return task;
   }
 

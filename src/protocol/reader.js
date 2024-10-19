@@ -24,7 +24,7 @@ export class Reader {
   getBuffer = () =>
     this.length ? this.uint8.subarray(this.length) : this.uint8;
 
-  read = length => {
+  read(length) {
     let size = 0;
     let offset = 0;
     let { client, uint8, view } = this;
@@ -63,7 +63,7 @@ export class Reader {
 
     this.length = length;
     if (offset) this.uint8.set(uint8.subarray(offset, offset + length));
-  };
+  }
 
   clear() {
     this.length = 0;
@@ -73,6 +73,12 @@ export class Reader {
 
   getInt16() {
     const int16 = this.view.getInt16(this.offset);
+    this.offset += 2;
+    return int16;
+  }
+
+  getUint16() {
+    const int16 = this.view.getUint16(this.offset);
     this.offset += 2;
     return int16;
   }

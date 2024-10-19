@@ -18,17 +18,19 @@ export class Task {
 
   isSent = false;
   isData = false;
+  isCorked = false;
   isNoDecode = false;
   isSimpleQuery = false;
 
   next = null;
-  data = [];
   file = null;
   client = null;
   statement = null;
   controller = null;
   errorNoData = null;
+  unknownTypes = null;
 
+  data = [];
   values = nullArray;
 
   reject = noop;
@@ -58,8 +60,21 @@ export class Task {
       this.isSimpleQuery = true;
     }
 
-    if (this.client.task) this.client.queue.enqueue(this);
-    else this.client.task = this;
+    if (this.client.task !== this) {
+      if (this.client.task) {
+        this.client.queue.enqueue(this);
+      } else {
+        this.client.task = this;
+      }
+    }
+
+    if (
+      !this.isSent &&
+      !this.client.writer.promise &&
+      !this.client.writer.isLocked
+    ) {
+      this.send();
+    }
 
     try {
       return await this;
@@ -69,17 +84,18 @@ export class Task {
     }
   }
 
+  async forceExecute(sql, values) {
+    this.client.task = this;
+    const promise = this.execute(sql, values);
+
+    if (!this.isSent) this.send();
+
+    return await promise;
+  }
+
   then(resolve, reject) {
     this.resolve = resolve;
     this.reject = reject;
-
-    if (
-      !this.isSent &&
-      !this.client.writer.promise &&
-      !this.client.writer.isLocked
-    ) {
-      this.send();
-    }
   }
 
   send() {
@@ -94,6 +110,21 @@ export class Task {
     }
 
     return this.next;
+  }
+
+  cork() {
+    this.isCorked = true;
+    return this;
+  }
+
+  uncork() {
+    this.isCorked = false;
+
+    if (!this.isSent) {
+      this.send();
+    }
+
+    return this;
   }
 
   onDescribe() {
@@ -142,8 +173,11 @@ export class Task {
 
   setDataToFile(path) {
     this.file = { path, fd: 0 };
-    this.setData = createFileData;
+
     this.onReady = resolveCount;
+    this.setData = createFileData;
+
+    this.isSimpleQuery = false;
     return this;
   }
 }

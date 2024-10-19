@@ -7,6 +7,7 @@ export function createFileData(reader) {
     this.setData = writeToFile;
     this.onError = onErrorFileData;
     this.onComplete = onCompleteFileData;
+
     this.setData(reader);
   } catch (error) {
     this.data = error;
@@ -40,6 +41,8 @@ function onErrorFileData() {
   } catch (error) {
     console.error(error);
   }
+
+  this.file = null;
 }
 
 function onCompleteFileData(info) {
@@ -48,5 +51,7 @@ function onCompleteFileData(info) {
   } catch (error) {
     console.error(error);
   }
+
+  this.file = null;
   this.resolve(Number(info[1]));
 }

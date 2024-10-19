@@ -1,8 +1,11 @@
 const { isArray } = Array;
 
-export const encodeArray = (writer, encode, id, values) => {
+export function encodeArray(writer, values) {
   let offset = writer.length;
+
+  const { type } = this;
   const { view } = writer;
+  //console.log('encodeArray', type.id, values);
   writer.alloc(24);
 
   let levels = 1;
@@ -13,7 +16,7 @@ export const encodeArray = (writer, encode, id, values) => {
 
   view.setInt32(offset + 4, levels);
   view.setInt32(offset + 8, 0);
-  view.setInt32(offset + 12, id);
+  view.setInt32(offset + 12, type.id);
   view.setInt32(offset + 16, values.length);
   view.setInt32(offset + 20, 1);
 
@@ -30,8 +33,8 @@ export const encodeArray = (writer, encode, id, values) => {
     const value = values[i];
 
     if (value == null) writer.setInt32(-1);
-    else encode(writer, value);
+    else type.encode(writer, value);
   }
 
   view.setInt32(offset, writer.length - offset - 4);
-};
+}

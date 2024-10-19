@@ -12,23 +12,23 @@ async function test() {
   try {
     console.time('saveToFile');
 
-    const state = await db
+    const result = await db
       .prepare()
       .setDataToFile('./test.txt')
       .execute(
         ` SELECT value::text || '\n'
-          FROM generate_series(0, 0) AS _(value)
-          WHERE false`,
+          FROM generate_series(1, 10_000_000) AS _(value)
+          WHERE (value / CASE WHEN value = 50_000_000 THEN 0 ELSE value END) > 0`,
         []
       );
 
     console.timeEnd('saveToFile');
-    console.log(state);
-
-    await db.disconnect();
+    console.log(result);
   } catch (error) {
     console.error(error);
   }
+
+  await db.disconnect();
 }
 
-test();
+await test();

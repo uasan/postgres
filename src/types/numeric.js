@@ -67,7 +67,7 @@ const decodeNumeric = ({ view, offset }) => {
   return value;
 };
 
-const encodeNumeric = (writer, value) => {
+function encodeNumeric(writer, value) {
   let text = value + '';
 
   switch (text) {
@@ -140,7 +140,7 @@ const encodeNumeric = (writer, value) => {
   view.setUint16((i += 2), +text.substr(0, n));
 
   for (; n < length; n += 4) view.setUint16((i += 2), +text.substr(n, 4));
-};
+}
 
 export const numeric = {
   id: 1700,

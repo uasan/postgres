@@ -30,10 +30,11 @@ export class PostgresClient {
   isReady = false;
   isIsolated = false;
 
-  queue = new Queue();
+  types = new Map();
   listeners = new Map();
   statements = new Map();
 
+  queue = new Queue();
   reader = new Reader(this);
   writer = new Writer(this);
 
@@ -41,6 +42,7 @@ export class PostgresClient {
     if (pool) {
       this.pool = pool;
       this.options = options;
+      this.types = pool.types;
     } else {
       this.options = getConnectionOptions(options);
     }
@@ -174,7 +176,10 @@ export class PostgresClient {
 
   async reset(options) {
     await this.connection.disconnect();
+
+    this.types.clear();
     this.options = getConnectionOptions(options);
+
     await this.connection.connect();
   }
 

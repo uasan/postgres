@@ -1,4 +1,4 @@
-const decodeRange = ({ view, uint8, offset }) => {
+function decodeRange({ view, uint8, offset }) {
   switch (uint8[offset]) {
     case 1:
       return [];
@@ -11,9 +11,9 @@ const decodeRange = ({ view, uint8, offset }) => {
     default:
       return [null, null];
   }
-};
+}
 
-const encodeRange = () => {};
+function encodeRange() {}
 
 export const int4range = {
   id: 3904,

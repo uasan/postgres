@@ -1,5 +1,6 @@
 import { HIGH_WATER_MARK } from '../constants.js';
 import { textEncoder } from '../utils/string.js';
+import { MESSAGE_SYNC } from './messages.js';
 
 export class Writer {
   length = 0;
@@ -33,7 +34,7 @@ export class Writer {
     this.length += length;
 
     if (this.length > this.uint8.byteLength) {
-      const uint8 = new Uint8Array((this.length + length) << 1);
+      const uint8 = new Uint8Array(this.length + 1024);
       uint8.set(this.uint8);
       this.uint8 = uint8;
       this.view = new DataView(uint8.buffer);
@@ -48,7 +49,7 @@ export class Writer {
     let offset = 0;
     const { client } = this;
 
-    let task = client.queue?.head;
+    let task = client.queue.head;
 
     //if (client.pid) console.trace('WRITE', this.uint8.subarray(0, this.length));
 
@@ -76,6 +77,8 @@ export class Writer {
         while (task?.isSent) task = task.next;
 
         if (task) {
+          if (task.isCorked) break;
+
           this.length = length = 0;
           this.offset = offset = 0;
 
@@ -137,6 +140,13 @@ export class Writer {
 
   setInt8(value) {
     const { length } = this;
+    this.alloc(1);
+    this.setInt8(length, value);
+    return this;
+  }
+
+  setUint8(value) {
+    const { length } = this;
     this.alloc(1)[length] = value;
     return this;
   }
@@ -193,7 +203,8 @@ export class Writer {
   setUTF8(value) {
     const { length } = this;
     this.alloc(4);
-    return this.text(value).view.setInt32(length, this.length - length - 4);
+    this.text(value).view.setInt32(length, this.length - length - 4);
+    return this;
   }
 
   clearLastMessage() {
@@ -201,13 +212,13 @@ export class Writer {
     return this;
   }
 
+  sync() {
+    return this.type(MESSAGE_SYNC).end();
+  }
+
   end() {
-    const { offset, length } = this;
-
-    this.view.setInt32(offset + 1, length - offset - 1);
-
+    this.view.setInt32(this.offset + 1, this.length - this.offset - 1);
     this.promise ??= this.write();
-
     return this;
   }
 }

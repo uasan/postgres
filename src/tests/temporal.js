@@ -1,10 +1,4 @@
-import {
-  Instant,
-  Duration,
-  PlainDate,
-  PlainDateTime,
-  PlainTime,
-} from '#native';
+import { Instant, Duration } from '#native';
 
 Duration.from({ weeks: 4, months: 2 }).total({
   unit: 'day',

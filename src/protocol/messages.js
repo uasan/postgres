@@ -1,7 +1,7 @@
 export const NULL = new Uint8Array([255, 255, 255, 255]);
 export const INT16_ONE_ONE = new Uint8Array([0, 1, 0, 1]);
-export const DESCRIBE_PORTAL = 80;
-export const DESCRIBE_STATEMENT = 83;
+export const PREPARED_PORTAL = 80;
+export const PREPARED_QUERY = 83;
 
 export const MESSAGE_FLUSH_END = new Uint8Array([72, 0, 0, 0, 4]);
 export const MESSAGES_EXEC_SYNC_FLUSH = new Uint8Array([
@@ -17,6 +17,7 @@ export const //
   MESSAGE_PASSWORD = 112,
   MESSAGE_EXECUTE = 69,
   MESSAGE_QUERY = 81,
+  MESSAGE_CLOSE = 67,
   MESSAGE_COPY_DATA = 100,
   MESSAGE_COPY_FAIL = 102,
   MESSAGE_COPY_DONE = new Uint8Array([

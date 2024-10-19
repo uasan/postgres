@@ -18,14 +18,13 @@ export function setDataFields(reader) {
 
   for (let i = 0; i < columns.length; i++) {
     const name = columns[i];
-    const decode = decoders[i];
 
     length = reader.getInt32();
 
     if (length === -1) row[name] = null;
     else {
       reader.ending = ending = reader.offset + length;
-      row[name] = decode(reader);
+      row[name] = decoders[i].decode(reader);
       reader.offset = ending;
     }
   }
@@ -38,10 +37,8 @@ export function setDataValue(reader) {
   if (length === -1) {
     this.data = null;
   } else {
-    const decode = this.statement.decoders[0];
     reader.ending = reader.offset + length;
-
-    this.data = decode(reader);
+    this.data = this.statement.decoders[0].decode(reader);
   }
 }
 
@@ -52,9 +49,7 @@ export function setValueToArray(reader) {
   if (length === -1) {
     this.data.push(null);
   } else {
-    const decode = this.statement.decoders[0];
     reader.ending = reader.offset + length;
-
-    this.data.push(decode(reader));
+    this.data.push(this.statement.decoders[0].decode(reader));
   }
 }

@@ -1,5 +1,4 @@
 import { PostgresClient } from '../client.js';
-import { FETCH_ONE } from '../constants.js';
 import { Duration, PlainTime, PlainDate, Instant } from '#native';
 
 const db = new PostgresClient({
@@ -28,6 +27,7 @@ async function test() {
     $14::int4[] AS "int4[]",
     $15::text[] AS "text[]",
     $16::uuid[] AS "uuid[]",
+    '{}'::text[] AS "empty[]",
     '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest"`;
 
   const params = [
@@ -55,7 +55,10 @@ async function test() {
     ],
   ];
 
-  db.query(sql, params, FETCH_ONE).then(console.log, console.error);
+  const result = await db.query(sql, params);
+  console.log(JSON.parse(JSON.stringify(result[0])));
+
+  await db.disconnect();
 }
 
-test();
+await test();

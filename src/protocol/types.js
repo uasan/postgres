@@ -10,6 +10,7 @@ import * as number from '../types/number.js';
 import { numeric } from '../types/numeric.js';
 import * as range from '../types/range.js';
 import * as geo from '../types/geo.js';
+import { inet, cidr, macaddr, macaddr8 } from '../types/net.js';
 import { json, jsonb, jsonpath } from '../types/json.js';
 import { typeArrayOf } from '../types/array/type.js';
 
@@ -46,12 +47,18 @@ export const types = {
   604: geo.polygon,
   628: geo.line,
   629: typeArrayOf(geo.line),
+  650: cidr,
+  651: typeArrayOf(cidr),
   700: number.float4,
   701: number.float8,
   705: text.unknown,
   718: geo.circle,
   719: typeArrayOf(geo.circle),
+  774: macaddr8,
+  775: typeArrayOf(macaddr8),
   790: number.money,
+  829: macaddr,
+  869: inet,
   791: typeArrayOf(number.money),
   1000: typeArrayOf(bool),
   1001: typeArrayOf(bytea),
@@ -75,6 +82,8 @@ export const types = {
   1028: typeArrayOf(number.oid),
   1033: text.aclitem,
   1034: typeArrayOf(text.aclitem),
+  1040: typeArrayOf(macaddr),
+  1041: typeArrayOf(inet),
   1042: text.bpchar,
   1043: text.varchar,
   1082: date.date,

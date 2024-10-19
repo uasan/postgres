@@ -1,18 +1,21 @@
-const decodeBlobValues = (reader, decode, values) => {
+function decodeBlobValues(reader, type, values) {
   for (let ending = 0, i = 0; i < values.length; i++) {
     ending = reader.getInt32();
 
     if (ending === -1) values[i] = null;
     else {
       reader.ending = ending += reader.offset;
-      values[i] = decode(reader);
+      values[i] = type.decode(reader);
       reader.offset = ending;
     }
   }
-};
+}
 
-export const decodeArray = (reader, decode) => {
+export function decodeArray(reader) {
   let levels = reader.getInt32() - 1;
+
+  if (levels === -1) return [];
+
   reader.offset += 8;
 
   const length = reader.getInt32();
@@ -20,7 +23,7 @@ export const decodeArray = (reader, decode) => {
 
   reader.offset += 4;
 
-  if (levels === 0) decodeBlobValues(reader, decode, values);
+  if (levels === 0) decodeBlobValues(reader, this.type, values);
   else {
     let list = values;
 
@@ -39,14 +42,14 @@ export const decodeArray = (reader, decode) => {
         for (let i = 0; i < levels; i++)
           target = target[0] = new Array((source = source[0]).length);
 
-        decodeBlobValues(reader, decode, target);
+        decodeBlobValues(reader, this.type, target);
         if (levels) decodeBlobStruct(list[i], levels - 1);
       }
     };
 
-    decodeBlobValues(reader, decode, list);
+    decodeBlobValues(reader, this.type, list);
     decodeBlobStruct(values, levels - 1);
   }
 
   return values;
-};
+}
