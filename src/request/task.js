@@ -79,8 +79,8 @@ export class Task {
     try {
       return await this;
     } catch (error) {
-      //throw error;
-      throw new PostgresError(error);
+      throw error;
+      //throw new PostgresError(error);
     }
   }
 

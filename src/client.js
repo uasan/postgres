@@ -125,19 +125,21 @@ export class PostgresClient {
   async rollback() {
     await this.ready();
 
-    switch (this.state) {
-      case TRANSACTION_ACTIVE:
-        if (this.transactions > 1) {
-          await this.query(
-            `ROLLBACK TO SAVEPOINT _${--this.transactions}`
-          ).catch(noop);
-        } else {
-          await this.query('ROLLBACK').catch(noop);
-        }
-        break;
+    if (this.connection.isReady) {
+      switch (this.state) {
+        case TRANSACTION_ACTIVE:
+          if (this.transactions > 1) {
+            await this.query(
+              `ROLLBACK TO SAVEPOINT _${--this.transactions}`
+            ).catch(noop);
+          } else {
+            await this.query('ROLLBACK').catch(noop);
+          }
+          break;
 
-      case TRANSACTION_ERROR:
-        await this.query('ROLLBACK').catch(noop);
+        case TRANSACTION_ERROR:
+          await this.query('ROLLBACK').catch(noop);
+      }
     }
   }
 
@@ -174,10 +176,6 @@ export class PostgresClient {
 
     await once(socket, 'close');
   };
-
-  isKeepAlive() {
-    return this.queue.length > 0 || this.listeners.size > 0;
-  }
 
   async reset(options) {
     await this.connection.disconnect();

@@ -1,12 +1,21 @@
 import { PostgresPool } from '../pool.js';
 
+// const db = new PostgresPool({
+//   max: 1,
+//   host: '127.0.0.1',
+//   port: 5432,
+//   username: 'api_ludicloud',
+//   password: 'pass',
+//   database: 'smartapps',
+// });
+
 const db = new PostgresPool({
   max: 1,
   host: '127.0.0.1',
-  port: 5432,
-  username: 'api_ludicloud',
+  port: 9090,
+  username: 'api_ludicloud_v2',
   password: 'pass',
-  database: 'smartapps',
+  database: 'smartapps-v2',
 });
 
 async function test() {

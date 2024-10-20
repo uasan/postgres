@@ -8,12 +8,16 @@ import { HIGH_WATER_MARK } from '../constants.js';
 import { PostgresError } from '../response/error.js';
 
 export class Connection {
-  timeout = 0;
+  timeout = 150_000;
   connecting = null;
   disconnecting = null;
 
+  isReady = false;
+
   constructor(client) {
     this.client = client;
+    this.timeout = client.options.timeout;
+
     this.params = {
       path: client.options.path,
       host: client.options.host,
@@ -33,16 +37,14 @@ export class Connection {
   onConnect = () => {
     //console.log('ON-CONNECTED', this.client.options.database);
     if (this.client.stream) {
-      this.timeout = 0;
       this.client.options.signal?.addEventListener('abort', this.onAbort);
-
       handshake(this.client);
     }
   };
 
   onClose = () => {
     //console.log('ON-CLOSE');
-
+    this.isReady = false;
     this.client.clear();
     this.connecting = null;
 
@@ -57,19 +59,13 @@ export class Connection {
   };
 
   onTimeout = () => {
-    if (this.client.listeners.size === 0) this.client.disconnect();
+    if (this.isKeepAlive() === false) {
+      this.client.disconnect().catch(noop);
+    }
   };
 
   onError = error => {
-    if (this.client.task) {
-      this.client.task.reject(error);
-      this.client.task = null;
-    }
-
-    if (this.timeout > 60_000) {
-      this.timeout = 0;
-      this.client.abort(error);
-    }
+    this.client.abort(error);
   };
 
   async connect() {
@@ -88,8 +84,8 @@ export class Connection {
       .on('error', this.onError)
       .once('close', this.onClose)
       .setNoDelay(true)
-      .setKeepAlive(true, 60_000);
-    //.setTimeout(120_000, this.onTimeout);
+      .setKeepAlive(true, 60_000)
+      .setTimeout(this.timeout, this.onTimeout);
 
     this.connecting = Promise.withResolvers();
 
@@ -107,7 +103,7 @@ export class Connection {
     try {
       await this.connecting.promise;
 
-      //console.log('ON-READY', this.client.queue.length, this.client.isReady);
+      this.isReady = true;
 
       if (this.client.listeners.size) {
         restoreListeners.call(this.client);
@@ -131,8 +127,10 @@ export class Connection {
         throw postgresError;
       }
 
-      await this.reconnect();
-      await this.connecting?.promise;
+      do {
+        await this.reconnect();
+        await this.connecting?.promise;
+      } while (this.isReady === false);
     } finally {
       this.connecting = null;
     }
@@ -157,13 +155,21 @@ export class Connection {
     await this.disconnecting?.promise;
   }
 
+  isKeepAlive() {
+    return (
+      this.client.task != null ||
+      this.client.queue.length > 0 ||
+      this.client.listeners.size > 0
+    );
+  }
+
   isNeedReconnect() {
-    return !this.client.isEnded && this.client.isKeepAlive();
+    return !this.client.isEnded && this.isKeepAlive();
   }
 
   async reconnect() {
-    //console.log('RECONNECT', this.timeout);
-    this.timeout += await randomTimeout;
+    //console.log('RECONNECT');
+    await randomTimeout;
 
     if (this.client.stream === null) {
       this.connect().catch(noop);

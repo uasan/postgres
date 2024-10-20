@@ -20,7 +20,7 @@ export const //
 
 export const randomTimeout = {
   then(resolve) {
-    const delay = 500 + random() * 5000;
+    const delay = ceil(500 + random() * 5000);
     setTimeout(resolve, delay, delay);
   },
 };
