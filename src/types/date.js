@@ -1,3 +1,5 @@
+import { types } from '../protocol/types.js';
+
 import {
   Number,
   BigInt,
@@ -107,38 +109,46 @@ function encodeInterval(writer, value) {
   view.setInt32(length + 16, data.years * 12 + data.months);
 }
 
-export const date = {
-  id: 1082,
-  decode: decodeDate,
-  encode: encodeDate,
-};
-
-export const time = {
-  id: 1083,
-  decode: decodeTime,
-  encode: encodeTime,
-};
-
-export const timetz = {
-  id: 1266,
-  decode: decodeTime,
-  encode: encodeTime,
-};
-
-export const interval = {
-  id: 1186,
-  decode: decodeInterval,
-  encode: encodeInterval,
-};
-
-export const timestamp = {
-  id: 1114,
-  decode: decodeTimestamp,
-  encode: encodeTimestamp,
-};
-
-export const timestamptz = {
-  id: 1184,
-  decode: decodeTimestamp,
-  encode: encodeTimestamp,
-};
+types
+  .add({
+    id: 1082,
+    array: 1182,
+    name: 'date',
+    decode: decodeDate,
+    encode: encodeDate,
+  })
+  .add({
+    id: 1083,
+    array: 1183,
+    name: 'time',
+    decode: decodeTime,
+    encode: encodeTime,
+  })
+  .add({
+    id: 1266,
+    array: 1270,
+    name: 'timetz',
+    decode: decodeTime,
+    encode: encodeTime,
+  })
+  .add({
+    id: 1186,
+    array: 1187,
+    name: 'interval',
+    decode: decodeInterval,
+    encode: encodeInterval,
+  })
+  .add({
+    id: 1114,
+    array: 1115,
+    name: 'timestamp',
+    decode: decodeTimestamp,
+    encode: encodeTimestamp,
+  })
+  .add({
+    id: 1184,
+    array: 1185,
+    name: 'timestamptz',
+    decode: decodeTimestamp,
+    encode: encodeTimestamp,
+  });

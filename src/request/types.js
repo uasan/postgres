@@ -1,10 +1,25 @@
+import '../types/text.js';
+import '../types/number.js';
+import '../types/uuid.js';
+import '../types/bool.js';
+import '../types/bytea.js';
+import '../types/bit.js';
+import '../types/date.js';
+import '../types/numeric.js';
+import '../types/range.js';
+import '../types/geo.js';
+import '../types/net.js';
+import '../types/json.js';
+import '../types/record/type.js';
+
 import { Task } from './task.js';
-import { types, unknown } from '../protocol/types.js';
-import { typeArrayOf } from '../types/array/type.js';
+import { types } from '../protocol/types.js';
+
+export const rawType = types.get(17);
 
 const SQL_FETCH_TYPES = `SELECT
   a.oid,
-  b.oid AS array,
+  a.typarray AS array,
   n.nspname || '.' || a.typname AS name
 FROM (
   SELECT DISTINCT CASE WHEN typelem != 0 THEN typelem ELSE oid END AS oid
@@ -12,33 +27,13 @@ FROM (
   WHERE oid = ANY($1)
 ) AS _
 JOIN pg_catalog.pg_type AS a USING(oid)
-JOIN pg_catalog.pg_namespace AS n ON n.oid = a.typnamespace
-LEFT JOIN pg_catalog.pg_type AS b ON b.oid = a.typarray`;
-
-const factoryType = (client, id) =>
-  client.types.get(id) ?? createType(client, id);
+JOIN pg_catalog.pg_namespace AS n ON n.oid = a.typnamespace`;
 
 export const getType = (task, id) =>
-  types[id] ?? task.client.types.get(id) ?? addTypeAsUnknown(task, id);
-
-let index = 0;
-
-function createType(client, id) {
-  const type = {
-    ...unknown,
-    id,
-    type: null,
-    array: null,
-    name: '',
-    index: ++index,
-  };
-
-  client.types.set(id, type);
-  return type;
-}
+  types.get(id) ?? task.client.types.get(id) ?? addTypeAsUnknown(task, id);
 
 function setType(client, data) {
-  const type = factoryType(client, data.oid);
+  const type = client.types.factory(data.oid);
 
   if (type.name) {
     return;
@@ -47,19 +42,14 @@ function setType(client, data) {
   type.name = data.name;
 
   if (data.array) {
-    type.array = Object.assign(
-      factoryType(client, data.array),
-      typeArrayOf(type)
-    );
+    client.types.setArrayType(type, data.array);
   }
-
-  //console.log(type);
 }
 
 function addTypeAsUnknown(task, id) {
   task.unknownTypes ??= new Set();
   task.unknownTypes.add(id);
-  return createType(task.client, id);
+  return task.client.types.create(id);
 }
 
 export function resolveTypes(task) {
@@ -87,9 +77,9 @@ async function onReadyResolveTypes() {
     }
 
     //console.log(client.writer.isLocked, client.types);
-    Object.getPrototypeOf(this).uncork();
-    client.writer.unlock();
   } catch (error) {
     console.error(error);
   }
+
+  Object.getPrototypeOf(this).uncork();
 }

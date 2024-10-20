@@ -1,8 +1,9 @@
 import { PostgresClient } from './client.js';
+import { TypesMap } from './protocol/types.js';
 import { getConnectionOptions } from './utils/options.js';
 
 export class PostgresPool extends Array {
-  types = new Map();
+  types = new TypesMap();
 
   constructor(options) {
     options = getConnectionOptions(options);
@@ -31,8 +32,12 @@ export class PostgresPool extends Array {
     return client;
   }
 
-  query(sql, values, options) {
-    return this.getClient().query(sql, values, options);
+  prepare() {
+    return this.getClient().prepare();
+  }
+
+  query(sql, values) {
+    return this.getClient().query(sql, values);
   }
 
   listen(name, handler) {
@@ -51,7 +56,7 @@ export class PostgresPool extends Array {
     return this.getClient(1).isolate();
   }
 
-  async disconnect() {
-    await Promise.all(this.map(client => client.disconnect()));
+  disconnect() {
+    return Promise.all(this.map(client => client.disconnect()));
   }
 }

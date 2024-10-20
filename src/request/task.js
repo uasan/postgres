@@ -84,14 +84,16 @@ export class Task {
     }
   }
 
-  async forceExecute(sql, values) {
+  forceExecute(sql, values) {
     this.client.task = this;
     const promise = this.execute(sql, values);
 
     if (!this.isSent) this.send();
 
-    return await promise;
+    return promise;
   }
+
+  describe(sql) {}
 
   then(resolve, reject) {
     this.resolve = resolve;
@@ -106,7 +108,7 @@ export class Task {
     } else {
       this.statement =
         this.client.statements.get(this.sql)?.execute(this) ??
-        new Statement(this.client, this);
+        new Statement(this);
     }
 
     return this.next;
@@ -119,6 +121,10 @@ export class Task {
 
   uncork() {
     this.isCorked = false;
+
+    if (this.client.writer.isLocked) {
+      this.client.writer.unlock();
+    }
 
     if (!this.isSent) {
       this.send();

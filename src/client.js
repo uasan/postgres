@@ -13,6 +13,8 @@ import {
   TRANSACTION_INACTIVE,
 } from './constants.js';
 import { PostgresError } from './response/error.js';
+import { noop } from '#native';
+import { TypesMap } from './protocol/types.js';
 
 export class PostgresClient {
   pid = 0;
@@ -23,6 +25,7 @@ export class PostgresClient {
   state = TRANSACTION_INACTIVE;
 
   pool = null;
+  types = null;
   stream = null;
   waitReady = null;
 
@@ -30,7 +33,6 @@ export class PostgresClient {
   isReady = false;
   isIsolated = false;
 
-  types = new Map();
   listeners = new Map();
   statements = new Map();
 
@@ -44,6 +46,7 @@ export class PostgresClient {
       this.options = options;
       this.types = pool.types;
     } else {
+      this.types = new TypesMap();
       this.options = getConnectionOptions(options);
     }
 
@@ -125,14 +128,16 @@ export class PostgresClient {
     switch (this.state) {
       case TRANSACTION_ACTIVE:
         if (this.transactions > 1) {
-          await this.query(`ROLLBACK TO SAVEPOINT _${--this.transactions}`);
+          await this.query(
+            `ROLLBACK TO SAVEPOINT _${--this.transactions}`
+          ).catch(noop);
         } else {
-          await this.query('ROLLBACK');
+          await this.query('ROLLBACK').catch(noop);
         }
         break;
 
       case TRANSACTION_ERROR:
-        await this.query('ROLLBACK');
+        await this.query('ROLLBACK').catch(noop);
     }
   }
 

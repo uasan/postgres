@@ -1,7 +1,6 @@
 import { noop } from '#native';
-import { blob } from '../protocol/types.js';
 import { setCountData, setNoData } from './state.js';
-import { getType, resolveTypes } from '../request/types.js';
+import { getType, resolveTypes, rawType } from '../request/types.js';
 import { TRANSACTION_ACTIVE, TRANSACTION_INACTIVE } from '../constants.js';
 
 export function parameterDescription({ task, reader }) {
@@ -23,7 +22,9 @@ export function rowDescription({ task, reader }) {
       columns.push(reader.getTextUTF8());
       reader.offset = reader.ending + 7;
 
-      decoders.push(task.isNoDecode ? blob : getType(task, reader.getInt32()));
+      decoders.push(
+        task.isNoDecode ? rawType : getType(task, reader.getInt32())
+      );
 
       reader.offset += 8;
     }

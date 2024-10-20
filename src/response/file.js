@@ -29,6 +29,7 @@ function writeToFile(reader) {
     this.data = error;
     this.setData = noop;
     this.resolve = this.reject;
+    this.client.cancelRequest();
     this.onError();
   }
 }
@@ -43,6 +44,7 @@ function onErrorFileData() {
   }
 
   this.file = null;
+  this.onError = noop;
 }
 
 function onCompleteFileData(info) {

@@ -1,4 +1,5 @@
 import { BigInt } from '#native';
+import { types } from '../protocol/types.js';
 
 const decodeInt2 = ({ view, offset }) => view.getInt16(offset);
 const decodeInt4 = ({ view, offset }) => view.getInt32(offset);
@@ -31,62 +32,88 @@ function encodeFloat8(writer, value) {
   writer.setInt32(8).setFloat64(value);
 }
 
-export const int2 = {
-  id: 21,
-  decode: decodeInt2,
-  encode: encodeInt2,
-};
-
-export const int4 = {
-  id: 23,
-  decode: decodeInt4,
-  encode: encodeInt4,
-};
-
-export const oid = {
-  id: 26,
-  decode: decodeUint4,
-  encode: encodeUint4,
-};
-
-export const int8 = {
-  id: 20,
-  decode: decodeInt8,
-  encode: encodeInt8,
-};
-
-export const float4 = {
-  id: 700,
-  decode: decodeFloat4,
-  encode: encodeFloat4,
-};
-
-export const float8 = {
-  id: 701,
-  decode: decodeFloat8,
-  encode: encodeFloat8,
-};
-
-export const money = {
-  id: 709,
-  decode: decodeInt8,
-  encode: encodeInt8,
-};
-
-export const xid = {
-  id: 28,
-  decode: decodeUint4,
-  encode: encodeUint4,
-};
-
-export const cid = {
-  id: 29,
-  decode: decodeUint4,
-  encode: encodeUint4,
-};
-
-export const regproc = {
-  id: 24,
-  decode: decodeUint4,
-  encode: encodeUint4,
-};
+types
+  .add({
+    id: 20,
+    array: 1016,
+    name: 'int8',
+    decode: decodeInt8,
+    encode: encodeInt8,
+  })
+  .add({
+    id: 21,
+    array: 1005,
+    name: 'int2',
+    decode: decodeInt2,
+    encode: encodeInt2,
+  })
+  .add({
+    id: 23,
+    array: 1007,
+    name: 'int4',
+    decode: decodeInt4,
+    encode: encodeInt4,
+  })
+  .add({
+    id: 26,
+    array: 1028,
+    name: 'oid',
+    decode: decodeUint4,
+    encode: encodeUint4,
+  })
+  .add({
+    id: 22,
+    array: 1006,
+    name: 'int2vector',
+    decode: decodeInt2,
+    encode: encodeInt2,
+  })
+  .add({
+    id: 30,
+    array: 1013,
+    name: 'oidvector',
+    decode: decodeUint4,
+    encode: decodeUint4,
+  })
+  .add({
+    id: 700,
+    array: 1021,
+    name: 'float4',
+    decode: decodeFloat4,
+    encode: encodeFloat4,
+  })
+  .add({
+    id: 701,
+    array: 1022,
+    name: 'float8',
+    decode: decodeFloat8,
+    encode: encodeFloat8,
+  })
+  .add({
+    id: 709,
+    array: 791,
+    name: 'money',
+    decode: decodeInt8,
+    encode: encodeInt8,
+  })
+  .add({
+    id: 28,
+    array: 1011,
+    name: 'xid',
+    decode: decodeUint4,
+    encode: encodeUint4,
+  })
+  .add({
+    id: 29,
+    array: 1012,
+    name: 'cid',
+    decode: decodeUint4,
+    encode: encodeUint4,
+  })
+  .add({
+    id: 24,
+    array: 1008,
+    name: 'regproc',
+    decode: decodeUint4,
+    encode: encodeUint4,
+  });

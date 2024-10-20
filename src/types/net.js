@@ -1,3 +1,4 @@
+import { types } from '../protocol/types.js';
 import { ensureNetNum, parseInt16 } from '../utils/number.js';
 
 function decodeInet(reader) {
@@ -76,30 +77,32 @@ function encodeInet(writer, data) {
   }
 }
 
-export const inet = {
-  id: 869,
-  name: 'inet',
-  decode: decodeInet,
-  encode: encodeInet,
-};
-
-export const cidr = {
-  id: 650,
-  name: 'cidr',
-  decode: decodeInet,
-  encode: encodeInet,
-};
-
-export const macaddr = {
-  id: 829,
-  name: 'macaddr',
-  decode: decodeInet,
-  encode: encodeInet,
-};
-
-export const macaddr8 = {
-  id: 774,
-  name: 'macaddr8',
-  decode: decodeInet,
-  encode: encodeInet,
-};
+types
+  .add({
+    id: 869,
+    array: 1041,
+    name: 'inet',
+    decode: decodeInet,
+    encode: encodeInet,
+  })
+  .add({
+    id: 650,
+    array: 651,
+    name: 'cidr',
+    decode: decodeInet,
+    encode: encodeInet,
+  })
+  .add({
+    id: 829,
+    array: 1040,
+    name: 'macaddr',
+    decode: decodeInet,
+    encode: encodeInet,
+  })
+  .add({
+    id: 774,
+    array: 775,
+    name: 'macaddr8',
+    decode: decodeInet,
+    encode: encodeInet,
+  });

@@ -23,18 +23,18 @@ export class Statement {
 
   countParams = 0;
 
-  constructor({ statements, writer }, task) {
-    const name = statements.size.toString(36);
+  constructor(task) {
+    const name = task.client.statements.size.toString(36);
 
     this.name = name;
-    this.writer = writer;
+    this.writer = task.client.writer;
 
-    writer.lock();
+    this.writer.lock();
+
     task.onError = onErrorParse;
+    task.client.statements.set(task.sql, this);
 
-    statements.set(task.sql, this);
-
-    writer
+    this.writer
       .type(MESSAGE_PARSE)
       .string(name)
       .string(task.sql)
@@ -64,13 +64,16 @@ export class Statement {
     return this;
   }
 
-  execute({ values, reject }) {
+  execute(task) {
+    const { values } = task;
     const { writer, encoders, countParams } = this;
 
     writer.type(MESSAGE_BIND).setBytes(this.params);
 
+    let i = 0;
+
     try {
-      for (let i = 0; i < countParams; i++) {
+      for (; i < countParams; i++) {
         if (values[i] == null) {
           writer.setBytes(NULL);
         } else {
@@ -78,8 +81,14 @@ export class Statement {
         }
       }
     } catch (error) {
+      let message = `Invalid value in param $${i + 1}::${encoders[i].name}`;
+
+      if (error) {
+        message += ': ' + error.message || error;
+      }
+
       writer.clearLastMessage().sync();
-      reject(error);
+      task.reject({ message, status: 422 });
       return this;
     }
 

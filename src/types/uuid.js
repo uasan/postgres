@@ -1,3 +1,4 @@
+import { types } from '../protocol/types.js';
 import { byteToHex, hexToByte } from '../utils/hex.js';
 
 const decodeUUID = ({ uint8, offset: i }) =>
@@ -52,8 +53,10 @@ function encodeUUID(writer, uuid) {
   }
 }
 
-export const uuid = {
+types.add({
   id: 2950,
+  array: 2951,
+  name: 'uuid',
   decode: decodeUUID,
   encode: encodeUUID,
-};
+});

@@ -1,151 +1,60 @@
-import { uuid } from '../types/uuid.js';
-import { bool } from '../types/bool.js';
-import { bytea } from '../types/bytea.js';
-import { bit, varbit } from '../types/bit.js';
-import { record } from '../types/record/type.js';
-import { voidType } from '../types/void.js';
-import * as date from '../types/date.js';
-import * as text from '../types/text.js';
-import * as number from '../types/number.js';
-import { numeric } from '../types/numeric.js';
-import * as range from '../types/range.js';
-import * as geo from '../types/geo.js';
-import { inet, cidr, macaddr, macaddr8 } from '../types/net.js';
-import { json, jsonb, jsonpath } from '../types/json.js';
-import { typeArrayOf } from '../types/array/type.js';
-
-export { unknown } from '../types/text.js';
-export { bytea as blob };
+import { decodeArray } from '../types/array/decode.js';
+import { encodeArray } from '../types/array/encode.js';
 
 //https://github.com/npgsql/doc/blob/main/dev/types.md/#L1
 
-export const types = {
-  0: text.unknown,
-  16: bool,
-  17: bytea,
-  18: text.char,
-  19: text.name,
-  20: number.int8,
-  21: number.int2,
-  22: typeArrayOf(number.int2),
-  23: number.int4,
-  24: number.regproc,
-  25: text.text,
-  26: number.oid,
-  28: number.xid,
-  29: number.cid,
-  30: typeArrayOf(number.oid),
-  114: json,
-  142: text.xml,
-  143: typeArrayOf(text.xml),
-  194: text.pgNodeTree,
-  199: typeArrayOf(json),
-  600: geo.point,
-  601: geo.lseg,
-  602: geo.path,
-  603: geo.box,
-  604: geo.polygon,
-  628: geo.line,
-  629: typeArrayOf(geo.line),
-  650: cidr,
-  651: typeArrayOf(cidr),
-  700: number.float4,
-  701: number.float8,
-  705: text.unknown,
-  718: geo.circle,
-  719: typeArrayOf(geo.circle),
-  774: macaddr8,
-  775: typeArrayOf(macaddr8),
-  790: number.money,
-  829: macaddr,
-  869: inet,
-  791: typeArrayOf(number.money),
-  1000: typeArrayOf(bool),
-  1001: typeArrayOf(bytea),
-  1002: typeArrayOf(text.char),
-  1003: typeArrayOf(text.name),
-  1005: typeArrayOf(number.int2),
-  1007: typeArrayOf(number.int4),
-  1008: typeArrayOf(number.regproc),
-  1009: typeArrayOf(text.text),
-  1011: typeArrayOf(number.xid),
-  1012: typeArrayOf(number.cid),
-  1014: typeArrayOf(text.bpchar),
-  1015: typeArrayOf(text.varchar),
-  1016: typeArrayOf(number.int8),
-  1017: typeArrayOf(geo.point),
-  1018: typeArrayOf(geo.lseg),
-  1019: typeArrayOf(geo.path),
-  1020: typeArrayOf(geo.box),
-  1021: typeArrayOf(number.float4),
-  1022: typeArrayOf(number.float8),
-  1028: typeArrayOf(number.oid),
-  1033: text.aclitem,
-  1034: typeArrayOf(text.aclitem),
-  1040: typeArrayOf(macaddr),
-  1041: typeArrayOf(inet),
-  1042: text.bpchar,
-  1043: text.varchar,
-  1082: date.date,
-  1083: date.time,
-  1114: date.timestamp,
-  1115: typeArrayOf(date.timestamp),
-  1027: typeArrayOf(geo.polygon),
-  1183: typeArrayOf(date.time),
-  1182: typeArrayOf(date.date),
-  1184: date.timestamptz,
-  1185: typeArrayOf(date.timestamptz),
-  1186: date.interval,
-  1187: typeArrayOf(date.interval),
-  1231: typeArrayOf(numeric),
-  1266: date.timetz,
-  1270: typeArrayOf(date.timetz),
-  1560: bit,
-  1561: typeArrayOf(bit),
-  1562: varbit,
-  1563: typeArrayOf(varbit),
-  1700: numeric,
-  2249: record,
-  2278: voidType,
-  2287: typeArrayOf(record),
-  2950: uuid,
-  2951: typeArrayOf(uuid),
-  3614: text.tsvector,
-  3615: text.tsquery,
-  3734: text.regconfig,
-  3643: typeArrayOf(text.tsvector),
-  3645: typeArrayOf(text.tsquery),
-  3735: typeArrayOf(text.regconfig),
-  3802: jsonb,
-  3807: typeArrayOf(jsonb),
-  3904: range.int4range,
-  3905: typeArrayOf(range.int4range),
-  3906: range.numrange,
-  3907: typeArrayOf(range.numrange),
-  3908: range.tsrange,
-  3909: typeArrayOf(range.tsrange),
-  3910: range.tstzrange,
-  3911: typeArrayOf(range.tstzrange),
-  3912: range.daterange,
-  3913: typeArrayOf(range.daterange),
-  3926: range.int8range,
-  3927: typeArrayOf(range.int8range),
-  4072: jsonpath,
-  4073: typeArrayOf(jsonpath),
-  4532: range.nummultirange,
-  4451: range.int4multirange,
-  4533: range.tsmultirange,
-  4534: range.tstzmultirange,
-  4535: range.datemultirange,
-  4536: range.int8multirange,
-  6150: typeArrayOf(range.int4multirange),
-  6151: typeArrayOf(range.nummultirange),
-  6152: typeArrayOf(range.tsmultirange),
-  6153: typeArrayOf(range.tstzmultirange),
-  6155: typeArrayOf(range.datemultirange),
-  6157: typeArrayOf(range.int8multirange),
-  16385: geo.cube,
-  16390: typeArrayOf(geo.cube),
-  16475: typeArrayOf(geo.earth),
-  16476: geo.earth,
-};
+export class Type {
+  id = 0;
+  name = '';
+
+  type = null;
+  array = null;
+
+  decode(reader) {
+    return reader.getTextUTF8();
+  }
+
+  encode(writer, value) {
+    writer.setUTF8(String(value));
+  }
+
+  serialize(value) {
+    return String(value);
+  }
+}
+
+export class TypesMap extends Map {
+  factory(id) {
+    return this.get(id) ?? this.create(id);
+  }
+
+  create(id) {
+    const type = new Type();
+
+    type.id = id;
+    this.set(id, type);
+
+    return type;
+  }
+
+  add({ array, ...data }) {
+    const type = Object.assign(new Type(), data);
+
+    if (array) {
+      this.setArrayType(type, array);
+    }
+
+    return this.set(type.id, type);
+  }
+
+  setArrayType(type, id) {
+    type.array = this.factory(id);
+
+    type.array.type = type;
+    type.array.decode = decodeArray;
+    type.array.encode = encodeArray;
+    type.array.name = type.name + '[]';
+  }
+}
+
+export const types = new TypesMap();

@@ -1,6 +1,7 @@
+import { types } from '../protocol/types.js';
 import { ceil, POSITIVE_INFINITY, NEGATIVE_INFINITY } from '#native';
 
-const countZeros = (text, start, step) => {
+function countZeros(text, start, step) {
   let count = 0;
   let { length } = text;
 
@@ -9,9 +10,9 @@ const countZeros = (text, start, step) => {
     else break;
 
   return count;
-};
+}
 
-const decodeNumeric = ({ view, offset }) => {
+function decodeNumeric({ view, offset }) {
   let value = '';
 
   let digits = view.getUint16(offset);
@@ -65,7 +66,7 @@ const decodeNumeric = ({ view, offset }) => {
   }
 
   return value;
-};
+}
 
 function encodeNumeric(writer, value) {
   let text = value + '';
@@ -142,8 +143,10 @@ function encodeNumeric(writer, value) {
   for (; n < length; n += 4) view.setUint16((i += 2), +text.substr(n, 4));
 }
 
-export const numeric = {
+types.add({
   id: 1700,
+  array: 1231,
+  name: 'numeric',
   decode: decodeNumeric,
   encode: encodeNumeric,
-};
+});
