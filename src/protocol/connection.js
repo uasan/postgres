@@ -8,7 +8,8 @@ import { HIGH_WATER_MARK } from '../constants.js';
 import { PostgresError } from '../response/error.js';
 
 export class Connection {
-  timeout = 150_000;
+  timeout = 0;
+
   connecting = null;
   disconnecting = null;
 

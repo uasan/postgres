@@ -6,7 +6,7 @@ export const getConnectionOptions = ({
   path = '',
   params,
   signal,
-  timeout = 150_000,
+  timeout = 1_000_000,
   database = 'postgres',
   username = 'postgres',
   password = '',
