@@ -13,8 +13,8 @@ import {
   TRANSACTION_INACTIVE,
 } from './constants.js';
 import { PostgresError } from './response/error.js';
-import { noop } from '#native';
 import { TypesMap } from './protocol/types.js';
+import { setCommit, setRollback } from './utils/queries.js';
 
 export class PostgresClient {
   pid = 0;
@@ -109,11 +109,7 @@ export class PostgresClient {
 
     switch (this.state) {
       case TRANSACTION_ACTIVE:
-        if (this.transactions > 1) {
-          await this.query(`RELEASE SAVEPOINT _${--this.transactions}`);
-        } else {
-          await this.query('COMMIT');
-        }
+        await this.query(setCommit(this));
         break;
 
       case TRANSACTION_ERROR:
@@ -123,23 +119,21 @@ export class PostgresClient {
   }
 
   async rollback() {
-    await this.ready();
+    try {
+      await this.ready();
 
-    if (this.connection.isReady) {
-      switch (this.state) {
-        case TRANSACTION_ACTIVE:
-          if (this.transactions > 1) {
-            await this.query(
-              `ROLLBACK TO SAVEPOINT _${--this.transactions}`
-            ).catch(noop);
-          } else {
-            await this.query('ROLLBACK').catch(noop);
-          }
-          break;
+      if (this.connection.isReady) {
+        switch (this.state) {
+          case TRANSACTION_ACTIVE:
+            await this.query(setRollback(this));
+            break;
 
-        case TRANSACTION_ERROR:
-          await this.query('ROLLBACK').catch(noop);
+          case TRANSACTION_ERROR:
+            await this.query('ROLLBACK');
+        }
       }
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -156,26 +150,6 @@ export class PostgresClient {
       throw error;
     }
   }
-
-  cancelRequest = async ({ pid, secret } = this) => {
-    const data = new DataView(new ArrayBuffer(16));
-
-    data.setInt32(0, 16);
-    data.setInt32(4, 80877102);
-    data.setInt32(8, pid);
-    data.setInt32(12, secret);
-
-    const socket = createConnection(
-      {
-        path: this.options.path,
-        host: this.options.host,
-        port: this.options.port,
-      },
-      () => socket.end(new Uint8Array(data.buffer))
-    );
-
-    await once(socket, 'close');
-  };
 
   async reset(options) {
     await this.connection.disconnect();
@@ -207,24 +181,56 @@ export class PostgresClient {
 
     //console.log('CLEAR');
 
-    for (let task = this.queue.head; task; task = task.next)
+    for (let task = this.queue.head; task; task = task.next) {
+      task.isSent = false;
       task.statement = null;
+    }
+  }
+
+  cancelTasks(error, isFinally = false) {
+    this.writer.reject?.(error);
+
+    if (this.task) {
+      this.task.reject(error);
+      this.task = null;
+    }
+
+    for (let task = this.queue.head; task; task = task.next)
+      if (isFinally || task.isSent) {
+        this.queue.dequeue().reject(error);
+      } else {
+        break;
+      }
+
+    return this;
+  }
+
+  async cancelRequest({ pid, secret } = this) {
+    const data = new DataView(new ArrayBuffer(16));
+
+    data.setInt32(0, 16);
+    data.setInt32(4, 80877102);
+    data.setInt32(8, pid);
+    data.setInt32(12, secret);
+
+    const socket = createConnection(
+      {
+        path: this.options.path,
+        host: this.options.host,
+        port: this.options.port,
+      },
+      () => socket.end(new Uint8Array(data.buffer))
+    );
+
+    await once(socket, 'close');
+  }
+
+  abort(error) {
+    return this.cancelTasks(error, true).disconnect();
   }
 
   disconnect() {
     return this.connection.disconnect();
-  }
-
-  abort(error) {
-    this.writer.reject?.(error);
-
-    do this.task?.reject(error);
-    while ((this.task = this.queue.dequeue())?.isSent);
-
-    if (this.task?.isSent === false) {
-      this.queue.unshift(this.task);
-      this.task = null;
-    }
   }
 }
 

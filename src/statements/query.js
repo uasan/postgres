@@ -1,3 +1,4 @@
+import { nullArray } from '#native';
 import {
   NULL,
   MESSAGE_BIND,
@@ -16,39 +17,35 @@ function onErrorParse() {
   this.client.statements.delete(this.sql);
 }
 
-export class Statement {
+export class Query {
+  name = '';
+  params = nullArray;
+
   columns = [];
   decoders = [];
   encoders = [];
 
-  countParams = 0;
-
   constructor(task) {
-    const name = task.client.statements.size.toString(36);
-
-    this.name = name;
-    this.writer = task.client.writer;
-
-    this.writer.lock();
-
     task.onError = onErrorParse;
     task.client.statements.set(task.sql, this);
 
-    this.writer
+    this.name = task.client.statements.size.toString(36);
+
+    task.client.writer
+      .lock()
       .type(MESSAGE_PARSE)
-      .string(name)
+      .string(this.name)
       .string(task.sql)
       .setInt16(0)
       .end()
       .type(MESSAGE_DESCRIBE)
       .setUint8(PREPARED_QUERY)
-      .string(name)
+      .string(this.name)
       .end()
       .setBytes(MESSAGE_FLUSH_END);
   }
 
   setParams(length) {
-    this.countParams = length;
     this.params = new Uint8Array([
       0,
       ...textEncoder.encode(this.name),
@@ -66,14 +63,17 @@ export class Statement {
 
   execute(task) {
     const { values } = task;
-    const { writer, encoders, countParams } = this;
+    const { writer } = task.client;
+
+    const { encoders } = this;
+    const { length } = encoders;
 
     writer.type(MESSAGE_BIND).setBytes(this.params);
 
     let i = 0;
 
     try {
-      for (; i < countParams; i++) {
+      for (; i < length; i++) {
         if (values[i] == null) {
           writer.setBytes(NULL);
         } else {

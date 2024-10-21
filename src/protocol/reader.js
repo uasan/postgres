@@ -41,14 +41,14 @@ export class Reader {
       }
 
       const handle = handlers[uint8[offset]];
-      //if (!handle) console.log('Not Handle', uint8[offset]);
+      //console.log(handle.name);
 
       try {
         this.offset = offset + 5;
         this.ending = offset + size;
         handle(client);
       } catch (error) {
-        client.abort(error);
+        client.cancelTasks(error).disconnect();
         return;
       }
 

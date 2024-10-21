@@ -4,6 +4,7 @@ import {
   MESSAGE_COPY_DONE,
   MESSAGE_COPY_FAIL,
 } from '../protocol/messages.js';
+import { noop } from '#native';
 
 export function copyBothResponse() {
   //
@@ -30,23 +31,25 @@ export function copyInResponse({ task, writer }) {
   );
 }
 
-export function copyOutResponse({ task, cancelRequest }) {
-  task.resolve(
+export function copyOutResponse(client) {
+  client.task.resolve(
     new ReadableStream({
       type: 'bytes',
+
       start(controller) {
-        task.resolve = () => {
+        client.task.resolve = () => {
           controller.close();
         };
-        task.reject = error => {
+        client.task.reject = error => {
           controller.error(error);
         };
-        task.controller = controller;
+        client.task.controller = controller;
       },
+
       async cancel() {
-        task.reject = null;
-        task.controller = null;
-        await cancelRequest();
+        client.task.reject = noop;
+        client.task.controller = null;
+        await client.cancelRequest();
       },
     })
   );

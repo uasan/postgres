@@ -1,5 +1,7 @@
 import { noop, nullArray } from '#native';
-import { Statement } from './statement.js';
+import { Query } from '../statements/query.js';
+import { Describer } from '../statements/describer.js';
+
 import {
   putData,
   pushData,
@@ -20,6 +22,7 @@ export class Task {
   isData = false;
   isCorked = false;
   isNoDecode = false;
+  isDescribe = false;
   isSimpleQuery = false;
 
   next = null;
@@ -93,7 +96,10 @@ export class Task {
     return promise;
   }
 
-  describe(sql) {}
+  describe(sql) {
+    this.isDescribe = true;
+    return this.execute(sql, nullArray);
+  }
 
   then(resolve, reject) {
     this.resolve = resolve;
@@ -105,10 +111,15 @@ export class Task {
 
     if (this.isSimpleQuery) {
       this.client.writer.type(MESSAGE_QUERY).string(this.sql).end();
+    } else if (this.isDescribe) {
+      if (this.statement) {
+        this.statement.execute(this);
+      } else {
+        this.statement = new Describer(this);
+      }
     } else {
       this.statement =
-        this.client.statements.get(this.sql)?.execute(this) ??
-        new Statement(this);
+        this.client.statements.get(this.sql)?.execute(this) ?? new Query(this);
     }
 
     return this.next;

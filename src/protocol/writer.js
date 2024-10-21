@@ -19,6 +19,7 @@ export class Writer {
   lock() {
     //console.log('LOCK');
     this.isLocked = true;
+    return this;
   }
 
   unlock() {
@@ -28,6 +29,8 @@ export class Writer {
     if (this.length) {
       this.promise ??= this.write();
     }
+
+    return this;
   }
 
   alloc(length) {

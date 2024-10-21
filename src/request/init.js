@@ -4,6 +4,7 @@ import {
   saslContinue,
   saslHandshake,
 } from '../protocol/auth/sasl.js';
+import { PostgresError } from '../response/error.js';
 
 export function handshake({ writer, options: { username, database, params } }) {
   const keys = Object.keys(params);
@@ -58,17 +59,19 @@ export function parameterStatus(client) {
   switch (name.toLowerCase()) {
     case 'server_version':
       if (+value < 14)
-        client.abort(new Error(`Minimum supported version PostgreSQL 14`));
+        client.abort(
+          PostgresError.of(`Minimum supported version PostgreSQL 14`)
+        );
       break;
 
     case 'timezone':
       if (value !== 'UTC')
-        client.abort(new Error(`Only time zone UTC supported`));
+        client.abort(PostgresError.of(`Only time zone UTC supported`), true);
       break;
 
     case 'client_encoding':
       if (value !== 'UTF8')
-        client.abort(new Error(`Only client encoding UTF8 supported`));
+        client.abort(PostgresError.of(`Only client encoding UTF8 supported`));
       break;
   }
 }

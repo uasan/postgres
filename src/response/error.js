@@ -81,7 +81,11 @@ export class PostgresError extends Error {
   }
 
   static is(error) {
-    return !!error?.[isPostgresError];
+    return error ? !!error[isPostgresError] || error instanceof this : false;
+  }
+
+  static of(message) {
+    return new this({ message });
   }
 
   static transactionAborted({ pid }) {
