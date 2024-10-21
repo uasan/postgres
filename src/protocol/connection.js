@@ -60,6 +60,7 @@ export class Connection {
   };
 
   onTimeout = () => {
+    console.log('onTimeout', this.isKeepAlive());
     if (this.isKeepAlive() === false) {
       this.client.disconnect().catch(noop);
     }
@@ -69,12 +70,12 @@ export class Connection {
     this.client.abort(error);
   };
 
-  async connect() {
+  async connect(isNotReconnect = false) {
     if (this.connecting) {
-      await this.connecting.promise;
+      await this.connecting.promise.catch(noop);
       return;
     } else if (this.client.stream) {
-      if (this.disconnecting) await this.disconnecting.promise;
+      if (this.disconnecting) await this.disconnecting.promise.catch(noop);
       else return;
     }
 
@@ -112,20 +113,25 @@ export class Connection {
 
       this.client.writer.unlock();
       this.client.task?.send();
-    } catch (error) {
+    } catch (e) {
       this.connecting = null;
       this.client.task = null;
 
       this.disconnecting ??= Promise.withResolvers();
       await this.disconnecting?.promise;
 
-      if (PostgresError.is(error) || !this.isNeedReconnect()) {
-        const postgresError = new PostgresError(error);
+      if (isNotReconnect || PostgresError.is(e) || !this.isNeedReconnect()) {
+        console.trace({
+          'this.client.isEnded': this.client.isEnded,
+          'this.client.task != null': this.client.task,
+          'this.client.queue.length > 0': this.client.queue.length,
+          'this.client.listeners.size > 0': this.client.listeners.size,
+        });
 
-        while (this.client.queue.length)
-          this.client.queue.dequeue().reject(postgresError);
+        const error = new PostgresError(e);
 
-        throw postgresError;
+        this.client.abort(error);
+        throw error;
       }
 
       do {
@@ -139,7 +145,7 @@ export class Connection {
 
   async disconnect() {
     //console.log('DISCONNECT');
-
+    console.trace();
     if (this.client.stream && this.disconnecting === null) {
       this.disconnecting = Promise.withResolvers();
 
@@ -173,7 +179,7 @@ export class Connection {
     await randomTimeout;
 
     if (this.client.stream === null) {
-      this.connect().catch(noop);
+      this.connect(true).catch(noop);
     }
   }
 

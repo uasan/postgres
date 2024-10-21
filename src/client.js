@@ -218,12 +218,13 @@ export class PostgresClient {
   abort(error) {
     this.writer.reject?.(error);
 
-    if (this.task) {
-      this.task.reject(error);
+    do this.task?.reject(error);
+    while ((this.task = this.queue.dequeue())?.isSent);
+
+    if (this.task?.isSent === false) {
+      this.queue.unshift(this.task);
       this.task = null;
     }
-
-    return this.connection.disconnect();
   }
 }
 

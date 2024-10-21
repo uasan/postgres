@@ -1,22 +1,22 @@
 import { PostgresPool } from '../pool.js';
 
-// const db = new PostgresPool({
-//   max: 1,
-//   host: '127.0.0.1',
-//   port: 5432,
-//   username: 'api_ludicloud',
-//   password: 'pass',
-//   database: 'smartapps',
-// });
-
 const db = new PostgresPool({
   max: 1,
   host: '127.0.0.1',
-  port: 9090,
-  username: 'api_ludicloud_v2',
+  port: 5432,
+  username: 'api_ludicloud',
   password: 'pass',
-  database: 'smartapps-v2',
+  database: 'smartapps',
 });
+
+// const db = new PostgresPool({
+//   max: 1,
+//   host: '127.0.0.1',
+//   port: 9090,
+//   username: 'api_ludicloud_v2',
+//   password: 'pass',
+//   database: 'smartapps-v2',
+// });
 
 async function test() {
   let sql = `
@@ -35,7 +35,11 @@ async function test() {
     console.error(error);
   }
 
-  await db.disconnect();
+  setInterval(() => {
+    db.query('SELECT 1');
+    console.log('QUERY');
+  }, 500_000);
+  //await db.disconnect();
 }
 
 await test();
