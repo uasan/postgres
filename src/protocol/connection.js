@@ -33,7 +33,7 @@ export class Connection {
   }
 
   onAbort = () => {
-    this.client.cancelTasks(PostgresError.of('AbortSignal'));
+    this.client.disconnect();
   };
 
   onConnect = () => {
