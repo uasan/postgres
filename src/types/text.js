@@ -18,16 +18,6 @@ types
     name: 'text',
   })
   .add({
-    id: 3615,
-    array: 3645,
-    name: 'tsquery',
-  })
-  .add({
-    id: 3614,
-    array: 3643,
-    name: 'tsvector',
-  })
-  .add({
     id: 142,
     array: 143,
     name: 'xml',

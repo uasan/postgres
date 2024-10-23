@@ -1,3 +1,4 @@
+import { assign } from '#native';
 import { decodeArray } from '../types/array/decode.js';
 import { encodeArray } from '../types/array/encode.js';
 import { serializeArray } from '../types/array/serialize.js';
@@ -32,6 +33,7 @@ export class Type {
   }
 }
 
+const names = new Map();
 export class TypesMap extends Map {
   factory(id) {
     return this.get(id) ?? this.create(id);
@@ -47,13 +49,18 @@ export class TypesMap extends Map {
   }
 
   add({ array, ...data }) {
-    const type = Object.assign(new Type(), data);
+    const type = assign(new Type(), data);
 
     if (array) {
       this.setArrayType(type, array);
     }
 
-    return this.set(type.id, type);
+    if (type.id) {
+      return this.set(type.id, type);
+    } else {
+      names.set('pg_catalog.' + type.name, type);
+      return this;
+    }
   }
 
   setType(data) {
@@ -64,6 +71,10 @@ export class TypesMap extends Map {
     }
 
     type.name = data.name;
+
+    if (names.has(type.name)) {
+      assign(type, names.get(type.name)).id = data.oid;
+    }
 
     if (data.array) {
       this.setArrayType(type, data.array);

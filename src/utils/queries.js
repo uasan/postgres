@@ -8,7 +8,7 @@ export const setRollback = client =>
     ? `ROLLBACK TO SAVEPOINT _${--client.transactions}`
     : 'ROLLBACK';
 
-export const SQL_FETCH_TYPES = `SELECT
+export const SELECT_TYPES = `SELECT
   a.oid,
   a.typarray AS array,
   n.nspname || '.' || a.typname AS name
