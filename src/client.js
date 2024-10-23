@@ -188,7 +188,7 @@ export class PostgresClient {
   }
 
   cancelTasks(error, isFinally = false) {
-    this.writer.reject?.(error);
+    this.writer.reject(error);
 
     if (this.task) {
       this.task.reject(error);

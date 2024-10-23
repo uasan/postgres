@@ -76,7 +76,7 @@ function getBigIntTimestamp(data) {
       return BigInt((data - 946684800000) * 1000);
 
     default:
-      throw new Error('Invalid timestamp value: ' + data);
+      throw null;
   }
 }
 
@@ -109,6 +109,25 @@ function encodeInterval(writer, value) {
   view.setInt32(length + 16, data.years * 12 + data.months);
 }
 
+function serializeDate(data) {
+  switch (data.constructor) {
+    case String:
+      return data;
+
+    case Instant:
+      return data.toString();
+
+    case Date:
+      return data.toISOString();
+
+    case Number:
+      return new Date(data).toISOString();
+
+    default:
+      throw null;
+  }
+}
+
 types
   .add({
     id: 1082,
@@ -116,6 +135,7 @@ types
     name: 'date',
     decode: decodeDate,
     encode: encodeDate,
+    serialize: serializeDate,
   })
   .add({
     id: 1083,
@@ -144,6 +164,7 @@ types
     name: 'timestamp',
     decode: decodeTimestamp,
     encode: encodeTimestamp,
+    serialize: serializeDate,
   })
   .add({
     id: 1184,
@@ -151,4 +172,5 @@ types
     name: 'timestamptz',
     decode: decodeTimestamp,
     encode: encodeTimestamp,
+    serialize: serializeDate,
   });

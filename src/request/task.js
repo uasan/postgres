@@ -71,14 +71,6 @@ export class Task {
       }
     }
 
-    if (
-      !this.isSent &&
-      !this.client.writer.promise &&
-      !this.client.writer.isLocked
-    ) {
-      this.send();
-    }
-
     try {
       return await this;
     } catch (error) {
@@ -104,6 +96,14 @@ export class Task {
   then(resolve, reject) {
     this.resolve = resolve;
     this.reject = reject;
+
+    if (
+      !this.isSent &&
+      !this.client.writer.promise &&
+      !this.client.writer.isLocked
+    ) {
+      this.send();
+    }
   }
 
   send() {

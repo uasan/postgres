@@ -17,8 +17,7 @@ async function test() {
       .setDataToFile('./test.txt')
       .execute(
         ` SELECT value::text || '\n'
-          FROM generate_series(1, 10_000_000) AS _(value)
-          WHERE (value / CASE WHEN value = 50_000_000 THEN 0 ELSE value END) > 0`,
+          FROM generate_series(1, 10_000_000) AS _(value)`,
         []
       );
 

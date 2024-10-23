@@ -1,4 +1,4 @@
-import { BigInt } from '#native';
+import { BigInt, identity } from '#native';
 import { types } from '../protocol/types.js';
 
 const decodeInt2 = ({ view, offset }) => view.getInt16(offset);
@@ -37,6 +37,7 @@ types
     id: 20,
     array: 1016,
     name: 'int8',
+    quote: identity,
     decode: decodeInt8,
     encode: encodeInt8,
   })
@@ -44,6 +45,7 @@ types
     id: 21,
     array: 1005,
     name: 'int2',
+    quote: identity,
     decode: decodeInt2,
     encode: encodeInt2,
   })
@@ -51,6 +53,7 @@ types
     id: 23,
     array: 1007,
     name: 'int4',
+    quote: identity,
     decode: decodeInt4,
     encode: encodeInt4,
   })
@@ -58,6 +61,7 @@ types
     id: 26,
     array: 1028,
     name: 'oid',
+    quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
   })
@@ -79,6 +83,7 @@ types
     id: 700,
     array: 1021,
     name: 'float4',
+    quote: identity,
     decode: decodeFloat4,
     encode: encodeFloat4,
   })
@@ -86,6 +91,7 @@ types
     id: 701,
     array: 1022,
     name: 'float8',
+    quote: identity,
     decode: decodeFloat8,
     encode: encodeFloat8,
   })
@@ -100,6 +106,7 @@ types
     id: 28,
     array: 1011,
     name: 'xid',
+    quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
   })
@@ -107,6 +114,7 @@ types
     id: 29,
     array: 1012,
     name: 'cid',
+    quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
   })
@@ -114,6 +122,7 @@ types
     id: 24,
     array: 1008,
     name: 'regproc',
+    quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
   });

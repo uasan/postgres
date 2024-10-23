@@ -5,7 +5,6 @@ import {
   MESSAGE_PARSE,
   INT16_ONE_ONE,
   MESSAGE_DESCRIBE,
-  MESSAGE_FLUSH_END,
   PREPARED_QUERY,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
@@ -42,7 +41,7 @@ export class Query {
       .setUint8(PREPARED_QUERY)
       .string(this.name)
       .end()
-      .setBytes(MESSAGE_FLUSH_END);
+      .flush();
   }
 
   setParams(length) {
@@ -93,6 +92,7 @@ export class Query {
     }
 
     writer.setBytes(INT16_ONE_ONE).end().setBytes(MESSAGES_EXEC_SYNC_FLUSH);
+
     return this;
   }
 }

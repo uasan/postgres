@@ -1,6 +1,8 @@
+import { PostgresError } from '../response/error.js';
+
 export async function listen(name, handler) {
   if (typeof handler !== 'function') {
-    throw new Error('Listening handler must be function');
+    throw PostgresError.of('Listening handler must be function');
   }
 
   const handlers = this.listeners.get(name);
@@ -8,8 +10,8 @@ export async function listen(name, handler) {
   if (handlers) {
     handlers.add(handler);
   } else {
-    await this.query(`LISTEN ${name}`);
     this.listeners.set(name, new Set().add(handler));
+    await this.query(`LISTEN ${name}`);
   }
 }
 
@@ -22,16 +24,14 @@ export async function notify(name, value) {
 
 export async function unlisten(name, handler) {
   if (typeof handler !== 'function') {
-    throw new Error('Listening handler must be function');
+    throw PostgresError.of('Listening handler must be function');
   }
 
   const handlers = this.listeners.get(name);
 
-  if (handlers?.includes(handler)) {
-    handlers.splice(handlers.indexOf(handler), 1);
-  }
+  handlers?.delete(handler);
 
-  if (!handlers?.length) {
+  if (!handlers?.size) {
     this.listeners.delete(name);
     await this.query(`UNLISTEN ${name}`);
   }

@@ -10,10 +10,10 @@ export async function notificationResponse({ reader, listeners }) {
   if (handlers) {
     reader.offset = i;
     reader.ending = ending;
-    const payload = reader.uint8[i] ? reader.getTextUTF8() : '';
 
-    for (i = 0; i < handlers.length; i++) {
-      const handler = handlers[i];
+    const payload = reader.uint8[i] ? reader.getString() : undefined;
+
+    for (const handler of handlers) {
       try {
         await handler(payload);
       } catch (error) {

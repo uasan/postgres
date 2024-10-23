@@ -1,5 +1,6 @@
 import { decodeArray } from '../types/array/decode.js';
 import { encodeArray } from '../types/array/encode.js';
+import { serializeArray } from '../types/array/serialize.js';
 
 //https://github.com/npgsql/doc/blob/main/dev/types.md/#L1
 
@@ -20,6 +21,14 @@ export class Type {
 
   serialize(value) {
     return String(value);
+  }
+
+  quote(value) {
+    return "'" + value.replaceAll("'", "''") + "'";
+  }
+
+  getSQL(value) {
+    return value == null ? 'NULL' : this.quote(this.serialize(value));
   }
 }
 
@@ -47,13 +56,29 @@ export class TypesMap extends Map {
     return this.set(type.id, type);
   }
 
+  setType(data) {
+    const type = this.factory(data.oid);
+
+    if (type.name) {
+      return;
+    }
+
+    type.name = data.name;
+
+    if (data.array) {
+      this.setArrayType(type, data.array);
+    }
+  }
+
   setArrayType(type, id) {
     type.array = this.factory(id);
 
     type.array.type = type;
+    type.array.name = type.name + '[]';
+
     type.array.decode = decodeArray;
     type.array.encode = encodeArray;
-    type.array.name = type.name + '[]';
+    type.array.serialize = serializeArray;
   }
 }
 

@@ -1,7 +1,6 @@
 import {
   MESSAGE_PARSE,
   MESSAGE_DESCRIBE,
-  MESSAGE_FLUSH_END,
   PREPARED_QUERY,
   MESSAGE_CLOSE,
 } from '../protocol/messages.js';
@@ -16,20 +15,24 @@ export class Describer {
   encoders = [];
 
   constructor(task) {
-    task.onError = onErrorParse;
-
-    task.client.writer
-      .lock()
-      .type(MESSAGE_PARSE)
-      .setUint8(0)
-      .string(task.sql)
-      .setInt16(0)
-      .end()
-      .type(MESSAGE_DESCRIBE)
-      .setUint8(PREPARED_QUERY)
-      .setUint8(0)
-      .end()
-      .setBytes(MESSAGE_FLUSH_END);
+    if (task.client.statements.has(task.sql)) {
+      task.client.writer.sync();
+      task.resolve(task.client.statements.get(task.sql));
+    } else {
+      task.onError = onErrorParse;
+      task.client.writer
+        .lock()
+        .type(MESSAGE_PARSE)
+        .setUint8(0)
+        .string(task.sql)
+        .setInt16(0)
+        .end()
+        .type(MESSAGE_DESCRIBE)
+        .setUint8(PREPARED_QUERY)
+        .setUint8(0)
+        .end()
+        .flush();
+    }
   }
 
   setParams() {

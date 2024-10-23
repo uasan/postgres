@@ -35,11 +35,7 @@ async function test() {
     console.error(error);
   }
 
-  setInterval(() => {
-    db.query('SELECT 1');
-    console.log('QUERY');
-  }, 500_000);
-  //await db.disconnect();
+  await db.disconnect();
 }
 
 await test();

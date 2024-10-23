@@ -149,7 +149,7 @@ export class Connection {
       this.connecting?.reject();
 
       this.client.writer.lock();
-      this.client.writer.reject?.();
+      this.client.writer.reject();
       this.client.stream.end(MESSAGE_TERMINATE);
     }
 

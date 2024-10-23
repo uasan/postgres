@@ -1,3 +1,4 @@
+import { identity } from '#native';
 import { types } from '../protocol/types.js';
 
 const decodeBool = reader => reader.uint8[reader.offset] === 1;
@@ -10,6 +11,7 @@ types.add({
   id: 16,
   array: 1000,
   name: 'bool',
+  quote: identity,
   decode: decodeBool,
   encode: encodeBool,
 });

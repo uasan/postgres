@@ -3,17 +3,16 @@ export const INT16_ONE_ONE = new Uint8Array([0, 1, 0, 1]);
 export const PREPARED_PORTAL = 80;
 export const PREPARED_QUERY = 83;
 
-export const MESSAGE_FLUSH_END = new Uint8Array([72, 0, 0, 0, 4]);
 export const MESSAGES_EXEC_SYNC_FLUSH = new Uint8Array([
   69, 0, 0, 0, 9, 0, 0, 0, 0, 0, 83, 0, 0, 0, 4, 72, 0, 0, 0, 4,
 ]);
 
 export const //
   MESSAGE_SYNC = 83,
+  MESSAGE_FLUSH = 72,
   MESSAGE_BIND = 66,
   MESSAGE_PARSE = 80,
   MESSAGE_DESCRIBE = 68,
-  MESSAGE_FLUSH = 72,
   MESSAGE_PASSWORD = 112,
   MESSAGE_EXECUTE = 69,
   MESSAGE_QUERY = 81,

@@ -16,13 +16,13 @@ async function test() {
       ARRAY['users_search'::ludicloud.api_type] AS out
     `;
 
-  //const params = [['users_search']];
+  const params = [['users_search']];
 
   try {
     let result = await db.prepare().describe(sql);
 
     console.log(result.encoders);
-    console.log(await db.query('SELECT 1', []));
+    console.log(await db.query(sql, params));
 
     result = await db.prepare().describe(sql);
     console.log(result.encoders);

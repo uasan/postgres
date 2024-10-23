@@ -2,6 +2,8 @@ import 'temporal-polyfill/global';
 
 export const //
   noop = () => {},
+  identity = x => x,
+  { isArray } = Array,
   { max, ceil, floor, random } = Math,
   { Number, String, BigInt } = globalThis,
   { isNaN, isFinite, parseInt, NEGATIVE_INFINITY, POSITIVE_INFINITY } = Number,

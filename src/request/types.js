@@ -14,37 +14,12 @@ import '../types/record/type.js';
 
 import { Task } from './task.js';
 import { types } from '../protocol/types.js';
+import { SQL_FETCH_TYPES } from '../utils/queries.js';
 
 export const rawType = types.get(17);
 
-const SQL_FETCH_TYPES = `SELECT
-  a.oid,
-  a.typarray AS array,
-  n.nspname || '.' || a.typname AS name
-FROM (
-  SELECT DISTINCT CASE WHEN typelem != 0 THEN typelem ELSE oid END AS oid
-  FROM pg_catalog.pg_type
-  WHERE oid = ANY($1)
-) AS _
-JOIN pg_catalog.pg_type AS a USING(oid)
-JOIN pg_catalog.pg_namespace AS n ON n.oid = a.typnamespace`;
-
 export const getType = (task, id) =>
   types.get(id) ?? task.client.types.get(id) ?? addTypeAsUnknown(task, id);
-
-function setType(client, data) {
-  const type = client.types.factory(data.oid);
-
-  if (type.name) {
-    return;
-  }
-
-  type.name = data.name;
-
-  if (data.array) {
-    client.types.setArrayType(type, data.array);
-  }
-}
 
 function addTypeAsUnknown(task, id) {
   task.unknownTypes ??= new Set();
@@ -73,7 +48,7 @@ async function onReadyResolveTypes() {
     ]);
 
     for (let i = 0; i < rows.length; i++) {
-      setType(client, rows[i]);
+      client.types.setType(rows[i]);
     }
 
     //console.log(client.writer.isLocked, client.types);

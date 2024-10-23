@@ -1,11 +1,12 @@
+import { noop } from '#native';
 import { HIGH_WATER_MARK } from '../constants.js';
 import { textEncoder } from '../utils/string.js';
-import { MESSAGE_SYNC } from './messages.js';
+import { MESSAGE_FLUSH, MESSAGE_SYNC } from './messages.js';
 
 export class Writer {
   length = 0;
   offset = 0;
-  reject = null;
+  reject = noop;
   promise = null;
   isLocked = true;
 
@@ -97,7 +98,7 @@ export class Writer {
     this.length = 0;
     this.offset = 0;
 
-    this.reject = null;
+    this.reject = noop;
     this.promise = null;
   }
 
@@ -105,7 +106,7 @@ export class Writer {
     this.length = 0;
     this.offset = 0;
 
-    this.reject?.();
+    this.reject();
     this.promise = null;
   }
 
@@ -213,6 +214,10 @@ export class Writer {
   clearLastMessage() {
     this.length = this.offset;
     return this;
+  }
+
+  flush() {
+    return this.type(MESSAGE_FLUSH).end();
   }
 
   sync() {
