@@ -15,6 +15,7 @@ import {
 import { PostgresError } from './response/error.js';
 import { TypesMap } from './protocol/types.js';
 import { setCommit, setRollback } from './utils/queries.js';
+import { noop } from '#native';
 
 export class PostgresClient {
   pid = 0;
@@ -120,7 +121,7 @@ export class PostgresClient {
 
   async rollback() {
     try {
-      await this.ready();
+      await this.ready().catch(noop);
 
       if (this.connection.isReady) {
         switch (this.state) {
@@ -191,13 +192,17 @@ export class PostgresClient {
     this.writer.reject(error);
 
     if (this.task) {
+      this.task.onError(error);
       this.task.reject(error);
+
       this.task = null;
     }
 
     for (let task = this.queue.head; task; task = task.next)
       if (isFinally || task.isSent) {
-        this.queue.dequeue().reject(error);
+        this.queue.dequeue();
+        task.onError(error);
+        task.reject(error);
       } else {
         break;
       }

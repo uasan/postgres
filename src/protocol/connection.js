@@ -55,8 +55,9 @@ export class Connection {
         new PostgresError(this.error),
         PostgresError.is(this.error)
       );
-
       this.error = null;
+    } else if (this.client.task?.isSent) {
+      this.client.cancelTasks(PostgresError.of('Connection close'));
     }
 
     if (this.disconnecting) {
@@ -69,7 +70,7 @@ export class Connection {
 
   onTimeout = () => {
     if (this.isKeepAlive() === false) {
-      this.client.disconnect().catch(noop);
+      this.client.disconnect(PostgresError.of('Timeout')).catch(noop);
     }
   };
 
