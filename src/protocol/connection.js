@@ -139,23 +139,6 @@ export class Connection {
     }
   }
 
-  async disconnect() {
-    if (this.client.stream && this.disconnecting === null) {
-      this.disconnecting = Promise.withResolvers();
-
-      this.client.isEnded = true;
-      this.client.isIsolated = true;
-
-      this.connecting?.reject();
-
-      this.client.writer.lock();
-      this.client.writer.reject();
-      this.client.stream.end(MESSAGE_TERMINATE);
-    }
-
-    await this.disconnecting?.promise;
-  }
-
   isKeepAlive() {
     return (
       this.client.task != null ||
@@ -174,6 +157,24 @@ export class Connection {
     if (this.client.stream === null) {
       this.connect(true).catch(noop);
     }
+  }
+
+  async disconnect() {
+    if (this.client.stream && this.disconnecting === null) {
+      this.disconnecting = Promise.withResolvers();
+
+      this.client.isEnded = true;
+      this.client.isIsolated = true;
+
+      this.connected?.reject();
+      this.connecting?.reject();
+
+      this.client.writer.lock();
+      this.client.writer.reject();
+      this.client.stream.end(MESSAGE_TERMINATE);
+    }
+
+    await this.disconnecting?.promise;
   }
 
   async [Symbol.asyncDispose]() {

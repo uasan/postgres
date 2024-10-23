@@ -7,7 +7,9 @@ import {
   Duration,
   PlainTime,
   PlainDate,
+  round,
 } from '#native';
+import { stringify } from '../utils/string.js';
 
 const plainTime = PlainTime.from('00:00');
 const plainDate = PlainDate.from('2000-01-01');
@@ -58,7 +60,26 @@ function encodeDate(writer, value) {
 
   writer.alloc(8);
   view.setInt32(length, 4);
-  view.setInt32(length + 4, value.since(plainDate).days * 86400);
+  view.setInt32(length + 4, getInt32Date(value));
+}
+
+function getInt32Date(data) {
+  switch (data.constructor) {
+    case PlainDate:
+      return data.since(plainDate).days * 86400;
+
+    case Date:
+      return round((data.getTime() - 946684800000) / 1000);
+
+    case String:
+      return round((Date.parse(data) - 946684800000) / 1000);
+
+    case Number:
+      return round((data - 946684800000) / 1000);
+
+    default:
+      throw stringify(data);
+  }
 }
 
 function getBigIntTimestamp(data) {
@@ -76,7 +97,7 @@ function getBigIntTimestamp(data) {
       return BigInt((data - 946684800000) * 1000);
 
     default:
-      throw null;
+      throw stringify(data);
   }
 }
 

@@ -1,5 +1,5 @@
 import { types } from '../protocol/types.js';
-import { ceil, POSITIVE_INFINITY, NEGATIVE_INFINITY } from '#native';
+import { ceil, POSITIVE_INFINITY, NEGATIVE_INFINITY, identity } from '#native';
 
 function countZeros(text, start, step) {
   let count = 0;
@@ -147,6 +147,7 @@ types.add({
   id: 1700,
   array: 1231,
   name: 'numeric',
+  quote: identity,
   decode: decodeNumeric,
   encode: encodeNumeric,
 });
