@@ -159,18 +159,18 @@ export class Connection {
     }
   }
 
-  async disconnect() {
+  async disconnect(error) {
     if (this.client.stream && this.disconnecting === null) {
       this.disconnecting = Promise.withResolvers();
 
       this.client.isEnded = true;
       this.client.isIsolated = true;
 
-      this.connected?.reject();
-      this.connecting?.reject();
+      this.connected?.reject(error);
+      this.connecting?.reject(error);
 
       this.client.writer.lock();
-      this.client.writer.reject();
+      this.client.writer.reject(error);
       this.client.stream.end(MESSAGE_TERMINATE);
     }
 

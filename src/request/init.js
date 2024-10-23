@@ -28,24 +28,24 @@ export function handshake({ writer, options: { username, database, params } }) {
   writer.promise = writer.write();
 }
 
-export function authentication({ reader, writer, options }) {
-  switch (reader.getInt32()) {
+export function authentication(client) {
+  switch (client.reader.getInt32()) {
     case 5:
-      md5Password(reader, writer, options);
+      md5Password(client);
       return;
     case 10:
-      saslHandshake(reader, writer, options);
+      saslHandshake(client);
       return;
     case 11:
-      saslContinue(reader, writer, options);
+      saslContinue(client);
       return;
     case 12:
-      saslFinal(reader, writer, options);
+      saslFinal(client);
       return;
     case 0:
       return;
   }
-  throw new Error('Not supported authentication method');
+  throw PostgresError.of('Not supported authentication method');
 }
 
 export function backendKeyData(client) {

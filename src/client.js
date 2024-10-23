@@ -229,8 +229,8 @@ export class PostgresClient {
     return this.cancelTasks(error, true).disconnect();
   }
 
-  disconnect() {
-    return this.connection.disconnect();
+  disconnect(error) {
+    return this.connection.disconnect(error);
   }
 }
 
