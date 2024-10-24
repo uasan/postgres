@@ -32,6 +32,9 @@ function encodeFloat8(writer, value) {
   writer.setInt32(8).setFloat64(value);
 }
 
+const serializeBigInt = value => BigInt(value).toString();
+const serializeNumber = value => Number(value).toString();
+
 types
   .add({
     id: 20,
@@ -40,6 +43,7 @@ types
     quote: identity,
     decode: decodeInt8,
     encode: encodeInt8,
+    serialize: serializeBigInt,
   })
   .add({
     id: 21,
@@ -48,6 +52,7 @@ types
     quote: identity,
     decode: decodeInt2,
     encode: encodeInt2,
+    serialize: serializeNumber,
   })
   .add({
     id: 23,
@@ -56,6 +61,7 @@ types
     quote: identity,
     decode: decodeInt4,
     encode: encodeInt4,
+    serialize: serializeNumber,
   })
   .add({
     id: 26,
@@ -64,6 +70,7 @@ types
     quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
+    serialize: serializeNumber,
   })
   .add({
     id: 22,
@@ -86,6 +93,7 @@ types
     quote: identity,
     decode: decodeFloat4,
     encode: encodeFloat4,
+    serialize: serializeNumber,
   })
   .add({
     id: 701,
@@ -94,6 +102,7 @@ types
     quote: identity,
     decode: decodeFloat8,
     encode: encodeFloat8,
+    serialize: serializeNumber,
   })
   .add({
     id: 709,
@@ -101,6 +110,7 @@ types
     name: 'money',
     decode: decodeInt8,
     encode: encodeInt8,
+    serialize: serializeBigInt,
   })
   .add({
     id: 28,
@@ -109,6 +119,7 @@ types
     quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
+    serialize: serializeNumber,
   })
   .add({
     id: 29,
@@ -117,6 +128,7 @@ types
     quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
+    serialize: serializeNumber,
   })
   .add({
     id: 24,
@@ -125,4 +137,5 @@ types
     quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,
+    serialize: serializeNumber,
   });

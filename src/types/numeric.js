@@ -69,7 +69,7 @@ function decodeNumeric({ view, offset }) {
 }
 
 function encodeNumeric(writer, value) {
-  let text = value + '';
+  let text = String(value);
 
   switch (text) {
     case 'NaN':
@@ -127,8 +127,6 @@ function encodeNumeric(writer, value) {
 
   digits = ceil(length / 4);
 
-  //console.log({ digits, weight, dscale, text });
-
   writer.alloc(12 + digits * 2);
   view.setInt32(i, 8 + digits * 2);
 
@@ -143,6 +141,8 @@ function encodeNumeric(writer, value) {
   for (; n < length; n += 4) view.setUint16((i += 2), +text.substr(n, 4));
 }
 
+const serialize = value => String(value).replace(/[^\d.-]+/g, '');
+
 types.add({
   id: 1700,
   array: 1231,
@@ -150,4 +150,5 @@ types.add({
   quote: identity,
   decode: decodeNumeric,
   encode: encodeNumeric,
+  serialize,
 });

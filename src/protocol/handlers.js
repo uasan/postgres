@@ -19,13 +19,8 @@ import {
   emptyQueryResponse,
   parameterDescription,
 } from '../response/statement.js';
-import {
-  copyData,
-  copyDone,
-  copyInResponse,
-  copyOutResponse,
-  copyBothResponse,
-} from '../response/copy.js';
+import { copyInResponse, copyBothResponse } from '../request/copyFrom.js';
+import { copyData, copyDone, copyOutResponse } from '../response/copyTo.js';
 
 export const handlers = {
   49: parseComplete,
