@@ -48,7 +48,7 @@ export class Reader {
         this.ending = offset + size;
         handle(client);
       } catch (error) {
-        client.cancelTasks(error).disconnect(error);
+        client.abort(error);
         return;
       }
 

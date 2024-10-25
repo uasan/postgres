@@ -7,6 +7,7 @@ export class Writer {
   length = 0;
   offset = 0;
   reject = noop;
+  client = null;
   promise = null;
   isLocked = true;
 
@@ -72,7 +73,7 @@ export class Writer {
 
     do {
       try {
-        await promise;
+        if (await promise) break;
       } catch {
         break;
       }

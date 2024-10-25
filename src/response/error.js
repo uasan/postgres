@@ -48,7 +48,7 @@ export class PostgresError extends Error {
   }) {
     super(message);
 
-    if (isPostgres && sql && position) {
+    if (sql && position) {
       let max = 60;
 
       let left = sql
@@ -73,10 +73,10 @@ export class PostgresError extends Error {
 
       let length = right.indexOf(' ') > 0 ? right.indexOf(' ') : right.length;
 
-      this.stack =
-        left + right + '\n' + ' '.repeat(left.length) + '^'.repeat(length);
+      //this.stack =
+      //  left + right + '\n' + ' '.repeat(left.length) + '^'.repeat(length);
     }
-    //this.stack = sql;
+
     Object.assign(this, fields);
   }
 
@@ -107,8 +107,6 @@ export function errorResponse({ pid, task, reader }) {
     }
     task.onError(error);
     task.reject(error);
-  } else {
-    console.error(new PostgresError(error));
   }
 }
 
