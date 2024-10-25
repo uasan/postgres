@@ -1,7 +1,7 @@
 import { identity } from '#native';
 import { types } from '../protocol/types.js';
 
-const decodeBool = reader => reader.uint8[reader.offset] === 1;
+const decodeBool = reader => reader.bytes[reader.offset] === 1;
 
 function encodeBool(writer, value) {
   writer.setInt32(1).setUint8(value ? 1 : 0);

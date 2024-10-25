@@ -18,7 +18,7 @@ export function rowDescription({ task, reader }) {
     const { columns, decoders } = task.statement;
 
     for (let i = 0; i < length; i++) {
-      reader.ending = reader.uint8.indexOf(0, reader.offset);
+      reader.ending = reader.bytes.indexOf(0, reader.offset);
       columns.push(reader.getTextUTF8());
       reader.offset = reader.ending + 7;
 
@@ -92,7 +92,7 @@ export function emptyQueryResponse({ task }) {
 }
 
 export function readyForQuery(client) {
-  const state = client.reader.uint8[client.reader.offset];
+  const state = client.reader.bytes[client.reader.offset];
   const { task } = client;
 
   if (client.state !== state) {

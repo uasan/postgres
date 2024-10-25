@@ -1,7 +1,7 @@
 import { types } from '../protocol/types.js';
 
 function decodeTSQuery(reader) {
-  return reader.uint8.slice(reader.offset, reader.ending);
+  return reader.bytes.slice(reader.offset, reader.ending);
 }
 
 class Parser extends Array {

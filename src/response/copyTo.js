@@ -25,7 +25,7 @@ export function copyOutResponse(client) {
 }
 
 export function copyData({ task, reader }) {
-  task.controller?.enqueue(reader.uint8.slice(reader.offset, reader.ending));
+  task.controller?.enqueue(reader.bytes.slice(reader.offset, reader.ending));
 }
 
 export function copyDone({ task, writer }) {

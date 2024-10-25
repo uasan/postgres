@@ -1,7 +1,7 @@
 import { types } from '../protocol/types.js';
 
-function decodeRange({ view, uint8, offset }) {
-  switch (uint8[offset]) {
+function decodeRange({ view, bytes, offset }) {
+  switch (bytes[offset]) {
     case 1:
       return [];
     case 2:

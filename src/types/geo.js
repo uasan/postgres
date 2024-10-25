@@ -1,7 +1,7 @@
 import { noop } from '#native';
 import { types } from '../protocol/types.js';
 
-const decodeGeo = reader => reader.uint8.slice(reader.offset, reader.ending);
+const decodeGeo = reader => reader.bytes.slice(reader.offset, reader.ending);
 
 types
   .add({

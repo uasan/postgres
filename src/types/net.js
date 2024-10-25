@@ -4,15 +4,15 @@ import { ensureNetNum, parseInt16 } from '../utils/number.js';
 function decodeInet(reader) {
   let ip = '';
 
-  const mask = reader.uint8[reader.offset + 1];
-  const length = reader.uint8[reader.offset + 3];
+  const mask = reader.bytes[reader.offset + 1];
+  const length = reader.bytes[reader.offset + 3];
 
-  if (reader.uint8[reader.offset] === 2) {
+  if (reader.bytes[reader.offset] === 2) {
     let k = reader.offset + 4;
 
     for (let i = 0; i < 4; i++) {
       if (i) ip += '.';
-      ip += i >= length ? 0 : reader.uint8[k + i];
+      ip += i >= length ? 0 : reader.bytes[k + i];
     }
   } else {
     reader.offset += 4;

@@ -7,7 +7,7 @@ export function md5Password({ reader, writer, options }) {
   const buffer = new Uint8Array(36);
 
   textEncoder.encodeInto(md5(options.password + options.username), buffer);
-  buffer.set(reader.uint8.subarray(reader.offset, reader.offset + 4), 32);
+  buffer.set(reader.bytes.subarray(reader.offset, reader.offset + 4), 32);
 
   writer
     .type(MESSAGE_PASSWORD)

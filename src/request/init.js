@@ -17,11 +17,11 @@ export function handshake({ writer, options: { username, database, params } }) {
     text += '\x00' + keys[i] + '\x00' + params[keys[i]];
 
   writer.alloc(8);
-  writer.uint8[6] = 0;
+  writer.bytes[6] = 0;
   writer.text(text);
   writer.alloc(2);
-  writer.uint8[writer.length - 2] = 0;
-  writer.uint8[writer.length - 1] = 0;
+  writer.bytes[writer.length - 2] = 0;
+  writer.bytes[writer.length - 1] = 0;
   writer.view.setUint32(0, writer.length);
   writer.view.setUint16(4, 3);
 

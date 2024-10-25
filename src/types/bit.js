@@ -1,13 +1,13 @@
 import { types } from '../protocol/types.js';
 
 const decodeBit = reader =>
-  reader.uint8.slice(reader.offset + 4, reader.ending);
+  reader.bytes.slice(reader.offset + 4, reader.ending);
 
-function encodeBit(writer, uint8) {
+function encodeBit(writer, bytes) {
   writer
-    .setInt32(uint8.byteLength + 4)
-    .setInt32(uint8.byteLength * 8)
-    .setBytes(uint8);
+    .setInt32(bytes.byteLength + 4)
+    .setInt32(bytes.byteLength * 8)
+    .setBytes(bytes);
 }
 
 types

@@ -8,26 +8,26 @@ export class Reader {
 
   constructor(client) {
     this.client = client;
-    this.uint8 = new Uint8Array(131072);
-    this.view = new DataView(this.uint8.buffer);
+    this.bytes = new Uint8Array(131072);
+    this.view = new DataView(this.bytes.buffer);
   }
 
   alloc(length) {
-    if (length - this.uint8.byteLength > 1024) {
-      this.uint8 = new Uint8Array(this.uint8.byteLength + length + 1024);
-      this.view = new DataView(this.uint8.buffer);
-      //console.log('ALLOC-READER', this.uint8.byteLength);
+    if (length - this.bytes.byteLength > 1024) {
+      this.bytes = new Uint8Array(this.bytes.byteLength + length + 1024);
+      this.view = new DataView(this.bytes.buffer);
+      //console.log('ALLOC-READER', this.bytes.byteLength);
     }
-    return this.uint8;
+    return this.bytes;
   }
 
   getBuffer = () =>
-    this.length ? this.uint8.subarray(this.length) : this.uint8;
+    this.length ? this.bytes.subarray(this.length) : this.bytes;
 
   read(length) {
     let size = 0;
     let offset = 0;
-    let { client, uint8, view } = this;
+    let { client, bytes, view } = this;
 
     if (client.stream === null) return;
     length += this.length;
@@ -40,7 +40,7 @@ export class Reader {
         break;
       }
 
-      const handle = handlers[uint8[offset]];
+      const handle = handlers[bytes[offset]];
       //console.log(handle.name);
 
       try {
@@ -62,7 +62,7 @@ export class Reader {
     }
 
     this.length = length;
-    if (offset) this.uint8.set(uint8.subarray(offset, offset + length));
+    if (offset) this.bytes.set(bytes.subarray(offset, offset + length));
   }
 
   clear() {
@@ -90,7 +90,7 @@ export class Reader {
   }
 
   getTextUTF8() {
-    return textDecoder.decode(this.uint8.subarray(this.offset, this.ending));
+    return textDecoder.decode(this.bytes.subarray(this.offset, this.ending));
   }
 
   getString() {
@@ -98,7 +98,7 @@ export class Reader {
     const length = this.ending - 1;
 
     for (let i = this.offset; i < length; i++)
-      text += String.fromCharCode(this.uint8[i]);
+      text += String.fromCharCode(this.bytes[i]);
 
     return text;
   }

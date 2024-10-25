@@ -1,9 +1,9 @@
 import { types } from '../protocol/types.js';
 
-const decodeBytea = reader => reader.uint8.slice(reader.offset, reader.ending);
+const decodeBytea = reader => reader.bytes.slice(reader.offset, reader.ending);
 
-function encodeBytea(writer, uint8) {
-  writer.setInt32(uint8.byteLength).setBytes(uint8);
+function encodeBytea(writer, bytes) {
+  writer.setInt32(bytes.byteLength).setBytes(bytes);
 }
 
 function serializeBytea(data) {

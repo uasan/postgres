@@ -20,7 +20,7 @@ function writeToFile(reader) {
   try {
     writeSync(
       this.file.fd,
-      reader.uint8,
+      reader.bytes,
       reader.offset + 6,
       reader.ending - reader.offset - 6
     );

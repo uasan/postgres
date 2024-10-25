@@ -20,13 +20,13 @@ const fields = {
 };
 
 function makeError(pid, reader) {
-  const { uint8 } = reader;
+  const { bytes } = reader;
 
   let code = 0;
   const error = { pid, [isPostgresError]: true };
 
-  while ((code = uint8[reader.offset])) {
-    reader.ending = uint8.indexOf(0, ++reader.offset);
+  while ((code = bytes[reader.offset])) {
+    reader.ending = bytes.indexOf(0, ++reader.offset);
 
     if (fields[code]) {
       error[fields[code]] = reader.getTextUTF8();

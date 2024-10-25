@@ -11,8 +11,8 @@ export class Writer {
   promise = null;
   isLocked = true;
 
-  uint8 = new Uint8Array(131072);
-  view = new DataView(this.uint8.buffer);
+  bytes = new Uint8Array(131072);
+  view = new DataView(this.bytes.buffer);
 
   constructor(client) {
     this.client = client;
@@ -38,15 +38,15 @@ export class Writer {
   alloc(length) {
     this.length += length;
 
-    if (this.length > this.uint8.byteLength) {
-      const uint8 = new Uint8Array(this.length + 1024);
-      uint8.set(this.uint8);
-      this.uint8 = uint8;
-      this.view = new DataView(uint8.buffer);
-      //console.log('ALLOC-WRITER', uint8.byteLength);
+    if (this.length > this.bytes.byteLength) {
+      const bytes = new Uint8Array(this.length + 1024);
+      bytes.set(this.bytes);
+      this.bytes = bytes;
+      this.view = new DataView(bytes.buffer);
+      //console.log('ALLOC-WRITER', bytes.byteLength);
     }
 
-    return this.uint8;
+    return this.bytes;
   }
 
   async write() {
@@ -56,7 +56,7 @@ export class Writer {
 
     let task = client.queue.head;
 
-    //if (client.pid) console.trace('WRITE', this.uint8.subarray(0, this.length));
+    //if (client.pid) console.trace('WRITE', this.bytes.subarray(0, this.length));
 
     const promise = {
       then: (resolve, reject) => {
@@ -64,7 +64,7 @@ export class Writer {
         this.reject = reject;
 
         client.stream._write(
-          this.uint8.subarray(offset, length),
+          this.bytes.subarray(offset, length),
           undefined,
           resolve
         );
@@ -127,12 +127,12 @@ export class Writer {
     try {
       this.length += textEncoder.encodeInto(
         value,
-        this.uint8.subarray(this.length)
+        this.bytes.subarray(this.length)
       ).written;
       return this;
     } catch (error) {
       if (error instanceof RangeError) {
-        this.alloc(this.uint8.byteLength);
+        this.alloc(this.bytes.byteLength);
         return this.text(value);
       }
       throw error;
