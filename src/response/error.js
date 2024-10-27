@@ -1,3 +1,9 @@
+import {
+  formatError,
+  STATUS_CODES,
+  highlightErrorSQL,
+} from '../utils/error.js';
+
 //https://www.postgresql.org/docs/current/protocol-error-fields.html
 //https://www.postgresql.org/docs/current/errcodes-appendix.html
 
@@ -41,43 +47,38 @@ function makeError(pid, reader) {
 export class PostgresError extends Error {
   constructor({
     sql,
+    hint,
+    where,
+    detail,
     message,
+    severity,
     position,
     [isPostgresError]: isPostgres,
     ...fields
   }) {
     super(message);
 
-    if (sql && position) {
-      let max = 60;
-
-      let left = sql
-        .slice(0, position - 1)
-        .replace(/\s+/g, ' ')
-        .trimStart();
-
-      let right = sql
-        .slice(position - 1)
-        .replace(/\s+/g, ' ')
-        .trimEnd();
-
-      if (left.length > max) {
-        const chunk = left.slice(0, left.length - max);
-        left = left.slice(chunk.lastIndexOf(' ') + 1);
-      }
-
-      if (right.length > max) {
-        const chunk = right.slice(max);
-        right = right.slice(0, max + chunk.indexOf(' '));
-      }
-
-      let length = right.indexOf(' ') > 0 ? right.indexOf(' ') : right.length;
-
-      //this.stack =
-      //  left + right + '\n' + ' '.repeat(left.length) + '^'.repeat(length);
+    if (isPostgres && severity) {
+      fields.status ??= STATUS_CODES[fields.code] ?? 500;
     }
 
-    Object.assign(this, fields);
+    if (detail) {
+      message += '\n' + detail;
+    }
+
+    if (where) {
+      message += '\n' + where;
+    }
+
+    if (hint) {
+      message += '\n' + hint;
+    }
+
+    if (sql && position) {
+      message += '\n' + highlightErrorSQL(sql, position);
+    }
+
+    formatError(Object.assign(this, fields), message);
   }
 
   static is(error) {
@@ -99,12 +100,13 @@ export class PostgresError extends Error {
 }
 
 export function errorResponse({ pid, task, reader }) {
-  const error = makeError(pid, reader);
-
   if (task) {
+    const error = makeError(pid, reader);
+
     if (task.sql) {
       error.sql ??= task.sql;
     }
+
     task.onError(error);
     task.reject(error);
   }

@@ -13,16 +13,16 @@ async function test() {
   //let sql = `SELECT ($1::tsquery)::text AS in`;
 
   let sql = `SELECT
-    $$'A' & 'B'$$::tsquery AS out,
+    $$'a' & 'b' & 'c':*$$::tsquery AS out,
     ($1::tsquery)::text AS in`;
 
-  //'user': & 'aaa': & 'bbb':*
-  const params = ["& 'A' 'B'"];
+  const params = [`'a' & 'b' & 'c':*`];
 
   try {
     const result = await db.query(sql, params);
 
-    console.log(result[0]);
+    console.log('IN', result[0].in);
+    console.log('OUT', result[0].out);
   } catch (error) {
     console.error(error);
   }

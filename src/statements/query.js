@@ -8,6 +8,7 @@ import {
   PREPARED_QUERY,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
+import { makeErrorEncodeParameter } from '../utils/error.js';
 
 import { textEncoder } from '../utils/string.js';
 
@@ -80,14 +81,8 @@ export class Query {
         }
       }
     } catch (error) {
-      let message = `Invalid value in param $${i + 1}::${encoders[i].name}`;
-
-      if (error) {
-        message += ': ' + error.message || error;
-      }
-
       writer.clearLastMessage().sync();
-      task.reject({ message, status: 422 });
+      task.reject(makeErrorEncodeParameter(task, error, i));
       return this;
     }
 

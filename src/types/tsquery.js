@@ -7,16 +7,23 @@ function decodeTSQuery(reader) {
 class Parser {
   pos = 0;
   count = 0;
-  length = 0;
+
   writer = null;
+  operand = null;
 
   constructor(writer, text) {
     this.writer = writer;
-    this.length = writer.alloc(8);
 
-    while (text.length > this.pos)
-      switch (text[this.pos++]) {
+    let word = '';
+    let length = writer.alloc(8);
+
+    for (; text.length > this.pos; this.pos++)
+      switch (text[this.pos]) {
         case ' ':
+          if (word) {
+            this.writeWord(text, word);
+            word = '';
+          }
           break;
 
         case '!':
@@ -38,50 +45,67 @@ class Parser {
         case "'":
           this.writeWord(text, this.getWordFromQuote(text));
           break;
+
+        case ':':
+          if (word) {
+            this.writeWord(text, word);
+            word = '';
+          }
+          break;
+
+        default:
+          word += text[this.pos];
       }
 
-    this.writer.view.setInt32(this.length, writer.length - this.length - 4);
-    this.writer.view.setUint32(this.length + 4, this.count);
+    if (word) {
+      this.writeWord(text, word);
+    }
 
-    //console.log(this.writer.bytes.slice(this.length, this.writer.length));
+    this.writer.view.setInt32(length, writer.length - length - 4);
+    this.writer.view.setUint32(length + 4, this.count);
+
+    //   Uint8Array(23) [
+    //     0,  0, 0, 5, 2,  2, 1, 0,
+    //     1, 99, 0, 2, 2,  1, 0, 0,
+    //    98,  0, 1, 0, 0, 97, 0
+    //  ]
+
+    // Uint8Array(23) [
+    //   0,  0, 0, 5, 2,  2,  1, 0,
+    //   0, 97, 0, 1, 0,  0, 98, 0,
+    //   2,  2, 1, 0, 1, 99,  0
+    // ]
+
+    console.log(this.writer.bytes.slice(length + 4, this.writer.length));
   }
 
   getWordFromQuote(text) {
-    let i = text.indexOf("'", this.pos);
+    let i = text.indexOf("'", ++this.pos);
 
     if (i === -1) {
       throw null;
     }
 
     let word = text.slice(this.pos, i);
-    this.pos = i + 1;
 
-    if (text[i - 1] === '\\') {
-      word = word.slice(0, -1) + this.getWordFromQuote(text);
+    if (text[i + 1] === "'") {
+      this.pos = i + 1;
+      word += "'" + this.getWordFromQuote(text);
+    } else if (text[i - 1] === '\\') {
+      this.pos = i;
+      word = word.slice(0, -1) + "'" + this.getWordFromQuote(text);
+    } else {
+      this.pos = i + 1;
     }
 
     return word;
-  }
-
-  writeWord(text, value) {
-    this.count++;
-    this.writer.setUint8(1);
-
-    if (text[this.pos] === ':') {
-      this.pos++;
-      this.writeWeightPrefix(text);
-    } else {
-      this.writer.setUint8(0).setUint8(0);
-    }
-    console.log('writeWord', value);
-    this.writer.string(value);
   }
 
   writeWeightPrefix(text) {
     let weight = 0;
     let prefix = 0;
 
-    loop: while (text.length > this.pos)
+    while (text.length > this.pos && text[this.pos] !== ' ')
       switch (text[this.pos++]) {
         case '*':
           prefix = 1;
@@ -107,9 +131,6 @@ class Parser {
           weight += 1;
           break;
 
-        case ' ':
-          break loop;
-
         default:
           throw null;
       }
@@ -117,10 +138,39 @@ class Parser {
     this.writer.setUint8(weight).setUint8(prefix);
   }
 
+  writeWord(text, word) {
+    const { length } = this.writer;
+
+    this.count++;
+    this.writer.setUint8(1);
+
+    if (text[this.pos] === ':') {
+      this.pos++;
+      this.writeWeightPrefix(text);
+    } else {
+      this.writer.setUint8(0).setUint8(0);
+    }
+
+    if (word.includes('\\')) {
+      word = word.replaceAll('\\\\', '\\');
+    }
+
+    this.writer.string(word);
+
+    if (text.length > this.pos) {
+      this.operand = this.writer.bytes.slice(length, this.writer.length);
+      this.writer.length = length;
+    }
+  }
+
   writeOperator(id) {
     this.count++;
     this.writer.setUint8(2).setUint8(id);
-    console.log('writeOperator', id);
+
+    if (this.operand) {
+      this.writer.setBytes(this.operand);
+      this.operand = null;
+    }
   }
 }
 

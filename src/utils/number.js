@@ -1,5 +1,10 @@
 import { isNaN, parseInt } from './native.js';
 
+export function ensureFiniteNumber(n) {
+  if (isFinite(n)) return n;
+  throw null;
+}
+
 export function ensureNetNum(n) {
   if (n < 0 || n > 255) throw null;
   return n;

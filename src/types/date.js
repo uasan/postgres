@@ -10,6 +10,7 @@ import {
   PlainDate,
 } from '#native';
 import { stringify } from '../utils/string.js';
+import { ensureFiniteNumber } from '../utils/number.js';
 
 const plainTime = PlainTime.from('00:00');
 const plainDate = PlainDate.from('2000-01-01');
@@ -70,13 +71,15 @@ function getInt32Date(data) {
       return floor((data.getTime() - 946684800000) / 86400000);
 
     case String:
-      return floor((Date.parse(data) - 946684800000) / 86400000);
+      return floor(
+        (ensureFiniteNumber(Date.parse(data)) - 946684800000) / 86400000
+      );
 
     case Number:
-      return floor((data - 946684800000) / 86400000);
+      return floor((ensureFiniteNumber(data) - 946684800000) / 86400000);
 
     default:
-      throw stringify(data);
+      throw null;
   }
 }
 
@@ -95,7 +98,7 @@ function getBigIntTimestamp(data) {
       return BigInt((data - 946684800000) * 1000);
 
     default:
-      throw stringify(data);
+      throw null;
   }
 }
 
