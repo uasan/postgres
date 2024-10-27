@@ -11,8 +11,9 @@ export class Writer {
   promise = null;
   isLocked = true;
 
-  bytes = new Uint8Array(131072);
-  view = new DataView(this.bytes.buffer);
+  buffer = new ArrayBuffer(131072, { maxByteLength: 1048576 });
+  bytes = new Uint8Array(this.buffer);
+  view = new DataView(this.buffer);
 
   constructor(client) {
     this.client = client;
@@ -35,35 +36,31 @@ export class Writer {
     return this;
   }
 
-  alloc(length) {
-    this.length += length;
+  alloc(size) {
+    const { length } = this;
 
-    if (this.length > this.bytes.byteLength) {
-      const bytes = new Uint8Array(this.length + 1024);
-      bytes.set(this.bytes);
-      this.bytes = bytes;
-      this.view = new DataView(bytes.buffer);
-      //console.log('ALLOC-WRITER', bytes.byteLength);
+    this.length += size;
+
+    if (this.length > this.buffer.byteLength) {
+      this.buffer.resize(this.length + 1024);
+
+      console.log('ALLOC-WRITER', this.buffer.byteLength);
     }
 
-    return this.bytes;
+    return length;
   }
 
   async write() {
     let length = 0;
     let offset = 0;
-    const { client } = this;
-
-    let task = client.queue.head;
-
-    //if (client.pid) console.trace('WRITE', this.bytes.subarray(0, this.length));
+    let task = this.client.queue.head;
 
     const promise = {
       then: (resolve, reject) => {
         length = this.length;
         this.reject = reject;
 
-        client.stream._write(
+        this.client.stream._write(
           this.bytes.subarray(offset, length),
           undefined,
           resolve
@@ -78,7 +75,7 @@ export class Writer {
         break;
       }
 
-      if (this.isLocked === false && (task ??= client.queue.head)) {
+      if (this.isLocked === false && (task ??= this.client.queue.head)) {
         while (task?.isSent) task = task.next;
 
         if (task) {
@@ -112,14 +109,13 @@ export class Writer {
   }
 
   type(code) {
-    this.offset = this.length;
-    this.alloc(5)[this.offset] = code;
+    this.offset = this.alloc(5);
+    this.bytes[this.offset] = code;
     return this;
   }
 
   setBytes(value) {
-    const { length } = this;
-    this.alloc(value.length).set(value, length);
+    this.bytes.set(value, this.alloc(value.length));
     return this;
   }
 
@@ -144,70 +140,52 @@ export class Writer {
   }
 
   setInt8(value) {
-    const { length } = this;
-    this.alloc(1);
-    this.setInt8(length, value);
+    this.view.setInt8(this.alloc(1), value);
     return this;
   }
 
   setUint8(value) {
-    const { length } = this;
-    this.alloc(1)[length] = value;
+    this.bytes[this.alloc(1)] = value;
     return this;
   }
 
   setInt16(value) {
-    const { length } = this;
-    this.alloc(2);
-    this.view.setInt16(length, value);
+    this.view.setInt16(this.alloc(2), value);
     return this;
   }
 
   setUint16(value) {
-    const { length } = this;
-    this.alloc(2);
-    this.view.setUint16(length, value);
+    this.view.setUint16(this.alloc(2), value);
     return this;
   }
 
   setInt32(value) {
-    const { length } = this;
-    this.alloc(4);
-    this.view.setInt32(length, value);
+    this.view.setInt32(this.alloc(4), value);
     return this;
   }
 
   setUint32(value) {
-    const { length } = this;
-    this.alloc(4);
-    this.view.setUint32(length, value);
+    this.view.setUint32(this.alloc(4), value);
     return this;
   }
 
   setFloat32(value) {
-    const { length } = this;
-    this.alloc(4);
-    this.view.setFloat32(length, value);
+    this.view.setFloat32(this.alloc(4), value);
     return this;
   }
 
   setFloat64(value) {
-    const { length } = this;
-    this.alloc(8);
-    this.view.setFloat64(length, value);
+    this.view.setFloat64(this.alloc(8), value);
     return this;
   }
 
   setBigInt64(value) {
-    const { length } = this;
-    this.alloc(8);
-    this.view.setBigInt64(length, value);
+    this.view.setBigInt64(this.alloc(8), value);
     return this;
   }
 
   setUTF8(value) {
-    const { length } = this;
-    this.alloc(4);
+    const length = this.alloc(4);
     this.text(value).view.setInt32(length, this.length - length - 4);
     return this;
   }

@@ -24,8 +24,9 @@ const decodeUUID = ({ bytes, offset: i }) =>
   byteToHex[bytes[i + 15]];
 
 function encodeUUID(writer, uuid) {
-  const i = writer.length;
-  const bytes = writer.alloc(20);
+  const i = writer.alloc(20);
+  const { bytes } = writer;
+
   bytes[i] = 0;
   bytes[i + 1] = 0;
   bytes[i + 2] = 0;

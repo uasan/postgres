@@ -6,19 +6,21 @@ export class Reader {
   offset = 0;
   ending = 0;
 
+  client = null;
+
+  buffer = new ArrayBuffer(131072, { maxByteLength: 1048576 });
+  bytes = new Uint8Array(this.buffer);
+  view = new DataView(this.buffer);
+
   constructor(client) {
     this.client = client;
-    this.bytes = new Uint8Array(131072);
-    this.view = new DataView(this.bytes.buffer);
   }
 
   alloc(length) {
     if (length - this.bytes.byteLength > 1024) {
-      this.bytes = new Uint8Array(this.bytes.byteLength + length + 1024);
-      this.view = new DataView(this.bytes.buffer);
-      //console.log('ALLOC-READER', this.bytes.byteLength);
+      this.buffer.resize(this.bytes.byteLength + length + 1024);
+      console.log('ALLOC-READER', this.buffer.byteLength);
     }
-    return this.bytes;
   }
 
   getBuffer = () =>
@@ -27,7 +29,8 @@ export class Reader {
   read(length) {
     let size = 0;
     let offset = 0;
-    let { client, bytes, view } = this;
+
+    const { client, bytes, view } = this;
 
     if (client.stream === null) return;
     length += this.length;

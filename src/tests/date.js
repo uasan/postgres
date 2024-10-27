@@ -14,7 +14,7 @@ const db = new PostgresClient({
 async function test() {
   const result = await db.query(
     `SELECT
-      $1::date AS "now_date",
+      ($1::date) AS "now_date",
       $2::timestamp AS "now_timestamp",
       '2000-01-01T00:00:00Z'::timestamp AS "timestamp",
       '2000-01-01T00:00:00Z'::timestamptz AS "timestamptz",

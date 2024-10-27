@@ -1,13 +1,13 @@
 import { types } from '../protocol/types.js';
 
 import {
+  floor,
   Number,
   BigInt,
   Instant,
   Duration,
   PlainTime,
   PlainDate,
-  round,
 } from '#native';
 import { stringify } from '../utils/string.js';
 
@@ -19,7 +19,8 @@ const decodeTimestamp = ({ view, offset }) =>
 //Instant.fromEpochMicroseconds(view.getBigInt64(offset) + 946684800000000n);
 
 const decodeDate = ({ view, offset }) =>
-  plainDate.add({ days: ~~(view.getInt32(offset) / 86400) });
+  new Date(view.getInt32(offset) * 86400000 + 946684800000);
+// plainDate.add({ days: floor(view.getInt32(offset) / 86400) });
 
 const decodeTime = ({ view, offset }) =>
   plainTime.add({ microseconds: Number(view.getBigInt64(offset)) });
@@ -56,11 +57,8 @@ function encodeTime(writer, value) {
 }
 
 function encodeDate(writer, value) {
-  const { view, length } = writer;
-
-  writer.alloc(8);
-  view.setInt32(length, 4);
-  view.setInt32(length + 4, getInt32Date(value));
+  writer.view.setInt32(writer.alloc(4), 4);
+  writer.view.setInt32(writer.alloc(4), getInt32Date(value));
 }
 
 function getInt32Date(data) {
@@ -69,13 +67,13 @@ function getInt32Date(data) {
       return data.since(plainDate).days * 86400;
 
     case Date:
-      return round((data.getTime() - 946684800000) / 1000);
+      return floor((data.getTime() - 946684800000) / 86400000);
 
     case String:
-      return round((Date.parse(data) - 946684800000) / 1000);
+      return floor((Date.parse(data) - 946684800000) / 86400000);
 
     case Number:
-      return round((data - 946684800000) / 1000);
+      return floor((data - 946684800000) / 86400000);
 
     default:
       throw stringify(data);
@@ -102,11 +100,8 @@ function getBigIntTimestamp(data) {
 }
 
 function encodeTimestamp(writer, data) {
-  const { view, length } = writer;
-
-  writer.alloc(12);
-  view.setInt32(length, 8);
-  view.setBigInt64(length + 4, getBigIntTimestamp(data));
+  writer.view.setInt32(writer.alloc(4), 8);
+  writer.view.setBigInt64(writer.alloc(8), getBigIntTimestamp(data));
 }
 
 function encodeInterval(writer, value) {
