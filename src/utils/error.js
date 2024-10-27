@@ -1,8 +1,11 @@
-import { styleText } from 'node:util';
+//import { styleText } from 'node:util';
 import { stringify } from './string.js';
 
-const red = text => styleText('red', text);
-const bold = text => styleText('bold', text);
+// const red = text => styleText('red', text);
+// const bold = text => styleText('bold', text);
+
+const red = text => '\x1b[31m' + text + '\x1b[0m';
+const bold = text => '\x1b[22m' + text + '\x1b[0m';
 
 export const STATUS_CODES = {
   42501: 403,
