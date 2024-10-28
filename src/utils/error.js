@@ -4,8 +4,7 @@ import { stringify } from './string.js';
 // const red = text => styleText('red', text);
 // const bold = text => styleText('bold', text);
 
-const red = text => '\x1b[31m' + text + '\x1b[0m';
-const bold = text => '\x1b[22m' + text + '\x1b[0m';
+const red = text => '\x1b[1m\x1b[31m' + text + '\x1b[0m\x1b[22m';
 
 export const STATUS_CODES = {
   42501: 403,
@@ -76,8 +75,5 @@ export const filterErrorStack = stack =>
 
 export function formatError(error, message) {
   error.stack =
-    bold(red('Postgres Error: ')) +
-    message +
-    '\n' +
-    filterErrorStack(error.stack);
+    red('\nPostgres Error: ') + message + '\n' + filterErrorStack(error.stack);
 }

@@ -9,6 +9,7 @@ import { PostgresError } from '../response/error.js';
 
 export class Connection {
   timeout = 0;
+  retries = 0;
   isReady = false;
 
   error = null;
@@ -76,6 +77,10 @@ export class Connection {
 
   onError = error => {
     this.error = error;
+
+    if (this.retries === 3) {
+      console.error(new PostgresError(error));
+    }
   };
 
   async connect(isNotReconnect = false) {
@@ -114,6 +119,7 @@ export class Connection {
     try {
       await this.connecting.promise;
 
+      this.retries = 0;
       this.isReady = true;
 
       if (this.client.listeners.size) {
@@ -153,6 +159,7 @@ export class Connection {
   }
 
   async reconnect() {
+    this.retries++;
     await randomTimeout;
 
     if (this.client.stream === null) {

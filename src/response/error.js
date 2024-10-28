@@ -109,7 +109,7 @@ export function errorResponse({ pid, task, reader }) {
     task.onError(error);
     task.reject(error);
   } else {
-    console.error(error);
+    console.error(new PostgresError(error));
   }
 }
 
