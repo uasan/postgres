@@ -76,7 +76,7 @@ export class Connection {
   };
 
   onError = error => {
-    this.error = error;
+    this.error ??= error;
 
     if (this.retries === 3) {
       console.error(new PostgresError(error));
