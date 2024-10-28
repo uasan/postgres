@@ -67,7 +67,7 @@ export class PostgresClient {
   }
 
   async ready() {
-    if (this.isReady === false) {
+    if (this.stream && this.isReady === false) {
       this.waitReady ??= Promise.withResolvers();
       await this.waitReady.promise;
     }
