@@ -108,8 +108,6 @@ export function readyForQuery(client) {
   }
 
   if (client.task === null) {
-    client.isReady = true;
-
     if (client.waitReady) {
       client.waitReady.resolve();
       client.waitReady = null;

@@ -31,7 +31,6 @@ export class PostgresClient {
   waitReady = null;
 
   isEnded = false;
-  isReady = false;
   isIsolated = false;
 
   listeners = new Map();
@@ -67,7 +66,7 @@ export class PostgresClient {
   }
 
   async ready() {
-    if (this.stream && this.isReady === false) {
+    if (this.task) {
       this.waitReady ??= Promise.withResolvers();
       await this.waitReady.promise;
     }
@@ -167,7 +166,6 @@ export class PostgresClient {
     this.transactions = 0;
 
     this.stream = null;
-    this.isReady = false;
     this.isIsolated = false;
     this.state = TRANSACTION_INACTIVE;
 
