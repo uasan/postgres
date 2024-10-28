@@ -75,5 +75,5 @@ export const filterErrorStack = stack =>
 
 export function formatError(error, message) {
   error.stack =
-    red('\nPostgres Error: ') + message + '\n' + filterErrorStack(error.stack);
+    red('Postgres Error: ') + message + '\n' + filterErrorStack(error.stack);
 }

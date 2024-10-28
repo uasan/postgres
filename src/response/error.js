@@ -63,15 +63,15 @@ export class PostgresError extends Error {
     }
 
     if (detail) {
-      message += '\n' + detail;
+      message += '\n' + detail.trim().replace(/\t+/g, '');
     }
 
     if (where) {
-      message += '\n' + where;
+      message += '\n' + where.trim();
     }
 
     if (hint) {
-      message += '\n' + hint;
+      message += '\n' + hint.trim();
     }
 
     if (sql && position) {
