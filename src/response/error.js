@@ -100,15 +100,16 @@ export class PostgresError extends Error {
 }
 
 export function errorResponse({ pid, task, reader }) {
-  if (task) {
-    const error = makeError(pid, reader);
+  const error = makeError(pid, reader);
 
+  if (task) {
     if (task.sql) {
       error.sql ??= task.sql;
     }
-
     task.onError(error);
     task.reject(error);
+  } else {
+    console.error(error);
   }
 }
 
