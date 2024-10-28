@@ -136,7 +136,7 @@ export class Connection {
 
       if (isNotReconnect || PostgresError.is(e) || !this.isNeedReconnect()) {
         this.error = e;
-        throw this.error;
+        throw new PostgresError(this.error);
       } else {
         await this.connected.promise;
       }

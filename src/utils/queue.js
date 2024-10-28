@@ -15,8 +15,12 @@ export class Queue {
 
     const task = this.head;
 
-    if (--this.length) this.head = task.next;
-    else this.head = null;
+    if (--this.length) {
+      this.head = task.next;
+    } else {
+      this.head = null;
+      this.tail = null;
+    }
 
     task.next = null;
 
@@ -24,8 +28,11 @@ export class Queue {
   }
 
   unshift(task) {
-    if (this.length++) task.next = this.head;
-    else this.tail = task;
+    if (this.length++) {
+      task.next = this.head;
+    } else {
+      this.tail = task;
+    }
 
     this.head = task;
   }
