@@ -44,7 +44,7 @@ export class Reader {
       }
 
       const handle = handlers[bytes[offset]];
-      //console.log(handle.name);
+      //console.log(handle.name, size);
 
       try {
         this.offset = offset + 5;

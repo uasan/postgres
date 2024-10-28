@@ -16,14 +16,13 @@ export function handshake({ writer, options: { username, database, params } }) {
   for (let i = 0; i < keys.length; i++)
     text += '\x00' + keys[i] + '\x00' + params[keys[i]];
 
-  writer.alloc(8);
-  writer.bytes[6] = 0;
-  writer.text(text);
-  writer.alloc(2);
-  writer.bytes[writer.length - 2] = 0;
-  writer.bytes[writer.length - 1] = 0;
-  writer.view.setUint32(0, writer.length);
-  writer.view.setUint16(4, 3);
+  const length = writer.alloc(4);
+
+  writer
+    .setInt32(196608)
+    .text(text)
+    .setInt16(0)
+    .view.setUint32(length, writer.length - length);
 
   writer.promise = writer.write();
 }
@@ -76,4 +75,8 @@ export function parameterStatus(client) {
   }
 }
 
-export function negotiateProtocolVersion() {}
+export function negotiateProtocolVersion({ reader, task }) {
+  const version = reader.getInt16() + '.' + reader.getInt16();
+
+  task?.reject(PostgresError.of('Negotiate Protocol Version ' + version));
+}

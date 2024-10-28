@@ -18,11 +18,11 @@ async function test() {
     num => console.log(2, num),
     console.error
   );
-  db.query(`SELECT $1::int, 3`, [3], 8).then(
+  db.query(`SELECT $1::int`, [3], 8).then(
     num => console.log(3, num),
     console.error
   );
-  db.query(`SELECT $1::int, 4`, [4], 8).then(
+  db.query(`SELECT $1::int`, [4], 8).then(
     num => console.log(4, num),
     console.error
   );
