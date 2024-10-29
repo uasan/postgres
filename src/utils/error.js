@@ -71,7 +71,7 @@ const DIR = import.meta.resolve('../../');
 const filterStack = line => !line.includes(DIR) && line.includes('file://');
 
 export const filterErrorStack = stack =>
-  stack.split('\n').filter(filterStack).join('\n');
+  stack.split('\n').filter(filterStack).join('\n') || stack;
 
 export function formatError(error, message) {
   error.stack =

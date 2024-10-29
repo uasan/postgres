@@ -14,9 +14,7 @@ export function saslHandshake(client) {
   const mechanisms = client.reader.getTextUTF8().split('\x00');
 
   if (mechanisms.includes('SCRAM-SHA-256') === false) {
-    throw new PostgresError.of(
-      'Not supported SASL auth-mechanisms: ' + mechanisms
-    );
+    throw PostgresError.of('Not supported SASL auth-mechanisms: ' + mechanisms);
   }
 
   const nonce = randomBytesBase64(18);

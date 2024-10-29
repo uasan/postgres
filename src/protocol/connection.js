@@ -45,20 +45,20 @@ export class Connection {
   };
 
   onClose = () => {
+    const isFinally =
+      this.client.isTransaction() || PostgresError.is(this.error);
+
     this.isReady = false;
-    this.client.clear();
     this.connecting = null;
 
+    this.client.clear();
     this.client.options.signal?.removeEventListener('abort', this.onAbort);
 
     if (this.error) {
-      this.client.cancelTasks(
-        new PostgresError(this.error),
-        PostgresError.is(this.error)
-      );
+      this.client.cancelTasks(this.error, isFinally);
       this.error = null;
     } else if (this.client.task?.isSent) {
-      this.client.cancelTasks(PostgresError.of('Connection close'));
+      this.client.cancelTasks(PostgresError.of('Connection close'), isFinally);
     }
 
     if (this.disconnecting) {
