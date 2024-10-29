@@ -1,5 +1,5 @@
-export { PostgresClient } from './src/client.js';
 export { PostgresPool } from './src/pool.js';
+export { PostgresClient } from './src/client.js';
 
 export {
   Now,

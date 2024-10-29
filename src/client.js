@@ -232,8 +232,9 @@ export class PostgresClient {
     return this.cancelTasks(error, true).disconnect(error);
   }
 
-  disconnect(error) {
-    return this.connection.disconnect(error);
+  async disconnect(error) {
+    await this.ready();
+    await this.connection.disconnect(error);
   }
 }
 
