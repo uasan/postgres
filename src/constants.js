@@ -3,8 +3,8 @@ export const //
   TRANSACTION_ACTIVE = 84,
   TRANSACTION_INACTIVE = 73;
 
+export const BUFFER_LENGTH = 131072;
 export const HIGH_WATER_MARK = 65535;
-export const KEY_SQL = Symbol('KEY SQL');
 
 export const DEFAULT_PARAMS = {
   // compute_query_id: 'on',

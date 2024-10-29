@@ -1,3 +1,4 @@
+import { BUFFER_LENGTH } from '../constants.js';
 import { textDecoder } from '../utils/string.js';
 import { handlers } from './handlers.js';
 
@@ -8,7 +9,7 @@ export class Reader {
 
   client = null;
 
-  buffer = new ArrayBuffer(131072, { maxByteLength: 1048576 });
+  buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: 1048576 });
   bytes = new Uint8Array(this.buffer);
   view = new DataView(this.buffer);
 
@@ -72,6 +73,7 @@ export class Reader {
     this.length = 0;
     this.offset = 0;
     this.ending = 0;
+    this.buffer.resize(BUFFER_LENGTH);
   }
 
   getInt16() {

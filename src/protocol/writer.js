@@ -1,5 +1,5 @@
 import { noop } from '#native';
-import { HIGH_WATER_MARK } from '../constants.js';
+import { BUFFER_LENGTH, HIGH_WATER_MARK } from '../constants.js';
 import { textEncoder } from '../utils/string.js';
 import { MESSAGE_FLUSH, MESSAGE_SYNC } from './messages.js';
 
@@ -11,7 +11,7 @@ export class Writer {
   promise = null;
   isLocked = true;
 
-  buffer = new ArrayBuffer(131072, { maxByteLength: 1048576 });
+  buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: 1048576 });
   bytes = new Uint8Array(this.buffer);
   view = new DataView(this.buffer);
 
@@ -106,6 +106,7 @@ export class Writer {
 
     this.reject();
     this.promise = null;
+    this.buffer.resize(BUFFER_LENGTH);
   }
 
   type(code) {
