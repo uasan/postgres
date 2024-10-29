@@ -56,6 +56,10 @@ export class PostgresPool extends Array {
     return this.getClient(1).isolate();
   }
 
+  isTransaction() {
+    return false;
+  }
+
   disconnect() {
     return Promise.all(this.map(client => client.disconnect()));
   }
