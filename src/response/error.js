@@ -93,7 +93,6 @@ export class PostgresError extends Error {
     return new this({
       pid,
       code: '25P02',
-      severity: 'ERROR',
       message: 'Current transaction is aborted',
     });
   }
@@ -104,12 +103,10 @@ export function errorResponse({ pid, task, reader }) {
 
   if (task) {
     if (task.sql) {
-      error.sql ??= task.sql;
+      error.sql ??= task.sql.trim().slice(0, 320);
     }
     task.onError(error);
     task.reject(error);
-  } else {
-    console.error(new PostgresError(error));
   }
 }
 

@@ -1,10 +1,7 @@
-//import { styleText } from 'node:util';
+import { styleText } from 'node:util';
 import { stringify } from './string.js';
 
-// const red = text => styleText('red', text);
-// const bold = text => styleText('bold', text);
-
-const red = text => '\x1b[1m\x1b[31m' + text + '\x1b[0m\x1b[22m';
+const red = text => styleText('bold', styleText('red', text));
 
 export const STATUS_CODES = {
   42501: 403,
@@ -71,7 +68,8 @@ const DIR = import.meta.resolve('../../');
 const filterStack = line => !line.includes(DIR) && line.includes('file://');
 
 export const filterErrorStack = stack =>
-  stack.split('\n').filter(filterStack).join('\n') || stack;
+  stack.split('\n').filter(filterStack).join('\n') ||
+  stack.slice(stack.indexOf('\n') + 1);
 
 export function formatError(error, message) {
   error.stack =
