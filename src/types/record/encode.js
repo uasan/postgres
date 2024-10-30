@@ -1,1 +1,3 @@
-export const encodeRecord = (writer, values) => {};
+import { noop } from '#native';
+
+export const encodeRecord = noop;

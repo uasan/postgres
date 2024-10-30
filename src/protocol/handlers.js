@@ -1,11 +1,13 @@
+import { notificationResponse } from '../response/notify.js';
+import { errorResponse, noticeResponse } from '../response/error.js';
+import { copyInResponse, copyBothResponse } from '../request/copyFrom.js';
+import { copyData, copyDone, copyOutResponse } from '../response/copyTo.js';
 import {
   authentication,
   backendKeyData,
   parameterStatus,
   negotiateProtocolVersion,
 } from '../request/init.js';
-import { errorResponse, noticeResponse } from '../response/error.js';
-import { notificationResponse } from '../response/notify.js';
 import {
   noData,
   dataRow,
@@ -19,8 +21,6 @@ import {
   emptyQueryResponse,
   parameterDescription,
 } from '../response/statement.js';
-import { copyInResponse, copyBothResponse } from '../request/copyFrom.js';
-import { copyData, copyDone, copyOutResponse } from '../response/copyTo.js';
 
 export const handlers = {
   49: parseComplete,

@@ -1,12 +1,11 @@
 const { isArray } = Array;
 
 export function encodeArray(writer, values) {
-  let offset = writer.length;
+  let offset = writer.alloc(24);
 
   const { type } = this;
   const { view } = writer;
   //console.log('encodeArray', type.id, values);
-  writer.alloc(24);
 
   let levels = 1;
 

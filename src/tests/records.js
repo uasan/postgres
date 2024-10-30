@@ -1,5 +1,4 @@
 import { PostgresPool } from '../pool.js';
-import { FETCH_ONE_VALUE} from '../constants.js';
 
 const db = new PostgresPool({
   max: 1,
@@ -16,7 +15,7 @@ async function test() {
   const params = [10, 'AAA'];
 
   try {
-    console.log(await db.query(sql, params, FETCH_ONE_VALUE));
+    console.log(await db.query(sql, params));
   } catch (error) {
     console.error(error);
   }
