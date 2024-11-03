@@ -18,14 +18,15 @@ export class Reader {
   }
 
   alloc(length) {
-    if (length - this.bytes.byteLength > 1024) {
-      this.buffer.resize(this.bytes.byteLength + length + 1024);
-      console.log('ALLOC-READER', this.buffer.byteLength);
+    if (length > this.bytes.byteLength) {
+      this.buffer.resize(length + 1024);
+      //console.log('ALLOC-READER', length);
     }
   }
 
-  getBuffer = () =>
-    this.length ? this.bytes.subarray(this.length) : this.bytes;
+  getBuffer() {
+    return this.length ? this.bytes.subarray(this.length) : this.bytes;
+  }
 
   read(length) {
     let size = 0;
@@ -33,7 +34,6 @@ export class Reader {
 
     const { client, bytes, view } = this;
 
-    if (client.stream === null) return;
     length += this.length;
 
     while (length > 4) {
@@ -50,6 +50,7 @@ export class Reader {
       try {
         this.offset = offset + 5;
         this.ending = offset + size;
+
         handle(client);
       } catch (error) {
         client.abort(error);
@@ -66,7 +67,7 @@ export class Reader {
     }
 
     this.length = length;
-    if (offset) this.bytes.set(bytes.subarray(offset, offset + length));
+    if (offset) bytes.set(bytes.subarray(offset, offset + length));
   }
 
   clear() {

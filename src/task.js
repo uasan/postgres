@@ -1,6 +1,6 @@
 import { noop, nullArray } from '#native';
-import { Query } from '../statements/query.js';
-import { Describer } from '../statements/describer.js';
+import { Query } from './statements/query.js';
+import { Describer } from './statements/describer.js';
 
 import {
   putData,
@@ -8,11 +8,12 @@ import {
   setDataValue,
   setDataFields,
   setValueToArray,
-} from '../response/data.js';
-import { MESSAGE_QUERY } from '../protocol/messages.js';
-import { PostgresError } from '../response/error.js';
-import { createFileData } from '../response/file.js';
-import { resolveCount } from '../response/state.js';
+} from './response/data.js';
+import { MESSAGE_QUERY } from './protocol/messages.js';
+import { PostgresError } from './response/error.js';
+import { createFileData } from './response/file.js';
+import { resolveCount } from './response/state.js';
+import { getDescribeTable, makeCopyFromSQL } from './utils/copy.js';
 
 export class Task {
   sql = '';
@@ -27,6 +28,7 @@ export class Task {
 
   next = null;
   file = null;
+  copy = null;
   client = null;
   statement = null;
   controller = null;
@@ -68,6 +70,7 @@ export class Task {
         this.client.queue.enqueue(this);
       } else {
         this.client.task = this;
+        this.client.isReady = false;
       }
     }
 
@@ -196,5 +199,13 @@ export class Task {
 
     this.isSimpleQuery = false;
     return this;
+  }
+
+  async copyFrom(table, options) {
+    this.copy = await new Task(this.client).describe(
+      getDescribeTable(table, options?.columns)
+    );
+
+    return await this.execute(makeCopyFromSQL(table, options), nullArray);
   }
 }

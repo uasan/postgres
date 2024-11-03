@@ -48,7 +48,7 @@ export class TypesMap extends Map {
     return type;
   }
 
-  add({ array, ...data }) {
+  addType({ array, ...data }) {
     const type = assign(new Type(), data);
 
     if (array) {

@@ -4,7 +4,6 @@ import { randomTimeout } from '#native';
 import { restoreListeners } from '../request/listen.js';
 import { MESSAGE_TERMINATE } from './messages.js';
 import { noop } from '../utils/native.js';
-import { HIGH_WATER_MARK } from '../constants.js';
 import { PostgresError } from '../response/error.js';
 
 export class Connection {
@@ -25,10 +24,9 @@ export class Connection {
       path: client.options.path,
       host: client.options.host,
       port: client.options.port,
-      highWaterMark: HIGH_WATER_MARK,
       onread: {
         callback: client.reader.read.bind(client.reader),
-        buffer: client.reader.getBuffer,
+        buffer: client.reader.getBuffer.bind(client.reader),
       },
     };
   }
@@ -98,9 +96,9 @@ export class Connection {
     this.client.stream = createConnection(this.params, this.onConnect)
       .on('error', this.onError)
       .once('close', this.onClose)
-      .setNoDelay(true)
-      .setKeepAlive(true, 60_000)
-      .setTimeout(this.timeout, this.onTimeout);
+      .setNoDelay(true);
+    //.setKeepAlive(true, 60_000);
+    //.setTimeout(this.timeout, this.onTimeout);
 
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();

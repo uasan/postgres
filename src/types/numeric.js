@@ -143,7 +143,7 @@ function encodeNumeric(writer, value) {
 
 const serialize = value => String(value).replace(/[^\d.-]+/g, '');
 
-types.add({
+types.addType({
   id: 1700,
   array: 1231,
   name: 'numeric',

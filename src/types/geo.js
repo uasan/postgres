@@ -4,62 +4,62 @@ import { types } from '../protocol/types.js';
 const decodeGeo = reader => reader.bytes.slice(reader.offset, reader.ending);
 
 types
-  .add({
+  .addType({
     id: 600,
     array: 1017,
     name: 'point',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 628,
     array: 629,
     name: 'line',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 601,
     array: 1018,
     name: 'lseg',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 603,
     array: 1020,
     name: 'box',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 602,
     array: 1019,
     name: 'path',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 604,
     array: 1027,
     name: 'polygon',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 718,
     array: 719,
     name: 'circle',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: NaN,
     name: 'cube',
     decode: decodeGeo,
     encode: noop,
   })
-  .add({
+  .addType({
     id: NaN,
     name: 'earth',
     decode: decodeGeo,

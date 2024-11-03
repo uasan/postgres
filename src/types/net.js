@@ -78,28 +78,28 @@ function encodeInet(writer, data) {
 }
 
 types
-  .add({
+  .addType({
     id: 869,
     array: 1041,
     name: 'inet',
     decode: decodeInet,
     encode: encodeInet,
   })
-  .add({
+  .addType({
     id: 650,
     array: 651,
     name: 'cidr',
     decode: decodeInet,
     encode: encodeInet,
   })
-  .add({
+  .addType({
     id: 829,
     array: 1040,
     name: 'macaddr',
     decode: decodeInet,
     encode: encodeInet,
   })
-  .add({
+  .addType({
     id: 774,
     array: 775,
     name: 'macaddr8',

@@ -36,15 +36,9 @@ const sql = `SELECT
   $2::text AS "2",
   $3::text AS "3"`;
 
-const sqlTerminate = 'SELECT pg_terminate_backend(pg_backend_pid())';
-
 const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })
   : () => db.query(sql, params);
-
-const queryTerminate = isPostgres
-  ? () => db.unsafe(sqlTerminate).catch(console.error)
-  : () => db.query(sqlTerminate).catch(console.error);
 
 async function test() {
   const sendQuery = async () => {
@@ -67,7 +61,6 @@ async function test() {
     } while (--tasks > max || sendQuery());
   };
 
-  //setInterval(queryTerminate, 500);
   await sendQuery();
 }
 

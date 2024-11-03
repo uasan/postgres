@@ -2,57 +2,57 @@ import { noop } from '#native';
 import { types } from '../protocol/types.js';
 
 types
-  .add({
+  .addType({
     id: 0,
     name: 'unknown',
   })
-  .add({
+  .addType({
     id: 2278,
     name: 'void',
     decode: noop,
     encode: noop,
   })
-  .add({
+  .addType({
     id: 25,
     array: 1009,
     name: 'text',
   })
-  .add({
+  .addType({
     id: 142,
     array: 143,
     name: 'xml',
   })
-  .add({
+  .addType({
     id: 18,
     array: 1002,
     name: 'char',
   })
-  .add({
+  .addType({
     id: 19,
     array: 1003,
     name: 'name',
   })
-  .add({
+  .addType({
     id: 1043,
     array: 1015,
     name: 'varchar',
   })
-  .add({
+  .addType({
     id: 1042,
     array: 1014,
     name: 'bpchar',
   })
-  .add({
+  .addType({
     id: 3734,
     array: 3735,
     name: 'regconfig',
   })
-  .add({
+  .addType({
     id: 1033,
     array: 1034,
     name: 'aclitem',
   })
-  .add({
+  .addType({
     id: 194,
     name: 'pg_node_tree',
   });

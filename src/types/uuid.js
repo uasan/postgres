@@ -54,7 +54,7 @@ function encodeUUID(writer, uuid) {
   }
 }
 
-types.add({
+types.addType({
   id: 2950,
   array: 2951,
   name: 'uuid',

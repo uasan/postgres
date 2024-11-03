@@ -14,7 +14,7 @@ import '../types/tsquery.js';
 import '../types/tsvector.js';
 import '../types/record/type.js';
 
-import { Task } from './task.js';
+import { Task } from '../task.js';
 import { types } from '../protocol/types.js';
 import { SELECT_TYPES } from '../utils/queries.js';
 

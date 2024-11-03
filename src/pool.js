@@ -1,5 +1,6 @@
 import { PostgresClient } from './client.js';
 import { TypesMap } from './protocol/types.js';
+import { Task } from './task.js';
 import { getConnectionOptions } from './utils/options.js';
 
 export class PostgresPool extends Array {
@@ -22,7 +23,7 @@ export class PostgresPool extends Array {
   getClient(i = 0) {
     let client = this[i];
 
-    while (client.queue.length && ++i < this.length)
+    while (client.isReady === false && ++i < this.length)
       if (
         this[i].isIsolated === false &&
         this[i].queue.length < client.queue.length
@@ -33,11 +34,11 @@ export class PostgresPool extends Array {
   }
 
   prepare() {
-    return this.getClient().prepare();
+    return new Task(this.getClient());
   }
 
   query(sql, values) {
-    return this.getClient().query(sql, values);
+    return new Task(this.getClient()).execute(sql, values);
   }
 
   listen(name, handler) {

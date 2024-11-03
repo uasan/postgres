@@ -11,14 +11,14 @@ function encodeBit(writer, bytes) {
 }
 
 types
-  .add({
+  .addType({
     id: 1560,
     array: 1561,
     name: 'bit',
     decode: decodeBit,
     encode: encodeBit,
   })
-  .add({
+  .addType({
     id: 1562,
     array: 1563,
     name: 'varbit',

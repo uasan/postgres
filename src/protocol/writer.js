@@ -1,5 +1,5 @@
 import { noop } from '#native';
-import { BUFFER_LENGTH, HIGH_WATER_MARK } from '../constants.js';
+import { BUFFER_LENGTH } from '../constants.js';
 import { textEncoder } from '../utils/string.js';
 import { MESSAGE_FLUSH, MESSAGE_SYNC } from './messages.js';
 
@@ -9,6 +9,7 @@ export class Writer {
   reject = noop;
   client = null;
   promise = null;
+  subarray = null;
   isLocked = true;
 
   buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: 1048576 });
@@ -43,34 +44,28 @@ export class Writer {
 
     if (this.length > this.buffer.byteLength) {
       this.buffer.resize(this.length + 1024);
-
-      console.log('ALLOC-WRITER', this.buffer.byteLength);
+      //console.log('ALLOC-WRITER', this.length);
     }
 
     return length;
   }
 
+  promisify = {
+    then: (resolve, reject) => {
+      this.reject = reject;
+      this.client.stream.write(this.subarray, null, resolve);
+    },
+  };
+
   async write() {
-    let length = 0;
-    let offset = 0;
     let task = this.client.queue.head;
 
-    const promise = {
-      then: (resolve, reject) => {
-        length = this.length;
-        this.reject = reject;
+    for (let offset = 0, ending = 0; this.length !== ending; offset = ending) {
+      ending = this.length;
+      this.subarray = this.bytes.subarray(offset, ending);
 
-        this.client.stream._write(
-          this.bytes.subarray(offset, length),
-          undefined,
-          resolve
-        );
-      },
-    };
-
-    do {
       try {
-        if (await promise) break;
+        await this.promisify;
       } catch {
         break;
       }
@@ -79,25 +74,29 @@ export class Writer {
         while (task?.isSent) task = task.next;
 
         if (task) {
-          if (task.isCorked) break;
+          if (task.isCorked) continue;
 
-          this.length = length = 0;
-          this.offset = offset = 0;
+          if (this.length === ending) {
+            this.length = ending = 0;
+            this.offset = offset = 0;
+          }
 
           while (
-            this.isLocked === false &&
             (task = task.send()) &&
-            this.length < HIGH_WATER_MARK
+            this.isLocked === false &&
+            this.length < BUFFER_LENGTH
           );
         }
       }
-    } while (this.length && this.length !== (offset = length));
+    }
 
     this.length = 0;
     this.offset = 0;
 
     this.reject = noop;
     this.promise = null;
+    this.subarray = null;
+    //this.buffer.resize(BUFFER_LENGTH);
   }
 
   clear() {
@@ -106,7 +105,9 @@ export class Writer {
 
     this.reject();
     this.promise = null;
+    this.subarray = null;
     this.buffer.resize(BUFFER_LENGTH);
+    return this;
   }
 
   type(code) {
@@ -121,19 +122,18 @@ export class Writer {
   }
 
   text(value) {
-    try {
-      this.length += textEncoder.encodeInto(
-        value,
-        this.bytes.subarray(this.length)
-      ).written;
-      return this;
-    } catch (error) {
-      if (error instanceof RangeError) {
-        this.alloc(this.bytes.byteLength);
-        return this.text(value);
-      }
-      throw error;
+    const size = value.length * 3;
+
+    if (this.length + size > this.buffer.byteLength) {
+      this.buffer.resize(this.length + size);
     }
+
+    this.length += textEncoder.encodeInto(
+      value,
+      this.bytes.subarray(this.length)
+    ).written;
+
+    return this;
   }
 
   string(value) {

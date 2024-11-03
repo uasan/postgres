@@ -14,7 +14,7 @@ function quote(data) {
   return "'\\X" + data + "'";
 }
 
-types.add({
+types.addType({
   id: 17,
   name: 'bytea',
   array: 1001,

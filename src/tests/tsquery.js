@@ -14,9 +14,9 @@ async function test() {
 
   let sql = `SELECT
     $$'a' & 'b' & 'c':*$$::tsquery AS out,
-    ($1::tsquery)::text AS in`;
+    ($1::tsquery[])::text AS in`;
 
-  const params = [`'a' & 'b' & 'c':*`];
+  const params = [[`'a' & 'b' & 'c':*`]];
 
   try {
     const result = await db.query(sql, params);

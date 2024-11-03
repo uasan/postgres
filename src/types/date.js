@@ -1,5 +1,5 @@
 import { types } from '../protocol/types.js';
-
+import { ensureFinite } from '../utils/number.js';
 import {
   floor,
   Number,
@@ -9,8 +9,6 @@ import {
   PlainTime,
   PlainDate,
 } from '#native';
-import { stringify } from '../utils/string.js';
-import { ensureFiniteNumber } from '../utils/number.js';
 
 const plainTime = PlainTime.from('00:00');
 const plainDate = PlainDate.from('2000-01-01');
@@ -71,12 +69,10 @@ function getInt32Date(data) {
       return floor((data.getTime() - 946684800000) / 86400000);
 
     case String:
-      return floor(
-        (ensureFiniteNumber(Date.parse(data)) - 946684800000) / 86400000
-      );
+      return floor((ensureFinite(Date.parse(data)) - 946684800000) / 86400000);
 
     case Number:
-      return floor((ensureFiniteNumber(data) - 946684800000) / 86400000);
+      return floor((ensureFinite(data) - 946684800000) / 86400000);
 
     default:
       throw null;
@@ -148,7 +144,7 @@ function serializeDate(data) {
 }
 
 types
-  .add({
+  .addType({
     id: 1082,
     array: 1182,
     name: 'date',
@@ -156,28 +152,28 @@ types
     encode: encodeDate,
     serialize: serializeDate,
   })
-  .add({
+  .addType({
     id: 1083,
     array: 1183,
     name: 'time',
     decode: decodeTime,
     encode: encodeTime,
   })
-  .add({
+  .addType({
     id: 1266,
     array: 1270,
     name: 'timetz',
     decode: decodeTime,
     encode: encodeTime,
   })
-  .add({
+  .addType({
     id: 1186,
     array: 1187,
     name: 'interval',
     decode: decodeInterval,
     encode: encodeInterval,
   })
-  .add({
+  .addType({
     id: 1114,
     array: 1115,
     name: 'timestamp',
@@ -185,7 +181,7 @@ types
     encode: encodeTimestamp,
     serialize: serializeDate,
   })
-  .add({
+  .addType({
     id: 1184,
     array: 1185,
     name: 'timestamptz',

@@ -76,7 +76,7 @@ class Parser {
     //   2,  2, 1, 0, 1, 99,  0
     // ]
 
-    console.log(this.writer.bytes.slice(length + 4, this.writer.length));
+    //console.log(this.writer.bytes.slice(length + 4, this.writer.length));
   }
 
   getWordFromQuote(text) {
@@ -178,7 +178,7 @@ function encodeTSQuery(writer, value) {
   new Parser(writer, String(value).trim());
 }
 
-types.add({
+types.addType({
   id: 3615,
   array: 3645,
   name: 'tsquery',

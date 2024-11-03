@@ -1,21 +1,22 @@
-import { createConnection } from 'net';
-import { once } from 'events';
+import { once } from 'node:events';
+import { createConnection } from 'node:net';
+
+import { noop } from '#native';
+import { Task } from './task.js';
 import { Queue } from './utils/queue.js';
 import { Reader } from './protocol/reader.js';
 import { Writer } from './protocol/writer.js';
+import { TypesMap } from './protocol/types.js';
+import { PostgresError } from './response/error.js';
 import { Connection } from './protocol/connection.js';
 import { getConnectionOptions } from './utils/options.js';
+import { setCommit, setRollback } from './utils/queries.js';
 import { listen, unlisten, notify } from './request/listen.js';
-import { Task } from './request/task.js';
 import {
   TRANSACTION_ACTIVE,
   TRANSACTION_ERROR,
   TRANSACTION_INACTIVE,
 } from './constants.js';
-import { PostgresError } from './response/error.js';
-import { TypesMap } from './protocol/types.js';
-import { setCommit, setRollback } from './utils/queries.js';
-import { noop } from '#native';
 
 export class PostgresClient {
   pid = 0;
@@ -29,7 +30,9 @@ export class PostgresClient {
   types = null;
   stream = null;
   waitReady = null;
+  connection = null;
 
+  isReady = true;
   isEnded = false;
   isIsolated = false;
 
@@ -166,6 +169,7 @@ export class PostgresClient {
     this.transactions = 0;
 
     this.stream = null;
+    this.isReady = true;
     this.isIsolated = false;
     this.state = TRANSACTION_INACTIVE;
 

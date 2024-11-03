@@ -14,6 +14,7 @@ export const STATUS_CODES = {
   22007: 422,
   22008: 422,
   22003: 422,
+  '08P01': 422,
   '22P02': 422,
   '22P03': 422,
 };
@@ -35,7 +36,7 @@ export function makeErrorEncodeParameter(task, error, index) {
 }
 
 export function highlightErrorSQL(sql, position) {
-  const max = 60;
+  const max = 86;
 
   let left = sql
     .slice(0, position - 1)
@@ -47,17 +48,15 @@ export function highlightErrorSQL(sql, position) {
     .replace(/\s+/g, ' ')
     .trimEnd();
 
+  const length = right.indexOf(' ') > 0 ? right.indexOf(' ') : right.length;
+
   if (left.length > max) {
-    const chunk = left.slice(0, left.length - max);
-    left = left.slice(chunk.lastIndexOf(' ') + 1);
+    left = left.slice(-(length + max));
   }
 
   if (right.length > max) {
-    const chunk = right.slice(max);
-    right = right.slice(0, max + chunk.indexOf(' '));
+    right = right.slice(0, length + max);
   }
-
-  const length = right.indexOf(' ') > 0 ? right.indexOf(' ') : right.length;
 
   return (
     left + right + '\n' + ' '.repeat(left.length) + red('^'.repeat(length))

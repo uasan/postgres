@@ -36,7 +36,7 @@ const serializeBigInt = value => BigInt(value).toString();
 const serializeNumber = value => Number(value).toString();
 
 types
-  .add({
+  .addType({
     id: 20,
     array: 1016,
     name: 'int8',
@@ -45,7 +45,7 @@ types
     encode: encodeInt8,
     serialize: serializeBigInt,
   })
-  .add({
+  .addType({
     id: 21,
     array: 1005,
     name: 'int2',
@@ -54,7 +54,7 @@ types
     encode: encodeInt2,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 23,
     array: 1007,
     name: 'int4',
@@ -63,7 +63,7 @@ types
     encode: encodeInt4,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 26,
     array: 1028,
     name: 'oid',
@@ -72,21 +72,21 @@ types
     encode: encodeUint4,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 22,
     array: 1006,
     name: 'int2vector',
     decode: decodeInt2,
     encode: encodeInt2,
   })
-  .add({
+  .addType({
     id: 30,
     array: 1013,
     name: 'oidvector',
     decode: decodeUint4,
     encode: decodeUint4,
   })
-  .add({
+  .addType({
     id: 700,
     array: 1021,
     name: 'float4',
@@ -95,7 +95,7 @@ types
     encode: encodeFloat4,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 701,
     array: 1022,
     name: 'float8',
@@ -104,7 +104,7 @@ types
     encode: encodeFloat8,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 709,
     array: 791,
     name: 'money',
@@ -112,7 +112,7 @@ types
     encode: encodeInt8,
     serialize: serializeBigInt,
   })
-  .add({
+  .addType({
     id: 28,
     array: 1011,
     name: 'xid',
@@ -121,7 +121,7 @@ types
     encode: encodeUint4,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 29,
     array: 1012,
     name: 'cid',
@@ -130,7 +130,7 @@ types
     encode: encodeUint4,
     serialize: serializeNumber,
   })
-  .add({
+  .addType({
     id: 24,
     array: 1008,
     name: 'regproc',

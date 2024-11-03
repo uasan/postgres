@@ -1,6 +1,6 @@
 import { isNaN, parseInt } from './native.js';
 
-export function ensureFiniteNumber(n) {
+export function ensureFinite(n) {
   if (isFinite(n)) return n;
   throw null;
 }

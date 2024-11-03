@@ -63,7 +63,7 @@ export class PostgresError extends Error {
     }
 
     if (detail) {
-      message += '\n' + detail.trim().replace(/\t+/g, '');
+      message += '\n' + detail.trim();
     }
 
     if (where) {
@@ -74,8 +74,16 @@ export class PostgresError extends Error {
       message += '\n' + hint.trim();
     }
 
-    if (sql && position) {
-      message += '\n' + highlightErrorSQL(sql, position);
+    if (severity !== 'ERROR') {
+      this.severity = severity;
+    }
+
+    if (sql) {
+      if (position) {
+        message += '\n' + highlightErrorSQL(sql, position);
+      } else {
+        this.sql = sql.trim().replace(/\s+/g, ' ').slice(0, 320);
+      }
     }
 
     formatError(Object.assign(this, fields), message);
@@ -98,15 +106,19 @@ export class PostgresError extends Error {
   }
 }
 
-export function errorResponse({ pid, task, reader }) {
+export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
   if (task) {
     if (task.sql) {
-      error.sql ??= task.sql.trim().slice(0, 320);
+      error.sql ??= task.sql;
     }
     task.onError(error);
     task.reject(error);
+  }
+
+  if (error.severity === 'FATAL') {
+    connection.error = error;
   }
 }
 

@@ -9,7 +9,7 @@ function encodeBool(writer, value) {
 
 const serialize = value => Boolean(value).toString();
 
-types.add({
+types.addType({
   id: 16,
   array: 1000,
   name: 'bool',

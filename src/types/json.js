@@ -15,7 +15,7 @@ function encodeJsonb(writer, value) {
 }
 
 types
-  .add({
+  .addType({
     id: 114,
     array: 199,
     name: 'json',
@@ -23,7 +23,7 @@ types
     encode: encodeJson,
     serialize: stringify,
   })
-  .add({
+  .addType({
     id: 3802,
     array: 3807,
     name: 'jsonb',
@@ -31,7 +31,7 @@ types
     encode: encodeJsonb,
     serialize: stringify,
   })
-  .add({
+  .addType({
     id: 4072,
     array: 4073,
     name: 'jsonpath',
