@@ -237,8 +237,12 @@ export class PostgresClient {
   }
 
   async disconnect(error) {
-    await this.ready();
-    await this.connection.disconnect(error);
+    if (error) {
+      await this.connection.disconnect(error);
+    } else {
+      await this.ready();
+      await this.connection.disconnect();
+    }
   }
 }
 

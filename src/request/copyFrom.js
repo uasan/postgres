@@ -63,9 +63,8 @@ class Writer {
     this.writer = writer;
 
     task.onError = error => {
-      this.writer.sync().unlock();
       this.error = error;
-      this.task.reject(error);
+      this.writer.unlock();
     };
   }
 
@@ -144,6 +143,7 @@ class Writer {
     try {
       return await this.task;
     } catch (error) {
+      //console.error(new PostgresError(error));
       throw new PostgresError(error);
     }
   }

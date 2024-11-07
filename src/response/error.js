@@ -1,3 +1,4 @@
+import { noop } from '#native';
 import {
   formatError,
   STATUS_CODES,
@@ -109,16 +110,18 @@ export class PostgresError extends Error {
 export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
+  if (error.severity === 'FATAL') {
+    connection.error = error;
+  }
+
   if (task) {
     if (task.sql) {
       error.sql ??= task.sql;
     }
     task.onError(error);
     task.reject(error);
-  }
-
-  if (error.severity === 'FATAL') {
-    connection.error = error;
+  } else {
+    connection.disconnect(error).catch(noop);
   }
 }
 

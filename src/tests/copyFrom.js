@@ -21,7 +21,7 @@ async function test() {
 
     console.time('copyFrom');
 
-    for (let i = 0; i < 1_000_000; i++) {
+    for (let i = 0; i < 0; i++) {
       if (i === 500_000) {
         //await writer.abort();
         //break;

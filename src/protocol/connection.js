@@ -96,8 +96,8 @@ export class Connection {
     this.client.stream = createConnection(this.params, this.onConnect)
       .on('error', this.onError)
       .once('close', this.onClose)
-      .setNoDelay(true);
-    //.setKeepAlive(true, 60_000);
+      .setNoDelay(true)
+      .setKeepAlive(true, 60_000);
     //.setTimeout(this.timeout, this.onTimeout);
 
     this.connected ??= Promise.withResolvers();
