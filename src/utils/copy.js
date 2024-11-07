@@ -17,7 +17,7 @@ export function makeCopyFromSQL(table, options = OPTIONS_FROM) {
 
   sql += ' FROM STDIN WITH (FORMAT binary';
 
-  if (options.freeze) sql += ', FREEZE';
+  if (options.freeze) sql += ', FREEZE true';
 
   sql += ')';
 

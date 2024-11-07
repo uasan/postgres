@@ -21,7 +21,7 @@ async function test() {
 
     console.time('copyFrom');
 
-    for (let i = 0; i < 100_000; i++) {
+    for (let i = 0; i < 1_000_000; i++) {
       if (i === 500_000) {
         //await writer.abort();
         //break;
@@ -31,13 +31,13 @@ async function test() {
         //     setTimeout(resolve, 5000);
         //   },
         // };
-      } else {
-        await writer.write({
-          _index: i,
-          _task_id: i,
-          location_queries: ['AAA'],
-        });
       }
+
+      await writer.write({
+        _index: i,
+        _task_id: i,
+        location_queries: ['AAA'],
+      });
     }
 
     await writer.close();

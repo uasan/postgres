@@ -9,10 +9,9 @@ import {
   setDataFields,
   setValueToArray,
 } from './response/data.js';
-import { MESSAGE_QUERY } from './protocol/messages.js';
+import { File } from './response/saveToFile.js';
 import { PostgresError } from './response/error.js';
-import { createFileData } from './response/file.js';
-import { resolveCount } from './response/state.js';
+import { MESSAGE_QUERY } from './protocol/messages.js';
 import { getDescribeTable, makeCopyFromSQL } from './utils/copy.js';
 
 export class Task {
@@ -191,13 +190,8 @@ export class Task {
     return this;
   }
 
-  setDataToFile(path) {
-    this.file = { path, fd: 0 };
-
-    this.onReady = resolveCount;
-    this.setData = createFileData;
-
-    this.isSimpleQuery = false;
+  setSaveToFile(path) {
+    this.file = new File(this, path);
     return this;
   }
 

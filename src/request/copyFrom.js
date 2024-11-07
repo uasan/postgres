@@ -26,7 +26,6 @@ class UnderlyingSink {
   }
 
   write(chunk) {
-    // return this.writer.type(MESSAGE_COPY_DATA).text(chunk).end().promise;
     return this.writer.type(MESSAGE_COPY_DATA).setBytes(chunk).end().promise;
   }
 
@@ -65,6 +64,7 @@ class Writer {
 
     task.onError = error => {
       this.error = error;
+      console.log(error);
       this.writer.sync().unlock();
     };
   }
@@ -124,6 +124,18 @@ class Writer {
   async close() {
     if (this.isClosed) {
       return;
+    }
+
+    if (this.error) {
+      throw new PostgresError(this.error);
+    }
+
+    if (this.isOpen === false) {
+      this.writer
+        .type(MESSAGE_COPY_DATA)
+        .setBytes(COPY_SIGN)
+        .setInt16(-1)
+        .end();
     }
 
     this.isClosed = true;

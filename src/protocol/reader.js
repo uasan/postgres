@@ -8,6 +8,7 @@ export class Reader {
   ending = 0;
 
   client = null;
+  paused = false;
 
   buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: 1048576 });
   bytes = new Uint8Array(this.buffer);
@@ -19,7 +20,7 @@ export class Reader {
 
   alloc(length) {
     if (length > this.bytes.byteLength) {
-      this.buffer.resize(length + 1024);
+      this.buffer.resize(length);
       //console.log('ALLOC-READER', length);
     }
   }
@@ -40,7 +41,7 @@ export class Reader {
       size = view.getUint32(offset + 1) + 1;
 
       if (size > length) {
-        this.alloc(size);
+        this.alloc(size + 1024);
         break;
       }
 
@@ -62,6 +63,10 @@ export class Reader {
         return;
       }
 
+      if (this.paused) {
+        break;
+      }
+
       offset += size;
       length -= size;
     }
@@ -75,6 +80,16 @@ export class Reader {
     this.offset = 0;
     this.ending = 0;
     this.buffer.resize(BUFFER_LENGTH);
+  }
+
+  pause() {
+    this.paused = true;
+    this.client.stream.pause();
+  }
+
+  resume() {
+    this.paused = false;
+    this.client.stream.resume();
   }
 
   getInt16() {

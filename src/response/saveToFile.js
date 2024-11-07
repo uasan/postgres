@@ -1,12 +1,26 @@
 import { noop } from '#native';
+import { resolveCount } from './state.js';
 import { openSync, writeSync, closeSync, unlinkSync } from 'node:fs';
 
-export function createFileData(reader) {
+export class File {
+  fd = 0;
+  path = '';
+
+  constructor(task, path) {
+    this.path = path;
+    task.onReady = resolveCount;
+    task.setData = initSaveToFile;
+
+    task.isSimpleQuery = false;
+  }
+}
+
+export function initSaveToFile(reader) {
   try {
     this.file.fd = openSync(this.file.path, 'w');
     this.setData = writeToFile;
-    this.onError = onErrorFileData;
-    this.onComplete = onCompleteFileData;
+    this.onError = onError;
+    this.onComplete = onComplete;
 
     this.setData(reader);
   } catch (error) {
@@ -34,7 +48,7 @@ function writeToFile(reader) {
   }
 }
 
-function onErrorFileData() {
+function onError() {
   try {
     if (this.file.fd) closeSync(this.file.fd);
 
@@ -47,7 +61,7 @@ function onErrorFileData() {
   this.onError = noop;
 }
 
-function onCompleteFileData(info) {
+function onComplete(info) {
   try {
     closeSync(this.file.fd);
   } catch (error) {

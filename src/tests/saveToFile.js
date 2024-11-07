@@ -12,17 +12,16 @@ async function test() {
   try {
     console.time('saveToFile');
 
-    const result = await db
+    await db
       .prepare()
-      .setDataToFile('./test.txt')
+      .setSaveToFile('./test.txt')
       .execute(
         ` SELECT value::text || '\n'
-          FROM generate_series(1, 10_000_000) AS _(value)`,
+          FROM generate_series(1, 1_000) AS _(value)`,
         []
       );
 
     console.timeEnd('saveToFile');
-    console.log(result);
   } catch (error) {
     console.error(error);
   }
