@@ -63,9 +63,9 @@ class Writer {
     this.writer = writer;
 
     task.onError = error => {
-      this.error = error;
-      console.log(error);
       this.writer.sync().unlock();
+      this.error = error;
+      this.task.reject(error);
     };
   }
 
