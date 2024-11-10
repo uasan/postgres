@@ -1,5 +1,6 @@
 import { BigInt, identity } from '#native';
 import { types } from '../protocol/types.js';
+import { ensureFinite } from '../utils/number.js';
 
 const decodeInt2 = ({ view, offset }) => view.getInt16(offset);
 const decodeInt4 = ({ view, offset }) => view.getInt32(offset);
@@ -33,7 +34,7 @@ function encodeFloat8(writer, value) {
 }
 
 const serializeBigInt = value => BigInt(value).toString();
-const serializeNumber = value => Number(value).toString();
+const serializeNumber = value => ensureFinite(Number(value)).toString();
 
 types
   .addType({

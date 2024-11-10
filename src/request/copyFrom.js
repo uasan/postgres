@@ -8,6 +8,7 @@ import {
 } from '../protocol/messages.js';
 import { BUFFER_LENGTH } from '../constants.js';
 import { makeErrorCopyFrom } from '../utils/copy.js';
+import { noop } from '#native';
 
 export function copyBothResponse() {
   //
@@ -55,7 +56,7 @@ class Writer {
   error = null;
   writer = null;
 
-  isOpen = false;
+  isWrited = false;
   isClosed = false;
 
   constructor(task, writer) {
@@ -63,8 +64,8 @@ class Writer {
     this.writer = writer;
 
     task.onError = error => {
+      if (this.isClosed === false) this.close().catch(noop);
       this.error = error;
-      this.writer.unlock();
     };
   }
 
@@ -73,13 +74,17 @@ class Writer {
       throw new PostgresError(this.error);
     }
 
+    if (this.isClosed) {
+      throw PostgresError.of('Writer closed');
+    }
+
     const { writer } = this;
     const { columns, decoders: encoders } = this.task.copy;
 
     writer.type(MESSAGE_COPY_DATA);
 
-    if (this.isOpen === false) {
-      this.isOpen = true;
+    if (this.isWrited === false) {
+      this.isWrited = true;
       writer.setBytes(COPY_SIGN);
     }
 
@@ -94,7 +99,7 @@ class Writer {
           encoders[i].encode(writer, data);
         } catch (error) {
           writer.clearLastMessage();
-          await this.abort(makeErrorCopyFrom(this.task.copy, i, error, data));
+          await this.abort(makeErrorCopyFrom(this, error, data, i));
           throw new PostgresError(this.error);
         }
       }
@@ -129,7 +134,7 @@ class Writer {
       throw new PostgresError(this.error);
     }
 
-    if (this.isOpen === false) {
+    if (this.isWrited === false) {
       this.writer
         .type(MESSAGE_COPY_DATA)
         .setBytes(COPY_SIGN)
@@ -143,7 +148,6 @@ class Writer {
     try {
       return await this.task;
     } catch (error) {
-      //console.error(new PostgresError(error));
       throw new PostgresError(error);
     }
   }

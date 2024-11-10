@@ -28,7 +28,8 @@ export function makeCopyFromSQL(table, options = OPTIONS_FROM) {
   return sql;
 }
 
-export function makeErrorCopyFrom({ columns, decoders }, index, error, data) {
+export function makeErrorCopyFrom({ task }, error, data, index) {
+  const { columns, decoders } = task.copy;
   let message = 'Invalid value ' + columns[index] + '::' + decoders[index].name;
 
   if (error) {

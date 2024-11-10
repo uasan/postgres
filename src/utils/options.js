@@ -1,3 +1,4 @@
+import { noop } from '#native';
 import { DEFAULT_PARAMS } from '../constants.js';
 
 export const getConnectionOptions = ({
@@ -10,7 +11,7 @@ export const getConnectionOptions = ({
   database = 'postgres',
   username = 'postgres',
   password = '',
-  onMessage = console.warn,
+  onMessage = noop,
   maxConnections = 1,
 } = {}) => ({
   port,

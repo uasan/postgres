@@ -21,14 +21,14 @@ async function test() {
 
     console.time('copyFrom');
 
-    for (let i = 0; i < 0; i++) {
-      if (i === 500_000) {
-        //await writer.abort();
-        //break;
-        //await db.cancelRequest();
+    for (let i = 0; i < 10_000; i++) {
+      if (i === 5000) {
+        // await writer.abort();
+        // break;
+        // await db.cancelRequest();
         // await {
         //   then(resolve) {
-        //     setTimeout(resolve, 5000);
+        //     setTimeout(resolve, 1000);
         //   },
         // };
       }
@@ -46,8 +46,10 @@ async function test() {
     await db.commit();
   } catch (error) {
     console.error(error);
+    await db.rollback();
   }
 
+  console.log(await db.query(`SELECT 'END'`, []));
   await db.disconnect();
 }
 

@@ -9,7 +9,9 @@ import { PostgresError } from '../response/error.js';
 export class Connection {
   timeout = 0;
   retries = 0;
+
   isReady = false;
+  isEnded = false;
 
   error = null;
   connected = null;
@@ -68,8 +70,10 @@ export class Connection {
   };
 
   onTimeout = () => {
-    if (this.isKeepAlive() === false) {
-      this.client.disconnect(PostgresError.of('Timeout')).catch(noop);
+    if (this.isKeepAlive()) {
+      this.client.stream.setTimeout(this.timeout, this.onTimeout);
+    } else {
+      this.disconnect().catch(noop);
     }
   };
 
@@ -90,15 +94,15 @@ export class Connection {
       else return;
     }
 
-    this.client.isEnded = false;
+    this.isEnded = false;
     this.disconnecting?.reject();
 
     this.client.stream = createConnection(this.params, this.onConnect)
       .on('error', this.onError)
       .once('close', this.onClose)
       .setNoDelay(true)
-      .setKeepAlive(true, 60_000);
-    //.setTimeout(this.timeout, this.onTimeout);
+      .setKeepAlive(true, 60_000)
+      .setTimeout(this.timeout, this.onTimeout);
 
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();
@@ -139,21 +143,21 @@ export class Connection {
         await this.connected.promise;
       }
     } finally {
-      this.connecting = null;
       this.connected = null;
+      this.connecting = null;
     }
   }
 
   isKeepAlive() {
     return (
-      this.client.task != null ||
+      this.client.task !== null ||
       this.client.queue.length > 0 ||
       this.client.listeners.size > 0
     );
   }
 
   isNeedReconnect() {
-    return !this.client.isEnded && this.isKeepAlive();
+    return !this.isEnded && this.isKeepAlive();
   }
 
   async reconnect() {
@@ -169,7 +173,7 @@ export class Connection {
     if (this.client.stream && this.disconnecting === null) {
       this.disconnecting = Promise.withResolvers();
 
-      this.client.isEnded = true;
+      this.isEnded = true;
       this.client.isIsolated = true;
 
       this.connected?.reject(error);

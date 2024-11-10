@@ -33,7 +33,6 @@ export class PostgresClient {
   connection = null;
 
   isReady = true;
-  isEnded = false;
   isIsolated = false;
 
   listeners = new Map();

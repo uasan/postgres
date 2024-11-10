@@ -23,7 +23,7 @@ export function makeErrorEncodeParameter(task, error, index) {
   const { sql } = task;
   const { name } = task.statement.encoders[index];
 
-  let position = sql.indexOf('$' + (index + 1));
+  let position = sql.indexOf('$' + (index + 1)) + 1;
   let message = `Invalid value param $${index + 1}::${name}`;
 
   if (error) {
@@ -48,7 +48,7 @@ export function highlightErrorSQL(sql, position) {
     .replace(/\s+/g, ' ')
     .trimEnd();
 
-  const length = right.indexOf(' ') > 0 ? right.indexOf(' ') : right.length;
+  const length = right.indexOf(' ') > 0 ? right.indexOf(' ') : 1;
 
   if (left.length > max) {
     left = left.slice(-(length + max));

@@ -4,20 +4,32 @@ import {
   PREPARED_QUERY,
   MESSAGE_CLOSE,
 } from '../protocol/messages.js';
+import { PostgresError } from '../response/error.js';
+import { makeErrorEncodeParameter } from '../utils/error.js';
 
 function onErrorParse() {
   this.client.writer.sync().unlock();
 }
 
 export class Describer {
+  task = null;
+
   columns = [];
   decoders = [];
   encoders = [];
 
   constructor(task) {
+    this.task = task;
+
     if (task.client.statements.has(task.sql)) {
+      const statement = task.client.statements.get(task.sql);
+
+      this.columns = statement.columns;
+      this.decoders = statement.decoders;
+      this.encoders = statement.encoders;
+
       task.client.writer.sync();
-      task.resolve(task.client.statements.get(task.sql));
+      task.resolve(this);
     } else {
       task.onError = onErrorParse;
       task.client.writer
@@ -48,5 +60,21 @@ export class Describer {
       .sync();
 
     task.resolve(this);
+  }
+
+  inlineSQL(source, values) {
+    this.task.values = values;
+
+    let sql = source[0];
+
+    for (let i = 0; i < this.encoders.length; i)
+      try {
+        sql += this.encoders[i].getSQL(values[i]);
+        sql += source[++i];
+      } catch (error) {
+        throw new PostgresError(makeErrorEncodeParameter(this.task, error, i));
+      }
+
+    return sql;
   }
 }

@@ -61,6 +61,10 @@ export class PostgresError extends Error {
 
     if (isPostgres && severity) {
       fields.status ??= STATUS_CODES[fields.code] ?? 500;
+
+      if (severity !== 'ERROR') {
+        this.severity = severity;
+      }
     }
 
     if (detail) {
@@ -75,12 +79,8 @@ export class PostgresError extends Error {
       message += '\n' + hint.trim();
     }
 
-    if (severity !== 'ERROR') {
-      this.severity = severity;
-    }
-
     if (sql) {
-      if (position) {
+      if (position >= 0) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {
         this.sql = sql.trim().replace(/\s+/g, ' ').slice(0, 320);
