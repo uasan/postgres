@@ -104,10 +104,12 @@ export class Connection {
 
     if (this.connecting) {
       await this.connecting.promise.catch(noop);
+    } else if (this.disconnecting) {
+      await this.disconnecting.promise.catch(noop);
+    }
+
+    if (this.isReady) {
       return;
-    } else if (this.client.stream) {
-      if (this.disconnecting) await this.disconnecting.promise.catch(noop);
-      else return;
     }
 
     this.isEnded = false;

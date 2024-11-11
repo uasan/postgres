@@ -105,6 +105,13 @@ export class PostgresError extends Error {
       message: 'Current transaction is aborted',
     });
   }
+
+  static poolOverflow() {
+    return new this({
+      status: 429,
+      message: 'Connections are out',
+    });
+  }
 }
 
 export function errorResponse({ pid, task, reader, connection }) {

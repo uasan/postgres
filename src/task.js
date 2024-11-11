@@ -77,20 +77,6 @@ export class Task {
     }
   }
 
-  forceExecute(sql, values) {
-    this.client.task = this;
-    const promise = this.execute(sql, values);
-
-    if (!this.isSent) this.send();
-
-    return promise;
-  }
-
-  describe(sql) {
-    this.isDescribe = true;
-    return this.execute(sql, nullArray);
-  }
-
   then(resolve, reject) {
     this.reject = reject;
     this.resolve = resolve;
@@ -144,6 +130,20 @@ export class Task {
     }
 
     return this;
+  }
+
+  forceExecute(sql, values) {
+    this.client.task = this;
+    const promise = this.execute(sql, values);
+
+    if (!this.isSent) this.send();
+
+    return promise;
+  }
+
+  describe(sql) {
+    this.isDescribe = true;
+    return this.execute(sql, nullArray);
   }
 
   onDescribe() {
