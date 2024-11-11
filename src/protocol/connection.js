@@ -96,9 +96,10 @@ export class Connection {
     if (this.isAbortTransaction) {
       this.isAbortTransaction = false;
 
-      const error = PostgresError.abortTransaction(this.client);
-      this.client.cancelTasks(error, true);
-      throw error;
+      this.client.cancelTasks(
+        PostgresError.abortTransaction(this.client),
+        true
+      );
     }
 
     if (this.connecting) {

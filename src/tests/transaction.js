@@ -12,9 +12,9 @@ const options = {
 const pool = new PostgresPool(options);
 
 async function test() {
-  try {
-    let db = pool.isolate();
+  let db = pool.isolate();
 
+  try {
     await db.begin();
 
     await {
@@ -23,13 +23,15 @@ async function test() {
       },
     };
 
-    console.log('QUERY', await db.query('SELECT 1', []));
+    console.log(await db.query(`SELECT 'QUERY' AS test`, []));
 
     await db.commit();
 
     db = db.unIsolate();
   } catch (error) {
     console.error(error);
+  } finally {
+    console.log(await db.query(`SELECT 'FINALLY' AS test`, []));
   }
 
   await pool.disconnect();
