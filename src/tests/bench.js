@@ -5,7 +5,7 @@ const isPostgres = process.argv.slice(2)[0] === 'postgres';
 
 const db = isPostgres
   ? new Postgres({
-      max: 4,
+      max: 8,
       port: 5432,
       host: '127.0.0.1',
       username: 'postgres',
@@ -13,7 +13,7 @@ const db = isPostgres
       database: 'postgres',
     })
   : new PostgresPool({
-      maxConnections: 4,
+      maxConnections: 8,
       port: 5432,
       host: '127.0.0.1',
       username: 'postgres',
@@ -35,29 +35,25 @@ const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })
   : () => db.query(sql, params);
 
+let count = 0;
+let time = performance.now();
+
 async function test() {
-  let count = 0;
-  let time = performance.now();
-
-  const sendQuery = async () => {
-    while (true) {
-      try {
-        await query();
-        count++;
-      } catch (error) {
-        console.error(error);
-      }
-
-      if (performance.now() - time >= 1000) {
-        console.log('RPS', count);
-
-        count = 0;
-        time = performance.now();
-      }
+  while (true) {
+    try {
+      await query();
+      count++;
+    } catch (error) {
+      console.error(error);
     }
-  };
 
-  for (let i = 0; i < 128; i++) sendQuery();
+    if (performance.now() - time >= 1000) {
+      console.log('RPS', count);
+
+      count = 0;
+      time = performance.now();
+    }
+  }
 }
 
-await test();
+for (let i = 0; i < 1000; i++) test();
