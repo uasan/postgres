@@ -1,5 +1,4 @@
 import { PostgresPool } from '../pool.js';
-//import { PostgresClient } from '../client.js';
 import Postgres from 'postgres';
 
 const isPostgres = process.argv.slice(2)[0] === 'postgres';
@@ -24,27 +23,24 @@ const db = isPostgres
 
 const { performance } = globalThis;
 
-let tasks = 0;
-let count = 0;
-let max = 100000;
-let time = performance.now();
-
-let params = ['A', 'B', 'C'];
-
 const sql = `SELECT
-  $1::text AS "1",
-  $2::text AS "2",
-  $3::text AS "3"`;
+  $1::int AS "int",
+  $2::bool AS "bool",
+  $3::text AS "text",
+  $4::timestamptz AS "timestamptz"`;
+
+const params = [1, true, 'ABC', new Date()];
 
 const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })
   : () => db.query(sql, params);
 
 async function test() {
-  const sendQuery = async () => {
-    do {
-      ++tasks;
+  let count = 0;
+  let time = performance.now();
 
+  const sendQuery = async () => {
+    while (true) {
       try {
         await query();
         count++;
@@ -58,10 +54,10 @@ async function test() {
         count = 0;
         time = performance.now();
       }
-    } while (--tasks > max || sendQuery());
+    }
   };
 
-  await sendQuery();
+  for (let i = 0; i < 128; i++) sendQuery();
 }
 
 await test();

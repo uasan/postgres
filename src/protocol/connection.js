@@ -12,6 +12,7 @@ export class Connection {
 
   isReady = false;
   isEnded = false;
+  isAbortTransaction = false;
 
   error = null;
   connected = null;
@@ -34,7 +35,7 @@ export class Connection {
   }
 
   onAbort = () => {
-    this.client.disconnect();
+    this.disconnect();
   };
 
   onConnect = () => {
@@ -45,8 +46,14 @@ export class Connection {
   };
 
   onClose = () => {
-    const isFinally =
-      this.client.isTransaction() || PostgresError.is(this.error);
+    let isFinally = false;
+
+    if (this.client.isTransaction()) {
+      isFinally = true;
+      this.isAbortTransaction = !this.client.task;
+    } else if (PostgresError.is(this.error)) {
+      isFinally = true;
+    }
 
     this.isReady = false;
     this.connecting = null;
@@ -86,6 +93,14 @@ export class Connection {
   };
 
   async connect(isNotReconnect = false) {
+    if (this.isAbortTransaction) {
+      this.isAbortTransaction = false;
+
+      const error = PostgresError.abortTransaction(this.client);
+      this.client.cancelTasks(error, true);
+      throw error;
+    }
+
     if (this.connecting) {
       await this.connecting.promise.catch(noop);
       return;

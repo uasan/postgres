@@ -98,7 +98,7 @@ export class PostgresError extends Error {
     return new this({ message });
   }
 
-  static transactionAborted({ pid }) {
+  static abortTransaction({ pid }) {
     return new this({
       pid,
       code: '25P02',

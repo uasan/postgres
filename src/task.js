@@ -54,10 +54,6 @@ export class Task {
   async execute(sql, values) {
     this.sql = sql;
 
-    if (this.client.stream === null) {
-      this.client.connect().catch(noop);
-    }
-
     if (values) {
       this.values = values;
     } else {
@@ -96,8 +92,12 @@ export class Task {
   }
 
   then(resolve, reject) {
-    this.resolve = resolve;
     this.reject = reject;
+    this.resolve = resolve;
+
+    if (this.client.stream === null) {
+      this.client.connect().catch(noop);
+    }
 
     if (
       !this.isSent &&

@@ -102,7 +102,7 @@ export class PostgresClient {
 
       case TRANSACTION_ERROR:
         await this.query('ROLLBACK');
-        throw PostgresError.transactionAborted(this);
+        throw PostgresError.abortTransaction(this);
     }
   }
 
@@ -116,15 +116,15 @@ export class PostgresClient {
 
       case TRANSACTION_ERROR:
         await this.query('ROLLBACK');
-        throw PostgresError.transactionAborted(this);
+        throw PostgresError.abortTransaction(this);
     }
   }
 
   async rollback() {
     try {
-      await this.ready().catch(noop);
-
       if (this.connection.isReady) {
+        await this.ready().catch(noop);
+
         switch (this.state) {
           case TRANSACTION_ACTIVE:
             await this.query(setRollback(this));
@@ -141,9 +141,8 @@ export class PostgresClient {
 
   async startTransaction(action, payload) {
     try {
-      await this.query('BEGIN');
+      await this.begin();
       const result = await action(this, payload);
-
       await this.commit();
 
       return result;
@@ -181,8 +180,6 @@ export class PostgresClient {
       this.waitReady = null;
     }
 
-    //console.log('CLEAR');
-
     for (let task = this.queue.head; task; task = task.next) {
       task.isSent = false;
       task.statement = null;
@@ -195,7 +192,6 @@ export class PostgresClient {
     if (this.task) {
       this.task.onError(error);
       this.task.reject(error);
-
       this.task = null;
     }
 

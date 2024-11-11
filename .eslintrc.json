@@ -18,6 +18,7 @@
   ],
   "rules": {
     "no-unreachable": "off",
-    "no-useless-catch": "off"
+    "no-useless-catch": "off",
+    "no-constant-condition": "off"
   }
 }

@@ -1,4 +1,3 @@
-import { noop } from '#native';
 import { PostgresPool } from '../pool.js';
 
 const options = {
@@ -16,20 +15,15 @@ async function test() {
   try {
     let db = pool.isolate();
 
-    await db.reset({ ...options, database: 'A' }).catch(noop);
-    await db.reset(options);
-    await db.reset({ ...options, database: 'B' }).catch(noop);
-    await db.reset(options);
-    await db.reset({ ...options, database: 'C' }).catch(noop);
-    await db.reset(options);
-
     await db.begin();
 
-    //await db.query('SELECT 1::int / 0::int').catch(console.error);
+    await {
+      then(resolve) {
+        setTimeout(resolve, 10000);
+      },
+    };
 
-    await db.query('SAVEPOINT _1');
-    //await db.query('ROLLBACK TO SAVEPOINT _1');
-    await db.query('RELEASE SAVEPOINT _1');
+    console.log('QUERY', await db.query('SELECT 1', []));
 
     await db.commit();
 
