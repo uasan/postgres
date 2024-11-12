@@ -106,8 +106,8 @@ export class Task {
         this.statement = new Describer(this);
       }
     } else {
-      this.statement =
-        this.client.statements.get(this.sql)?.execute(this) ?? new Query(this);
+      this.statement = this.client.statements.get(this.sql) ?? new Query(this);
+      this.statement.execute(this);
     }
 
     return this.next;
