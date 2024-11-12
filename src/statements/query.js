@@ -83,11 +83,8 @@ export class Query {
     } catch (error) {
       writer.clearLastMessage().sync();
       task.reject(makeErrorEncodeParameter(task, error, i));
-      return this;
     }
 
     writer.setBytes(INT16_ONE_ONE).end().setBytes(MESSAGES_EXEC_SYNC_FLUSH);
-
-    return this;
   }
 }
