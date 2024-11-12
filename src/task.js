@@ -106,7 +106,7 @@ export class Task {
         this.statement = new Describer(this);
       }
     } else if (this.client.statements.has(this.sql)) {
-      this.statement = this.client.statements.get(this.sql).execute(this);
+      this.statement = this.client.statements.get(this.sql);
       this.statement.execute(this);
     } else {
       this.statement = new Query(this);
