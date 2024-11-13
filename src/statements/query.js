@@ -70,19 +70,18 @@ export class Query {
 
     writer.type(MESSAGE_BIND).setBytes(this.params);
 
-    let i = 0;
-
-    try {
-      for (; i < length; i++) {
-        if (values[i] == null) {
-          writer.setBytes(NULL);
-        } else {
+    for (let i = 0; i < length; i++) {
+      if (values[i] == null) {
+        writer.setBytes(NULL);
+      } else {
+        try {
           encoders[i].encode(writer, values[i]);
+        } catch (error) {
+          writer.clearLastMessage().sync();
+          task.reject(makeErrorEncodeParameter(task, error, i));
+          return;
         }
       }
-    } catch (error) {
-      writer.clearLastMessage().sync();
-      task.reject(makeErrorEncodeParameter(task, error, i));
     }
 
     writer.setBytes(INT16_ONE_ONE).end().setBytes(MESSAGES_EXEC_SYNC_FLUSH);
