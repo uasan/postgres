@@ -2,9 +2,12 @@ import { types } from '../protocol/types.js';
 import { parseJSON, stringify } from '../utils/string.js';
 
 const decodeJson = reader => parseJSON(reader.getTextUTF8());
+
 const decodeJsonb = reader => (
   ++reader.offset, parseJSON(reader.getTextUTF8())
 );
+
+const decodeJsonPath = reader => (++reader.offset, reader.getTextUTF8());
 
 function encodeJson(writer, value) {
   writer.setUTF8(stringify(value));
@@ -12,6 +15,10 @@ function encodeJson(writer, value) {
 
 function encodeJsonb(writer, value) {
   writer.setUTF8('\x01' + stringify(value));
+}
+
+function encodeJsonPath(writer, value) {
+  writer.setUTF8('\x01' + value);
 }
 
 types
@@ -35,7 +42,7 @@ types
     id: 4072,
     array: 4073,
     name: 'jsonpath',
-    decode: decodeJsonb,
-    encode: encodeJsonb,
+    decode: decodeJsonPath,
+    encode: encodeJsonPath,
     serialize: stringify,
   });
