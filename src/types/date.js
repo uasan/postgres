@@ -40,6 +40,10 @@ const decodeInterval = ({ view, offset }) =>
 function encodeTime(writer, value) {
   const { view, length } = writer;
 
+  if (value.constructor !== PlainTime) {
+    value = PlainTime.from(value);
+  }
+
   writer.alloc(12);
   view.setInt32(length, 8);
 
