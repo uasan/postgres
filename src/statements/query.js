@@ -13,7 +13,7 @@ import { makeErrorEncodeParameter } from '../utils/error.js';
 import { textEncoder } from '../utils/string.js';
 
 function onErrorParse() {
-  this.client.writer.sync().unlock();
+  this.client.writer.unlock();
   this.client.statements.delete(this.sql);
 }
 
