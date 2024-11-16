@@ -9,9 +9,9 @@ const db = new PostgresClient({
 });
 
 async function test() {
-  await db.query(`SELECT) 1 / $1::int`, [0]).catch(console.error);
+  await db.query(`SELECT_ 1 / $1::int`, [0]).catch(console.error);
 
-  //console.log('SELECT', await db.query(`SELECT $1::int`, [1]));
+  console.log('SELECT', await db.query(`SELECT $1::int`, [1]));
 }
 
 test().catch(console.error);

@@ -80,7 +80,7 @@ export class Connection {
     if (this.isKeepAlive()) {
       this.client.stream.setTimeout(this.timeout, this.onTimeout);
     } else {
-      this.disconnect().catch(noop);
+      this.disconnect();
     }
   };
 
@@ -105,7 +105,7 @@ export class Connection {
     if (this.connecting) {
       await this.connecting.promise.catch(noop);
     } else if (this.disconnecting) {
-      await this.disconnecting.promise.catch(noop);
+      await this.disconnecting.promise;
     }
 
     if (this.isReady) {
@@ -113,7 +113,7 @@ export class Connection {
     }
 
     this.isEnded = false;
-    this.disconnecting?.reject();
+    this.disconnecting?.resolve();
 
     this.client.stream = createConnection(this.params, this.onConnect)
       .on('error', this.onError)

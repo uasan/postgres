@@ -153,7 +153,7 @@ export class Task {
     this.client.writer.unlock();
   }
 
-  onErrorParse() {
+  onSyntaxError() {
     this.client.writer.sync().unlock();
     this.client.statements.delete(this.sql);
   }

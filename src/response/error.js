@@ -1,4 +1,3 @@
-import { noop } from '#native';
 import {
   formatError,
   STATUS_CODES,
@@ -24,6 +23,10 @@ const fields = {
   113: 'query',
   115: 'schema',
   116: 'table',
+};
+
+const taskErrors = {
+  42601: 'onSyntaxError',
 };
 
 function makeError(pid, reader) {
@@ -114,10 +117,6 @@ export class PostgresError extends Error {
   }
 }
 
-const taskErrors = {
-  42601: 'onErrorParse',
-};
-
 export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
@@ -134,7 +133,7 @@ export function errorResponse({ pid, task, reader, connection }) {
     task.onError(error);
     task.reject(error);
   } else {
-    connection.disconnect(error).catch(noop);
+    connection.disconnect(error);
   }
 }
 
