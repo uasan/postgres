@@ -38,25 +38,21 @@ const decodeInterval = ({ view, offset }) =>
   );
 
 function encodeTime(writer, value) {
-  const { view, length } = writer;
-
   if (value.constructor !== PlainTime) {
     value = PlainTime.from(value);
   }
 
-  writer.alloc(12);
-  view.setInt32(length, 8);
-
-  view.setBigInt64(
-    length + 4,
-    BigInt(
-      value.hour * 3600000000 +
-        value.minute * 60000000 +
-        value.second * 1000000 +
-        value.millisecond * 1000 +
-        value.microsecond
-    )
-  );
+  writer
+    .setInt32(8)
+    .setBigInt64(
+      BigInt(
+        value.hour * 3600000000 +
+          value.minute * 60000000 +
+          value.second * 1000000 +
+          value.millisecond * 1000 +
+          value.microsecond
+      )
+    );
 }
 
 function encodeDate(writer, value) {
