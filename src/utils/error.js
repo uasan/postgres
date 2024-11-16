@@ -49,7 +49,12 @@ export function highlightErrorSQL(sql, position) {
     .replace(/\s+/g, ' ')
     .trimEnd();
 
-  const length = right.indexOf(' ') > 0 ? right.indexOf(' ') : 1;
+  const length =
+    right.indexOf(' ') > 0
+      ? right.indexOf(' ')
+      : right.indexOf(' ', 1) > 0
+        ? right.indexOf(' ', 1)
+        : right.length;
 
   if (left.length > max) {
     left = left.slice(-(length + max));

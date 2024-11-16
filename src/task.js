@@ -97,6 +97,8 @@ export class Task {
   send() {
     this.isSent = true;
 
+    //console.log('SEND', this.sql.trim());
+
     if (this.isSimpleQuery) {
       this.client.writer.type(MESSAGE_QUERY).string(this.sql).end();
     } else if (this.isDescribe) {
@@ -151,11 +153,6 @@ export class Task {
   onDescribe() {
     this.statement.execute(this);
     this.client.writer.unlock();
-  }
-
-  onSyntaxError() {
-    this.client.writer.sync().unlock();
-    this.client.statements.delete(this.sql);
   }
 
   setErrorNoData(error) {

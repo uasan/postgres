@@ -16,6 +16,8 @@ export class Query {
   name = '';
   params = nullArray;
 
+  isReady = false;
+
   columns = [];
   decoders = [];
   encoders = [];
@@ -39,7 +41,13 @@ export class Query {
       .flush();
   }
 
+  onError(task) {
+    task.client.writer.sync().unlock();
+    task.client.statements.delete(task.sql);
+  }
+
   setParams(length) {
+    this.isReady = true;
     this.params = new Uint8Array([
       0,
       ...textEncoder.encode(this.name),

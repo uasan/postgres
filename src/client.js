@@ -193,8 +193,6 @@ export class PostgresClient {
       this.task.onError(error);
       this.task.reject(error);
       this.task = null;
-    } else {
-      console.error(error instanceof Error ? error : new PostgresError(error));
     }
 
     for (let task = this.queue.head; task; task = task.next)

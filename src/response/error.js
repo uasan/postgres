@@ -25,10 +25,6 @@ const fields = {
   116: 'table',
 };
 
-const taskErrors = {
-  42601: 'onSyntaxError',
-};
-
 function makeError(pid, reader) {
   const { bytes } = reader;
 
@@ -122,14 +118,17 @@ export function errorResponse({ pid, task, reader, connection }) {
 
   if (error.severity === 'FATAL') {
     connection.error = error;
-  } else if (error.code in taskErrors) {
-    task[taskErrors[error.code]]();
   }
 
   if (task) {
     if (task.sql) {
       error.sql ??= task.sql;
     }
+
+    if (task.statement?.isReady === false) {
+      task.statement.onError(task);
+    }
+
     task.onError(error);
     task.reject(error);
   } else {

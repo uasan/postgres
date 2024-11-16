@@ -9,6 +9,7 @@ import { makeErrorEncodeParameter } from '../utils/error.js';
 
 export class Describer {
   task = null;
+  isReady = false;
 
   columns = [];
   decoders = [];
@@ -42,7 +43,12 @@ export class Describer {
     }
   }
 
+  onError(task) {
+    task.client.writer.sync().unlock();
+  }
+
   setParams() {
+    this.isReady = true;
     return this;
   }
 
