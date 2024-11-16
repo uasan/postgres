@@ -149,9 +149,13 @@ export class Task {
   }
 
   onDescribe() {
-    this.onError = noop;
     this.statement.execute(this);
     this.client.writer.unlock();
+  }
+
+  onErrorParse() {
+    this.client.writer.sync().unlock();
+    this.client.statements.delete(this.sql);
   }
 
   setErrorNoData(error) {

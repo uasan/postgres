@@ -7,10 +7,6 @@ import {
 import { PostgresError } from '../response/error.js';
 import { makeErrorEncodeParameter } from '../utils/error.js';
 
-function onErrorParse() {
-  this.client.writer.sync().unlock();
-}
-
 export class Describer {
   task = null;
 
@@ -31,7 +27,6 @@ export class Describer {
       task.client.writer.sync();
       task.resolve(this);
     } else {
-      task.onError = onErrorParse;
       task.client.writer
         .lock()
         .type(MESSAGE_PARSE)

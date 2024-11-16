@@ -129,8 +129,7 @@ export class Connection {
       this.client.queue.unshift(this.client.task);
     }
 
-    this.client.task = this.connecting.promise;
-    this.client.task.onError = noop;
+    this.client.task = this.client.prepare();
     this.client.task.reject = this.connecting.reject;
     this.client.task.onReady = this.connecting.resolve;
 
@@ -155,8 +154,7 @@ export class Connection {
       this.client.task = null;
 
       if (isNotReconnect || PostgresError.is(e) || !this.isNeedReconnect()) {
-        this.error = e;
-        throw new PostgresError(this.error);
+        throw new PostgresError((this.error = e));
       } else {
         await this.connected.promise;
       }
@@ -192,6 +190,7 @@ export class Connection {
       this.disconnecting = Promise.withResolvers();
 
       this.isEnded = true;
+      this.error ??= error;
       this.client.isIsolated = true;
 
       this.connected?.reject(error);

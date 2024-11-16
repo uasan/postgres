@@ -101,7 +101,7 @@ export function readyForQuery(client) {
     client.transactions = state === TRANSACTION_ACTIVE ? 1 : 0;
   }
 
-  task?.onReady();
+  task.onReady();
 
   if (client.task === task) {
     client.task = client.queue.dequeue();

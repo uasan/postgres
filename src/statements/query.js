@@ -12,11 +12,6 @@ import { makeErrorEncodeParameter } from '../utils/error.js';
 
 import { textEncoder } from '../utils/string.js';
 
-function onErrorParse() {
-  this.client.writer.unlock();
-  this.client.statements.delete(this.sql);
-}
-
 export class Query {
   name = '';
   params = nullArray;
@@ -26,7 +21,6 @@ export class Query {
   encoders = [];
 
   constructor(task) {
-    task.onError = onErrorParse;
     task.client.statements.set(task.sql, this);
 
     this.name = task.client.statements.size.toString(36);

@@ -193,6 +193,8 @@ export class PostgresClient {
       this.task.onError(error);
       this.task.reject(error);
       this.task = null;
+    } else {
+      console.error(error instanceof Error ? error : new PostgresError(error));
     }
 
     for (let task = this.queue.head; task; task = task.next)
@@ -228,7 +230,7 @@ export class PostgresClient {
   }
 
   abort(error) {
-    return this.cancelTasks(error, true).connection.disconnect(error);
+    return this.connection.disconnect(error);
   }
 
   async disconnect(error) {

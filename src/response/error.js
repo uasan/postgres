@@ -114,11 +114,17 @@ export class PostgresError extends Error {
   }
 }
 
+const taskErrors = {
+  42601: 'onErrorParse',
+};
+
 export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
   if (error.severity === 'FATAL') {
     connection.error = error;
+  } else if (error.code in taskErrors) {
+    task[taskErrors[error.code]]();
   }
 
   if (task) {
