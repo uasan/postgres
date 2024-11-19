@@ -28,9 +28,14 @@ export class PostgresPool extends Array {
       return client;
     }
 
-    while (++i < this.length)
-      if (!this[i].isIsolated && this[i].queue.length < client.queue.length)
+    while (++i < this.length) {
+      if (
+        this[i].isIsolated === false &&
+        (client.isIsolated || this[i].queue.length < client.queue.length)
+      ) {
         client = this[i];
+      }
+    }
 
     if (client.isIsolated) {
       throw PostgresError.poolOverflow();
