@@ -68,10 +68,6 @@ export class PostgresPool extends Array {
     return this.getClient(1).isolate();
   }
 
-  unIsolate() {
-    return this;
-  }
-
   isTransaction() {
     return false;
   }
