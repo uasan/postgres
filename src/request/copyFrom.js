@@ -115,7 +115,7 @@ class Writer {
   async abort(reason = 'Abort') {
     if (this.isClosed || this.error) return;
 
-    this.writer.type(MESSAGE_COPY_FAIL).string(reason).end().unlock();
+    this.writer.type(MESSAGE_COPY_FAIL).string(String(reason)).end().unlock();
 
     try {
       await this.task;
