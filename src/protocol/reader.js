@@ -1,16 +1,19 @@
-import { BUFFER_LENGTH } from '../constants.js';
-import { textDecoder } from '../utils/string.js';
 import { handlers } from './handlers.js';
+import { textDecoder } from '../utils/string.js';
+import { PostgresError } from '../response/error.js';
+import { BUFFER_LENGTH, BUFFER_MAX_LENGTH } from '../constants.js';
 
 export class Reader {
-  length = 0;
   offset = 0;
+  length = 0;
   ending = 0;
 
   client = null;
-  paused = false;
 
-  buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: 1048576 });
+  isRead = false;
+  isPaused = false;
+
+  buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: BUFFER_MAX_LENGTH });
   bytes = new Uint8Array(this.buffer);
   view = new DataView(this.buffer);
 
@@ -18,21 +21,51 @@ export class Reader {
     this.client = client;
   }
 
-  alloc(length) {
-    if (length > this.bytes.byteLength) {
-      this.buffer.resize(length);
-      //console.log('ALLOC-READER', length);
+  alloc() {
+    const length = this.buffer.byteLength + BUFFER_LENGTH;
+
+    if (length > BUFFER_MAX_LENGTH) {
+      this.client.abort(PostgresError.of('Overflow buffer reader'));
+    } else {
+      console.log('ALLOC-READER', this.buffer.byteLength, length);
+      try {
+        this.buffer.resize(length);
+      } catch (error) {
+        this.client.abort(error);
+      }
     }
   }
 
   getBuffer() {
-    return this.length ? this.bytes.subarray(this.length) : this.bytes;
+    if (this.length) {
+      if (this.buffer.byteLength - this.length < 5) {
+        this.alloc();
+      }
+
+      if (this.offset) {
+        this.bytes.set(new Uint8Array(this.buffer, this.offset, this.length));
+        this.offset = 0;
+      }
+
+      return new Uint8Array(this.buffer, this.length);
+    } else {
+      this.offset = 0;
+      this.buffer.resize(BUFFER_LENGTH);
+
+      return this.bytes;
+    }
   }
 
   read(length) {
-    let size = 0;
-    let offset = 0;
+    if (this.isPaused) {
+      this.length += length;
+      return;
+    }
 
+    this.isRead = true;
+
+    let size = 0;
+    let offset = this.offset;
     const { client, bytes, view } = this;
 
     length += this.length;
@@ -41,7 +74,6 @@ export class Reader {
       size = view.getUint32(offset + 1) + 1;
 
       if (size > length) {
-        this.alloc(size + 1024);
         break;
       }
 
@@ -49,48 +81,50 @@ export class Reader {
 
       //console.log(handle.name);
 
-      try {
-        this.offset = offset + 5;
-        this.ending = offset + size;
+      this.offset = offset + 5;
+      this.ending = offset + size;
 
+      try {
         handle(client);
       } catch (error) {
         client.abort(error);
-        return;
-      }
-
-      if (size === length) {
-        this.clear();
-        return;
-      }
-
-      if (this.paused) {
         break;
       }
 
       offset += size;
       length -= size;
+
+      if (this.isPaused) {
+        break;
+      }
     }
 
+    this.isRead = false;
+    this.offset = offset;
     this.length = length;
-    if (offset) bytes.set(bytes.subarray(offset, offset + length));
   }
 
   clear() {
-    this.length = 0;
     this.offset = 0;
+    this.length = 0;
     this.ending = 0;
+
+    this.isRead = false;
+    this.isPaused = false;
     this.buffer.resize(BUFFER_LENGTH);
   }
 
   pause() {
-    this.paused = true;
-    this.client.stream.pause();
+    this.isPaused = true;
   }
 
   resume() {
-    this.paused = false;
-    this.client.stream.resume();
+    if (this.isPaused) {
+      this.isPaused = false;
+      if (this.length > 4 && this.isRead === false) {
+        this.read(0);
+      }
+    }
   }
 
   getInt16() {

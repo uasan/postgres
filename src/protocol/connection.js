@@ -191,7 +191,6 @@ export class Connection {
 
       this.isEnded = true;
       this.error ??= error;
-      this.client.isIsolated = true;
 
       this.connected?.reject(error);
       this.connecting?.reject(error);

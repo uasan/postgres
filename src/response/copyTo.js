@@ -15,6 +15,10 @@ export function copyOutResponse(client) {
         client.task.controller = controller;
       },
 
+      pull() {
+        client.reader.resume();
+      },
+
       async cancel() {
         client.task.reject = noop;
         client.task.controller = null;
@@ -25,7 +29,13 @@ export function copyOutResponse(client) {
 }
 
 export function copyData({ task, reader }) {
-  task.controller?.enqueue(reader.bytes.slice(reader.offset, reader.ending));
+  if (task.controller) {
+    task.controller.enqueue(reader.bytes.slice(reader.offset, reader.ending));
+
+    if (task.controller.desiredSize <= 0) {
+      reader.pause();
+    }
+  }
 }
 
 export function copyDone({ task, writer }) {

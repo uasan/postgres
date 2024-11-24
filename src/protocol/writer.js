@@ -1,7 +1,7 @@
 import { noop } from '#native';
-import { BUFFER_LENGTH } from '../constants.js';
 import { textEncoder } from '../utils/string.js';
 import { MESSAGE_FLUSH, MESSAGE_SYNC } from './messages.js';
+import { BUFFER_LENGTH, BUFFER_MAX_LENGTH } from '../constants.js';
 
 export class Writer {
   length = 0;
@@ -12,7 +12,7 @@ export class Writer {
   subarray = null;
   isLocked = true;
 
-  buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: 1048576 });
+  buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: BUFFER_MAX_LENGTH });
   bytes = new Uint8Array(this.buffer);
   view = new DataView(this.buffer);
 
@@ -43,8 +43,12 @@ export class Writer {
     this.length += size;
 
     if (this.length > this.buffer.byteLength) {
-      this.buffer.resize(this.length + 1024);
       //console.log('ALLOC-WRITER', this.length);
+      try {
+        this.buffer.resize(this.length + 1024);
+      } catch (error) {
+        this.client.abort(error);
+      }
     }
 
     return length;
