@@ -193,8 +193,8 @@ export class Task {
     return this;
   }
 
-  setSaveToFile(path) {
-    this.file = new File(this, path);
+  setSaveToFile(path, options) {
+    this.file = new File(this, path, options);
     return this;
   }
 

@@ -17,7 +17,7 @@ async function test() {
       .setSaveToFile('./test.txt')
       .execute(
         ` SELECT value::text || '\n'
-          FROM generate_series(1, 1_000) AS _(value)`,
+          FROM generate_series(1, 1_000_000) AS _(value)`,
         []
       );
 

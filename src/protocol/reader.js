@@ -27,7 +27,7 @@ export class Reader {
     if (length > BUFFER_MAX_LENGTH) {
       this.client.abort(PostgresError.of('Overflow buffer reader'));
     } else {
-      console.log('ALLOC-READER', this.buffer.byteLength, length);
+      //console.log('ALLOC-READER', this.buffer.byteLength, length);
       try {
         this.buffer.resize(length);
       } catch (error) {
