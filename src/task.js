@@ -230,12 +230,13 @@ export class Task {
     return this;
   }
 
-  setDataAsArrayValue() {
+  setDataAsValues() {
     this.initData = initArray;
     this.addData = getData;
     this.setData = setValueToArray;
     return this;
   }
+
   setDataAsValue() {
     this.data = undefined;
     this.initData = noop;
