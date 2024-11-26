@@ -21,13 +21,11 @@ export class Writer {
   }
 
   lock() {
-    //console.log('LOCK');
     this.isLocked = true;
     return this;
   }
 
   unlock() {
-    //console.log('UNLOCK');
     this.isLocked = false;
 
     if (this.length) {

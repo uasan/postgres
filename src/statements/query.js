@@ -7,6 +7,7 @@ import {
   MESSAGE_DESCRIBE,
   PREPARED_QUERY,
   MESSAGES_EXEC_SYNC_FLUSH,
+  MESSAGE_EXECUTE,
 } from '../protocol/messages.js';
 import { makeErrorEncodeParameter } from '../utils/error.js';
 
@@ -86,6 +87,27 @@ export class Query {
       }
     }
 
-    writer.setBytes(INT16_ONE_ONE).end().setBytes(MESSAGES_EXEC_SYNC_FLUSH);
+    writer.setBytes(INT16_ONE_ONE).end();
+
+    if (task.limit) {
+      writer.lock();
+      this.next(task);
+    } else {
+      writer.setBytes(MESSAGES_EXEC_SYNC_FLUSH);
+    }
+  }
+
+  next(task) {
+    task.isData = false;
+    task.client.writer
+      .type(MESSAGE_EXECUTE)
+      .setUint8(0)
+      .setInt32(task.limit)
+      .end()
+      .flush();
+  }
+
+  end(task) {
+    task.client.writer.sync().unlock();
   }
 }

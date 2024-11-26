@@ -3,26 +3,34 @@ import { Query } from './statements/query.js';
 import { Describer } from './statements/describer.js';
 
 import {
-  putData,
+  getData,
   pushData,
   setDataValue,
   setDataFields,
   setValueToArray,
+  initArray,
+  initObject,
 } from './response/data.js';
 import { File } from './response/saveToFile.js';
+import { Iterator } from './response/iterator.js';
 import { PostgresError } from './response/error.js';
 import { MESSAGE_QUERY } from './protocol/messages.js';
 import { getDescribeTable, makeCopyFromSQL } from './utils/copy.js';
 
 export class Task {
   sql = '';
+
   count = 0;
+  limit = 0;
 
   isSent = false;
   isData = false;
+  isDone = false;
+  isError = false;
   isCorked = false;
   isNoDecode = false;
   isDescribe = false;
+  isExecuted = false;
   isSimpleQuery = false;
 
   next = null;
@@ -34,7 +42,7 @@ export class Task {
   errorNoData = null;
   unknownTypes = null;
 
-  data = [];
+  data = nullArray;
   values = nullArray;
 
   reject = noop;
@@ -44,6 +52,7 @@ export class Task {
   onError = noop;
   onComplete = noop;
 
+  initData = initArray;
   addData = pushData;
   setData = setDataFields;
 
@@ -53,6 +62,7 @@ export class Task {
 
   async execute(sql, values) {
     this.sql = sql;
+    this.isExecuted = true;
 
     if (values) {
       this.values = values;
@@ -150,9 +160,23 @@ export class Task {
     return this.execute(sql, nullArray);
   }
 
+  iterate(sql, values = nullArray, limit = 1) {
+    if (limit === 1 && this.addData === pushData) {
+      this.setDataAsObject();
+    }
+
+    this.limit = limit;
+    this.execute(sql, values);
+
+    return Iterator(this);
+  }
+
   onDescribe() {
     this.statement.execute(this);
-    this.client.writer.unlock();
+
+    if (this.limit === 0) {
+      this.client.writer.unlock();
+    }
   }
 
   setErrorNoData(error) {
@@ -166,28 +190,30 @@ export class Task {
   }
 
   setDataAsArrayObjects() {
-    this.data = [];
+    this.initData = initArray;
     this.addData = pushData;
     this.setData = setDataFields;
     return this;
   }
 
   setDataAsArrayValue() {
-    this.data = [];
-    this.addData = putData;
+    this.initData = initArray;
+    this.addData = getData;
     this.setData = setValueToArray;
     return this;
   }
 
   setDataAsObject() {
     this.data = null;
-    this.addData = putData;
+    this.initData = initObject;
+    this.addData = getData;
     this.setData = setDataFields;
     return this;
   }
 
   setDataAsValue() {
     this.data = undefined;
+    this.initData = noop;
     this.addData = noop;
     this.setData = setDataValue;
     return this;
@@ -202,7 +228,6 @@ export class Task {
     this.copy = await new Task(this.client).describe(
       getDescribeTable(table, options?.columns)
     );
-
     return await this.execute(makeCopyFromSQL(table, options), nullArray);
   }
 }

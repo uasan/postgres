@@ -1,5 +1,13 @@
-export function putData() {
-  return (this.data = {});
+export function initArray() {
+  this.data = [];
+}
+
+export function initObject() {
+  this.data = {};
+}
+
+export function getData() {
+  return this.data;
 }
 
 export function pushData() {

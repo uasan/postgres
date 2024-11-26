@@ -121,6 +121,8 @@ export function errorResponse({ pid, task, reader, connection }) {
   }
 
   if (task) {
+    task.isError = true;
+
     if (task.sql) {
       error.sql ??= task.sql;
     }

@@ -48,18 +48,24 @@ export function noData({ task }) {
 }
 
 export function dataRow({ task, reader }) {
-  task.isData = true;
+  if (task.isData === false) {
+    task.isData = true;
+    task.initData();
+  }
   task.setData(reader);
 }
 
-export function commandComplete(client) {
-  const { task, reader } = client;
-  const { resolve } = task;
+export function portalSuspended({ task }) {
+  task.resolve(true);
+}
+
+export function commandComplete({ task, reader }) {
+  task.isDone = true;
 
   if (task.onComplete !== noop) {
     task.onComplete(reader.getString().split(' '));
   } else if (task.isData) {
-    resolve(task.data);
+    task.resolve(task.data);
   } else {
     const words = reader.getString().split(' ');
 
@@ -82,7 +88,7 @@ export function commandComplete(client) {
         break;
 
       default:
-        task.onReady = resolve;
+        task.onReady = task.resolve;
     }
   }
 }
@@ -120,4 +126,3 @@ export function readyForQuery(client) {
 export function bindComplete() {}
 export function parseComplete() {}
 export function closeComplete() {}
-export function portalSuspended() {}

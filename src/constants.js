@@ -4,7 +4,7 @@ export const //
   TRANSACTION_INACTIVE = 73;
 
 export const BUFFER_LENGTH = 131072;
-export const BUFFER_MAX_LENGTH = 134217728;
+export const BUFFER_MAX_LENGTH = 268435456;
 
 export const DEFAULT_PARAMS = {
   // compute_query_id: 'on',

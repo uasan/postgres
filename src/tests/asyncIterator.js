@@ -1,44 +1,32 @@
-export async function* AsyncIterator() {
-  yield 1;
-  yield 2;
-  yield 3;
+import { PostgresClient } from '../client.js';
 
-  return 5;
-}
-
-const asyncIterator = {
-  [Symbol.asyncIterator]() {
-    return {
-      async next() {
-        return {
-          value: 'value',
-          done: false,
-        };
-      },
-
-      async return() {
-        console.log('RETURN');
-        return {
-          done: true,
-        };
-      },
-
-      async throw(error) {
-        console.log('THROW', error);
-        return {
-          done: true,
-        };
-      },
-    };
-  },
-};
+const db = new PostgresClient({
+  host: '127.0.0.1',
+  port: 5432,
+  username: 'postgres',
+  password: 'pass',
+  database: 'postgres',
+});
 
 async function test() {
-  for await (const value of asyncIterator) {
-    console.log(value);
-    //break;
-    throw new Error('ERROR');
+  const task = db.prepare();
+
+  const sql = `
+    SELECT value
+    FROM generate_series(1, 10) AS _(value)`;
+
+  let count = 0;
+
+  try {
+    for await (const value of task.iterate(sql, [], 3)) {
+      console.log(++count, value);
+    }
+  } catch (error) {
+    console.error(error);
   }
+
+  console.log('DONE');
+  console.log(await db.query('SELECT true AS query', []));
 }
 
-test().catch(() => {});
+test().catch(console.error);
