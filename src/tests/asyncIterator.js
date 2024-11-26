@@ -9,17 +9,20 @@ const db = new PostgresClient({
 });
 
 async function test() {
-  const task = db.prepare();
+  const task = db.prepare().setDataAsLookup(1);
 
   const sql = `
-    SELECT value
+    SELECT
+      value,
+      'A' || value::text as "a",
+      'B' || value::text as "b",
+      'C' || value::text as "c",
+      true as "d"
     FROM generate_series(1, 10) AS _(value)`;
 
-  let count = 0;
-
   try {
-    for await (const value of task.iterate(sql, [], 3)) {
-      console.log(++count, value);
+    for await (const value of task.iterate(sql, [], 5)) {
+      console.log(value);
     }
   } catch (error) {
     console.error(error);

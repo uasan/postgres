@@ -1,21 +1,24 @@
 import { noop, nullArray } from '#native';
 import { Query } from './statements/query.js';
 import { Describer } from './statements/describer.js';
-
-import {
-  getData,
-  pushData,
-  setDataValue,
-  setDataFields,
-  setValueToArray,
-  initArray,
-  initObject,
-} from './response/data.js';
 import { File } from './response/saveToFile.js';
 import { Iterator } from './response/iterator.js';
 import { PostgresError } from './response/error.js';
 import { MESSAGE_QUERY } from './protocol/messages.js';
 import { getDescribeTable, makeCopyFromSQL } from './utils/copy.js';
+import {
+  getData,
+  initArray,
+  initObject,
+  setDataValue,
+  setDataFields,
+  pushDataArray,
+  setDataLookup,
+  initObjectNull,
+  pushDataObject,
+  setDataEntries,
+  setValueToArray,
+} from './response/data.js';
 
 export class Task {
   sql = '';
@@ -53,7 +56,7 @@ export class Task {
   onComplete = noop;
 
   initData = initArray;
-  addData = pushData;
+  addData = pushDataObject;
   setData = setDataFields;
 
   constructor(client) {
@@ -161,7 +164,7 @@ export class Task {
   }
 
   iterate(sql, values = nullArray, limit = 1) {
-    if (limit === 1 && this.addData === pushData) {
+    if (limit === 1 && this.addData === pushDataObject) {
       this.setDataAsObject();
     }
 
@@ -191,15 +194,22 @@ export class Task {
 
   setDataAsArrayObjects() {
     this.initData = initArray;
-    this.addData = pushData;
+    this.addData = pushDataObject;
     this.setData = setDataFields;
     return this;
   }
 
-  setDataAsArrayValue() {
+  setDataAsEntries() {
+    this.initData = initArray;
+    this.addData = pushDataArray;
+    this.setData = setDataEntries;
+    return this;
+  }
+
+  setDataAsEntry() {
     this.initData = initArray;
     this.addData = getData;
-    this.setData = setValueToArray;
+    this.setData = setDataEntries;
     return this;
   }
 
@@ -211,6 +221,21 @@ export class Task {
     return this;
   }
 
+  setDataAsLookup(deep = 1) {
+    this.data = null;
+    this.count = deep;
+    this.initData = initObjectNull;
+    this.addData = noop;
+    this.setData = setDataLookup;
+    return this;
+  }
+
+  setDataAsArrayValue() {
+    this.initData = initArray;
+    this.addData = getData;
+    this.setData = setValueToArray;
+    return this;
+  }
   setDataAsValue() {
     this.data = undefined;
     this.initData = noop;

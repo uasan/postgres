@@ -152,4 +152,16 @@ export class Reader {
 
     return text;
   }
+
+  decode(decoder) {
+    const length = this.getInt32();
+
+    if (length === -1) return null;
+    else {
+      this.ending = this.offset + length;
+      const value = decoder.decode(this);
+      this.offset = this.ending;
+      return value;
+    }
+  }
 }

@@ -1,3 +1,6 @@
+import { create } from '#native';
+import { PostgresError } from './error.js';
+
 export function initArray() {
   this.data = [];
 }
@@ -6,12 +9,22 @@ export function initObject() {
   this.data = {};
 }
 
+export function initObjectNull() {
+  this.data = create(null);
+}
+
 export function getData() {
   return this.data;
 }
 
-export function pushData() {
+export function pushDataObject() {
   const data = {};
+  this.data.push(data);
+  return data;
+}
+
+export function pushDataArray() {
+  const data = [];
   this.data.push(data);
   return data;
 }
@@ -20,44 +33,59 @@ export function setDataFields(reader) {
   const row = this.addData();
   const { columns, decoders } = this.statement;
 
-  let length = 0;
-  let ending = 0;
   reader.offset += 2;
 
   for (let i = 0; i < columns.length; i++) {
-    const name = columns[i];
+    row[columns[i]] = reader.decode(decoders[i]);
+  }
+}
 
-    length = reader.getInt32();
+export function setDataEntries(reader) {
+  const row = this.addData();
+  const { decoders } = this.statement;
 
-    if (length === -1) row[name] = null;
-    else {
-      reader.ending = ending = reader.offset + length;
-      row[name] = decoders[i].decode(reader);
-      reader.offset = ending;
-    }
+  reader.offset += 2;
+
+  for (let i = 0; i < decoders.length; i++) {
+    row.push(reader.decode(decoders[i]));
   }
 }
 
 export function setDataValue(reader) {
   reader.offset += 2;
-  const length = reader.getInt32();
-
-  if (length === -1) {
-    this.data = null;
-  } else {
-    reader.ending = reader.offset + length;
-    this.data = this.statement.decoders[0].decode(reader);
-  }
+  this.data = reader.decode(this.statement.decoders[0]);
 }
 
 export function setValueToArray(reader) {
   reader.offset += 2;
-  const length = reader.getInt32();
+  this.data.push(reader.decode(this.statement.decoders[0]));
+}
 
-  if (length === -1) {
-    this.data.push(null);
+export function setDataLookup(reader) {
+  const { columns, decoders } = this.statement;
+
+  if (this.count >= columns.length) {
+    throw PostgresError.of('Lookup depth should be less length columns');
+  }
+
+  reader.offset += 2;
+
+  let row = this.data;
+  const deep = this.count - 1;
+
+  for (let i = 0; i < deep; i++) {
+    row = row[reader.decode(decoders[i])] ??= create(null);
+  }
+
+  const key = reader.decode(decoders[deep]);
+
+  if (deep + 2 === columns.length) {
+    row[key] = reader.decode(decoders[deep + 1]);
   } else {
-    reader.ending = reader.offset + length;
-    this.data.push(this.statement.decoders[0].decode(reader));
+    row = row[key] ??= {};
+
+    for (let i = deep + 1; i < columns.length; i++) {
+      row[columns[i]] = reader.decode(decoders[i]);
+    }
   }
 }

@@ -4,7 +4,7 @@ export const //
   noop = () => {},
   identity = x => x,
   { isArray } = Array,
-  { assign } = Object,
+  { assign, create } = Object,
   { max, ceil, floor, round, random } = Math,
   { Number, String, BigInt } = globalThis,
   { isNaN, isFinite, parseInt, NEGATIVE_INFINITY, POSITIVE_INFINITY } = Number,
