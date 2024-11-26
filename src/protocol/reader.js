@@ -9,8 +9,6 @@ export class Reader {
   ending = 0;
 
   client = null;
-
-  isRead = false;
   isPaused = false;
 
   buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: BUFFER_MAX_LENGTH });
@@ -62,8 +60,6 @@ export class Reader {
       return;
     }
 
-    this.isRead = true;
-
     let size = 0;
     let offset = this.offset;
     const { client, bytes, view } = this;
@@ -99,7 +95,6 @@ export class Reader {
       }
     }
 
-    this.isRead = false;
     this.offset = offset;
     this.length = length;
   }
@@ -109,7 +104,6 @@ export class Reader {
     this.length = 0;
     this.ending = 0;
 
-    this.isRead = false;
     this.isPaused = false;
     this.buffer.resize(BUFFER_LENGTH);
   }
@@ -121,7 +115,7 @@ export class Reader {
   resume() {
     if (this.isPaused) {
       this.isPaused = false;
-      if (this.length > 4 && this.isRead === false) {
+      if (this.length > 4) {
         this.read(0);
       }
     }
