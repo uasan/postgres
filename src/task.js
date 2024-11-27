@@ -69,8 +69,9 @@ export class Task {
 
     if (values) {
       this.values = values;
+      const cmd = sql.trimStart().slice(0, 7).trimEnd().toLowerCase();
 
-      if (sql.trimStart().slice(0, 7).trimEnd().toLowerCase() === 'select') {
+      if (cmd === 'select' || cmd === 'with') {
         this.cache = { key: '' };
       }
 
