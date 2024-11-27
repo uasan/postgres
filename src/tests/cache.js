@@ -1,6 +1,5 @@
 import { PostgresPool } from '../pool.js';
 import { getRelationNames } from '../cache/relation.js';
-import { FETCH_ONE_VALUE } from '../constants.js';
 
 const db = new PostgresPool({
   max: 1,
@@ -26,7 +25,7 @@ async function test() {
   const params = [];
 
   try {
-    console.log(getRelationNames(await db.query(sql, params, FETCH_ONE_VALUE)));
+    console.log(getRelationNames(await db.query(sql, params)));
   } catch (error) {
     console.error(error);
   }

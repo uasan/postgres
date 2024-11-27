@@ -60,8 +60,6 @@ export function portalSuspended({ task }) {
 }
 
 export function commandComplete({ task, reader }) {
-  task.isDone = true;
-
   if (task.onComplete !== noop) {
     task.onComplete(reader.getString().split(' '));
   } else if (task.isData) {

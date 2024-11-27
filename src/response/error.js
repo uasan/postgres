@@ -79,6 +79,8 @@ export class PostgresError extends Error {
     }
 
     if (sql) {
+      sql = String(sql);
+
       if (position >= 0) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {

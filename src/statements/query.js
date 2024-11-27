@@ -15,6 +15,7 @@ import { textEncoder } from '../utils/string.js';
 
 export class Query {
   name = '';
+  cache = null;
   params = nullArray;
 
   isReady = false;

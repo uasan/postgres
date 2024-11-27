@@ -19,6 +19,7 @@ import {
   setDataEntries,
   setValueToArray,
 } from './response/data.js';
+import { CacheResults } from './cache/results.js';
 
 export class Task {
   sql = '';
@@ -28,7 +29,6 @@ export class Task {
 
   isSent = false;
   isData = false;
-  isDone = false;
   isError = false;
   isCorked = false;
   isNoDecode = false;
@@ -39,6 +39,7 @@ export class Task {
   next = null;
   file = null;
   copy = null;
+  cache = null;
   client = null;
   statement = null;
   controller = null;
@@ -65,10 +66,17 @@ export class Task {
 
   async execute(sql, values) {
     this.sql = sql;
-    this.isExecuted = true;
 
     if (values) {
       this.values = values;
+
+      if (sql.trimStart().slice(0, 7).trimEnd().toLowerCase() === 'select') {
+        this.cache = { key: '' };
+      }
+
+      if (this.cache && CacheResults.check(this)) {
+        return this.data;
+      }
     } else {
       this.isSimpleQuery = true;
     }
@@ -82,8 +90,10 @@ export class Task {
       }
     }
 
+    this.isExecuted = true;
+
     try {
-      return await this;
+      return this.cache ? CacheResults.save(this, await this) : await this;
     } catch (error) {
       //throw error;
       throw new PostgresError(error);
@@ -180,6 +190,11 @@ export class Task {
     if (this.limit === 0) {
       this.client.writer.unlock();
     }
+  }
+
+  setCache() {
+    this.isCache = true;
+    return this;
   }
 
   setErrorNoData(error) {

@@ -7,7 +7,7 @@ export const BUFFER_LENGTH = 131072;
 export const BUFFER_MAX_LENGTH = 268435456;
 
 export const DEFAULT_PARAMS = {
-  // compute_query_id: 'on',
+  // compute_query_id: 'auto',
   // client_connection_check_interval: 10000,
   datestyle: 'iso',
   lock_timeout: 0,
