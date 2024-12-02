@@ -70,13 +70,6 @@ export class Task {
     if (values) {
       this.values = values;
 
-      // if (
-      //   sql.trimStart().slice(0, 5).trimEnd().toLowerCase() === 'with' ||
-      //   sql.trimStart().slice(0, 7).trimEnd().toLowerCase() === 'select'
-      // ) {
-      //   this.cache = { key: '' };
-      // }
-
       if (this.cache && CacheResults.check(this)) {
         return this.data;
       }
