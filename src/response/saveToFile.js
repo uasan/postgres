@@ -53,8 +53,8 @@ function writeToFileSync(reader) {
     writeSync(
       this.file.fd,
       reader.bytes,
-      reader.offset + 6,
-      reader.ending - reader.offset - 6
+      reader.offset + 4,
+      reader.ending - reader.offset - 4
     );
   } catch (error) {
     this.onError(error);
@@ -64,7 +64,7 @@ function writeToFileSync(reader) {
 function writeToFileAsync(reader) {
   write(
     this.file.fd,
-    reader.bytes.slice(reader.offset + 6, reader.ending),
+    reader.bytes.slice(reader.offset + 4, reader.ending),
     undefined,
     this.file.onWrite
   );

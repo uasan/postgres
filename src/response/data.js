@@ -33,8 +33,6 @@ export function setDataFields(reader) {
   const row = this.addData();
   const { columns, decoders } = this.statement;
 
-  reader.offset += 2;
-
   for (let i = 0; i < columns.length; i++) {
     row[columns[i]] = reader.decode(decoders[i]);
   }
@@ -44,20 +42,16 @@ export function setDataEntries(reader) {
   const row = this.addData();
   const { decoders } = this.statement;
 
-  reader.offset += 2;
-
   for (let i = 0; i < decoders.length; i++) {
     row.push(reader.decode(decoders[i]));
   }
 }
 
 export function setDataValue(reader) {
-  reader.offset += 2;
   this.data = reader.decode(this.statement.decoders[0]);
 }
 
 export function setValueToArray(reader) {
-  reader.offset += 2;
   this.data.push(reader.decode(this.statement.decoders[0]));
 }
 
@@ -67,8 +61,6 @@ export function setDataLookup(reader) {
   if (this.count >= columns.length) {
     throw PostgresError.of('Lookup depth should be less length columns');
   }
-
-  reader.offset += 2;
 
   let row = this.data;
   const deep = this.count - 1;

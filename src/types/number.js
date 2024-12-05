@@ -56,12 +56,28 @@ types
     serialize: serializeNumber,
   })
   .addType({
+    id: 22,
+    array: 1006,
+    name: 'int2vector',
+    decode: decodeInt2,
+    encode: encodeInt2,
+  })
+  .addType({
     id: 23,
     array: 1007,
     name: 'int4',
     quote: identity,
     decode: decodeInt4,
     encode: encodeInt4,
+    serialize: serializeNumber,
+  })
+  .addType({
+    id: 24,
+    array: 1008,
+    name: 'regproc',
+    quote: identity,
+    decode: decodeUint4,
+    encode: encodeUint4,
     serialize: serializeNumber,
   })
   .addType({
@@ -74,11 +90,22 @@ types
     serialize: serializeNumber,
   })
   .addType({
-    id: 22,
-    array: 1006,
-    name: 'int2vector',
-    decode: decodeInt2,
-    encode: encodeInt2,
+    id: 28,
+    array: 1011,
+    name: 'xid',
+    quote: identity,
+    decode: decodeUint4,
+    encode: encodeUint4,
+    serialize: serializeNumber,
+  })
+  .addType({
+    id: 29,
+    array: 1012,
+    name: 'cid',
+    quote: identity,
+    decode: decodeUint4,
+    encode: encodeUint4,
+    serialize: serializeNumber,
   })
   .addType({
     id: 30,
@@ -114,27 +141,9 @@ types
     serialize: serializeBigInt,
   })
   .addType({
-    id: 28,
-    array: 1011,
-    name: 'xid',
-    quote: identity,
-    decode: decodeUint4,
-    encode: encodeUint4,
-    serialize: serializeNumber,
-  })
-  .addType({
-    id: 29,
-    array: 1012,
-    name: 'cid',
-    quote: identity,
-    decode: decodeUint4,
-    encode: encodeUint4,
-    serialize: serializeNumber,
-  })
-  .addType({
-    id: 24,
-    array: 1008,
-    name: 'regproc',
+    id: 2205,
+    array: 2210,
+    name: 'regclass',
     quote: identity,
     decode: decodeUint4,
     encode: encodeUint4,

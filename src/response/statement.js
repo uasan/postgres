@@ -52,6 +52,7 @@ export function dataRow({ task, reader }) {
     task.isData = true;
     task.initData();
   }
+  reader.offset += 2;
   task.setData(reader);
 }
 
@@ -96,8 +97,8 @@ export function emptyQueryResponse({ task }) {
 }
 
 export function readyForQuery(client) {
-  const state = client.reader.bytes[client.reader.offset];
   const { task } = client;
+  const state = client.reader.bytes[client.reader.offset];
 
   if (client.state !== state) {
     client.state = state;
