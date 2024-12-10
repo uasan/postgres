@@ -1,8 +1,7 @@
-import { PostgresPool } from '../pool.js';
-import { getRelationNames } from '../cache/relation.js';
+import { ContextExplain } from '../cache/explain/context.js';
+import { PostgresClient } from '../client.js';
 
-const db = new PostgresPool({
-  max: 1,
+const db = new PostgresClient({
   host: '127.0.0.1',
   port: 5432,
   username: 'postgres',
@@ -10,25 +9,42 @@ const db = new PostgresPool({
   database: 'smartapps',
 });
 
-async function test() {
-  let sql = `
-  EXPLAIN (FORMAT JSON, VERBOSE true, COSTS false)
+//https://www.postgresql.org/docs/current/runtime-config-query.html
 
-   SELECT * FROM smartpeople.match_posts_to_users(
-   '8a74a9e0-f633-4793-ba1e-5c57cf0c31e2'::uuid,
-   null,
-   null
-  )
- 
+async function test() {
+  const sql = `
+    SELECT
+      us.skill_id,
+      u.first_name
+    FROM ludicloud.users AS u
+    JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
+    JOIN smartlibrary.skills AS sk ON(sk.skill_id = us.skill_id AND sk.catalog_id = any($2))
+    WHERE u.uid IN($1, $3) AND last_name % 'aaa'
+    ORDER BY last_name
   `;
 
-  const params = [];
+  // const sql = `
+  // SELECT *
+  // FROM (
+  //     SELECT coalesce("skill_name", null) AS dd
+  //     FROM smartlibrary.skills
+  //   ) _
+  // `;
 
-  try {
-    console.log(getRelationNames(await db.query(sql, params)));
-  } catch (error) {
-    console.error(error);
-  }
+  // const sql = `
+  // SELECT count(*) AS id
+  // FROM smartlibrary.skills
+  // `;
+
+  const task = db.prepare();
+  await task.execute(sql, []);
+
+  const context = await ContextExplain.create(task);
+
+  console.dir(context, {
+    depth: null,
+    colors: true,
+  });
 }
 
-test();
+test().catch(console.error);

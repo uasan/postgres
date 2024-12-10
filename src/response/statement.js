@@ -2,6 +2,7 @@ import { noop } from '#native';
 import { setCountData, setNoData } from './state.js';
 import { getType, resolveTypes, rawType } from '../request/types.js';
 import { TRANSACTION_ACTIVE, TRANSACTION_INACTIVE } from '../constants.js';
+import { SimpleQuery } from '../statements/simple.js';
 
 export function parameterDescription({ task, reader }) {
   const length = reader.getInt16();
@@ -13,29 +14,27 @@ export function parameterDescription({ task, reader }) {
 }
 
 export function rowDescription({ task, reader }) {
-  if (task.statement) {
-    const length = reader.getInt16();
-    const { columns, decoders } = task.statement;
+  if (task.isSimpleQuery) {
+    task.statement = new SimpleQuery();
+  }
 
-    for (let i = 0; i < length; i++) {
-      reader.ending = reader.bytes.indexOf(0, reader.offset);
-      columns.push(reader.getTextUTF8());
-      reader.offset = reader.ending + 7;
+  const length = reader.getInt16();
+  const { columns, decoders } = task.statement;
 
-      decoders.push(
-        task.isNoDecode ? rawType : getType(task, reader.getInt32())
-      );
+  for (let i = 0; i < length; i++) {
+    reader.ending = reader.bytes.indexOf(0, reader.offset);
+    columns.push(reader.getTextUTF8());
+    reader.offset = reader.ending + 7;
 
-      reader.offset += 8;
-    }
+    decoders.push(task.isNoDecode ? rawType : getType(task, reader.getInt32()));
 
-    if (task.unknownTypes) {
-      resolveTypes(task);
-    } else {
-      task.onDescribe();
-    }
+    reader.offset += 8;
+  }
+
+  if (task.unknownTypes) {
+    resolveTypes(task);
   } else {
-    task.setData = noop;
+    task.onDescribe();
   }
 }
 
@@ -52,6 +51,7 @@ export function dataRow({ task, reader }) {
     task.isData = true;
     task.initData();
   }
+
   reader.offset += 2;
   task.setData(reader);
 }
