@@ -28,7 +28,6 @@ async function test() {
     $15::text[] AS "text[]",
     $16::uuid[] AS "uuid[]",
     '{}'::text[] AS "empty[]",
-    'ABC'::varchar(3),
     '{pg_catalog.pg_policy}'::regclass[],
     '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest"`;
 

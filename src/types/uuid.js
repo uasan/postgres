@@ -1,5 +1,5 @@
 import { types } from '../protocol/types.js';
-import { byteToHex, hexToByte } from '../utils/hex.js';
+import { byteToHex } from '../utils/hex.js';
 
 const decodeUUID = ({ bytes, offset: i }) =>
   byteToHex[bytes[i]] +
@@ -35,22 +35,29 @@ function encodeUUID(writer, uuid) {
   if (uuid.length === 16) {
     bytes.set(uuid, i + 4);
   } else {
-    bytes[i + 4] = hexToByte[uuid[0]][uuid[1]];
-    bytes[i + 5] = hexToByte[uuid[2]][uuid[3]];
-    bytes[i + 6] = hexToByte[uuid[4]][uuid[5]];
-    bytes[i + 7] = hexToByte[uuid[6]][uuid[7]];
-    bytes[i + 8] = hexToByte[uuid[9]][uuid[10]];
-    bytes[i + 9] = hexToByte[uuid[11]][uuid[12]];
-    bytes[i + 10] = hexToByte[uuid[14]][uuid[15]];
-    bytes[i + 11] = hexToByte[uuid[16]][uuid[17]];
-    bytes[i + 12] = hexToByte[uuid[19]][uuid[20]];
-    bytes[i + 13] = hexToByte[uuid[21]][uuid[22]];
-    bytes[i + 14] = hexToByte[uuid[24]][uuid[25]];
-    bytes[i + 15] = hexToByte[uuid[26]][uuid[27]];
-    bytes[i + 16] = hexToByte[uuid[28]][uuid[29]];
-    bytes[i + 17] = hexToByte[uuid[30]][uuid[31]];
-    bytes[i + 18] = hexToByte[uuid[32]][uuid[33]];
-    bytes[i + 19] = hexToByte[uuid[34]][uuid[35]];
+    let v = 0;
+
+    bytes[i + 4] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+    bytes[i + 5] = (v >>> 16) & 0xff;
+    bytes[i + 6] = (v >>> 8) & 0xff;
+    bytes[i + 7] = v & 0xff;
+
+    bytes[i + 8] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+    bytes[i + 9] = v & 0xff;
+
+    bytes[i + 10] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+    bytes[i + 11] = v & 0xff;
+
+    bytes[i + 12] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+    bytes[i + 13] = v & 0xff;
+
+    bytes[i + 14] =
+      ((v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000) & 0xff;
+    bytes[i + 15] = (v / 0x100000000) & 0xff;
+    bytes[i + 16] = (v >>> 24) & 0xff;
+    bytes[i + 17] = (v >>> 16) & 0xff;
+    bytes[i + 18] = (v >>> 8) & 0xff;
+    bytes[i + 19] = v & 0xff;
   }
 }
 

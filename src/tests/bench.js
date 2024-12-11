@@ -27,9 +27,16 @@ const sql = `SELECT
   $1::int AS "int",
   $2::bool AS "bool",
   $3::text AS "text",
-  $4::timestamptz AS "timestamptz"`;
+  $4::uuid AS "uuid",
+  $5::timestamptz AS "timestamptz"`;
 
-const params = [1, true, 'ABC', new Date()];
+const params = [
+  1,
+  true,
+  'ABC',
+  'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
+  new Date(),
+];
 
 const query = isPostgres
   ? () => db.unsafe(sql, params, { prepare: true })
