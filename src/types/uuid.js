@@ -1,5 +1,8 @@
 import { types } from '../protocol/types.js';
-import { byteToHex } from '../utils/hex.js';
+
+const byteToHex = Array.from({ length: 256 }, (_, i) =>
+  (i + 0x100).toString(16).slice(1)
+);
 
 const decodeUUID = ({ bytes, offset: i }) =>
   byteToHex[bytes[i]] +
