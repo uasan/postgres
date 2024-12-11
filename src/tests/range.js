@@ -1,5 +1,4 @@
 import { PostgresPool } from '../pool.js';
-import { FETCH_ONE_VALUE } from '../constants.js';
 
 const db = new PostgresPool({
   max: 1,
@@ -14,7 +13,7 @@ async function test() {
   const sql = `SELECT 'empty'::int4range`;
   const params = [];
 
-  await db.query(sql, params, FETCH_ONE_VALUE);
+  await db.query(sql, params);
 }
 
 test();

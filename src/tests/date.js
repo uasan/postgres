@@ -6,7 +6,7 @@ const db = new PostgresClient({
   username: 'postgres',
   password: 'pass',
   database: 'postgres',
-  // params: {
+  // parameters: {
   //   timezone: 'America/New_York',
   // },
 });

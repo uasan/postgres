@@ -31,7 +31,7 @@ async function test() {
     '{pg_catalog.pg_policy}'::regclass[],
     '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest"`;
 
-  const params = [
+  const values = [
     true,
     'Text 👍',
     123456789,
@@ -56,7 +56,7 @@ async function test() {
     ],
   ];
 
-  const result = await db.query(sql, params);
+  const result = await db.query(sql, values);
   console.log(JSON.parse(JSON.stringify(result[0])));
 
   await db.disconnect();

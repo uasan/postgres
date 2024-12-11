@@ -6,15 +6,18 @@ import {
 } from '../protocol/auth/sasl.js';
 import { PostgresError } from '../response/error.js';
 
-export function handshake({ writer, options: { username, database, params } }) {
-  const keys = Object.keys(params);
+export function handshake({
+  writer,
+  options: { username, database, parameters },
+}) {
+  const keys = Object.keys(parameters);
   let text = 'user\x00' + username + '\x00database\x00' + database;
 
   text += '\x00timezone\x00UTC';
   text += '\x00client_encoding\x00UTF8';
 
   for (let i = 0; i < keys.length; i++)
-    text += '\x00' + keys[i] + '\x00' + params[keys[i]];
+    text += '\x00' + keys[i] + '\x00' + parameters[keys[i]];
 
   const length = writer.alloc(4);
 

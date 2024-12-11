@@ -5,8 +5,8 @@ export const getConnectionOptions = ({
   port = 5432,
   host = '127.0.0.1',
   path = '',
-  params,
   signal,
+  parameters,
   timeout = 1_000_000,
   database = 'postgres',
   username = 'postgres',
@@ -24,8 +24,8 @@ export const getConnectionOptions = ({
   password,
   onMessage,
   maxConnections,
-  params: {
+  parameters: {
     ...DEFAULT_PARAMS,
-    ...params,
+    ...parameters,
   },
 });

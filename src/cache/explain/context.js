@@ -25,7 +25,7 @@ export class ContextExplain {
     SET LOCAL random_page_cost TO 100000;
 
     --SET LOCAL enable_seqscan TO 0;
-    --SET LOCAL enable_nestloop TO 0;
+    SET LOCAL enable_nestloop TO 0;
     
     --SET LOCAL from_collapse_limit TO 1;
     --SET LOCAL join_collapse_limit TO 1;
