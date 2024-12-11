@@ -1,30 +1,30 @@
 import { types } from '../protocol/types.js';
 
-const byteToHex = Array.from({ length: 256 }, (_, i) =>
+const hex = Array.from({ length: 256 }, (_, i) =>
   (i + 0x100).toString(16).slice(1)
 );
 
 const decodeUUID = ({ bytes, offset: i }) =>
-  byteToHex[bytes[i]] +
-  byteToHex[bytes[i + 1]] +
-  byteToHex[bytes[i + 2]] +
-  byteToHex[bytes[i + 3]] +
+  hex[bytes[i]] +
+  hex[bytes[i + 1]] +
+  hex[bytes[i + 2]] +
+  hex[bytes[i + 3]] +
   '-' +
-  byteToHex[bytes[i + 4]] +
-  byteToHex[bytes[i + 5]] +
+  hex[bytes[i + 4]] +
+  hex[bytes[i + 5]] +
   '-' +
-  byteToHex[bytes[i + 6]] +
-  byteToHex[bytes[i + 7]] +
+  hex[bytes[i + 6]] +
+  hex[bytes[i + 7]] +
   '-' +
-  byteToHex[bytes[i + 8]] +
-  byteToHex[bytes[i + 9]] +
+  hex[bytes[i + 8]] +
+  hex[bytes[i + 9]] +
   '-' +
-  byteToHex[bytes[i + 10]] +
-  byteToHex[bytes[i + 11]] +
-  byteToHex[bytes[i + 12]] +
-  byteToHex[bytes[i + 13]] +
-  byteToHex[bytes[i + 14]] +
-  byteToHex[bytes[i + 15]];
+  hex[bytes[i + 10]] +
+  hex[bytes[i + 11]] +
+  hex[bytes[i + 12]] +
+  hex[bytes[i + 13]] +
+  hex[bytes[i + 14]] +
+  hex[bytes[i + 15]];
 
 function encodeUUID(writer, uuid) {
   const i = writer.alloc(20);
