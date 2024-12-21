@@ -1,17 +1,10 @@
 export async function notificationResponse({ reader, listeners }) {
-  let { ending } = reader;
-
   reader.offset += 4;
-  let i = reader.bytes.indexOf(0, reader.offset) + 1;
 
-  reader.ending = i - 1;
-  const handlers = listeners.get(reader.getTextUTF8());
+  const handlers = listeners.get(reader.getString());
 
   if (handlers) {
-    reader.offset = i;
-    reader.ending = ending;
-
-    const payload = reader.bytes[i]
+    const payload = reader.bytes[reader.offset]
       ? JSON.parse(reader.getString())
       : undefined;
 
