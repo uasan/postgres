@@ -18,10 +18,14 @@ const replica = new PostgresReplication({
 });
 
 function onChange({ schema, name }, action, newValues, oldValues) {
-  console.log(action + ': ' + schema + '.' + name, {
-    newValues,
-    oldValues,
-  });
+  console.log(
+    action + ': ' + schema + '.' + name,
+    {
+      newValues,
+      oldValues,
+    },
+    '\n'
+  );
 }
 
 const handler = {
@@ -64,17 +68,6 @@ async function test() {
 
     SELECT pg_logical_emit_message(true, 'my_prefix', 'Text Payload');
   `);
-
-  // setInterval(async () => {
-  //   console.log(
-  //     (
-  //       await db.query(
-  //         'SELECT sent_lsn, write_lsn, write_lag::text FROM pg_stat_replication',
-  //         []
-  //       )
-  //     )[0]
-  //   );
-  // }, 5000);
 }
 
 test().catch(console.error);
