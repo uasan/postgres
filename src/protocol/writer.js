@@ -187,6 +187,11 @@ export class Writer {
     return this;
   }
 
+  setBigUint64(value) {
+    this.view.setBigUint64(this.alloc(8), value);
+    return this;
+  }
+
   setUTF8(value) {
     const length = this.alloc(4);
     this.text(value).view.setInt32(length, this.length - length - 4);
@@ -195,6 +200,12 @@ export class Writer {
 
   clearLastMessage() {
     this.length = this.offset;
+    return this;
+  }
+
+  setZeros(count) {
+    const length = this.alloc(count);
+    while (count) this.bytes[length + --count] = 0;
     return this;
   }
 

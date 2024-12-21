@@ -75,7 +75,7 @@ export class Reader {
 
       const handle = handlers[bytes[offset]];
 
-      //console.log(handle.name);
+      //console.log(handle.name, size);
 
       this.offset = offset + 5;
       this.ending = offset + size;
@@ -121,6 +121,18 @@ export class Reader {
     }
   }
 
+  getInt8() {
+    const int8 = this.view.getInt8(this.offset);
+    this.offset += 1;
+    return int8;
+  }
+
+  getUint8() {
+    const int8 = this.bytes[this.offset];
+    this.offset += 1;
+    return int8;
+  }
+
   getInt16() {
     const int16 = this.view.getInt16(this.offset);
     this.offset += 2;
@@ -139,11 +151,29 @@ export class Reader {
     return int32;
   }
 
+  getUint32() {
+    const int32 = this.view.getUint32(this.offset);
+    this.offset += 4;
+    return int32;
+  }
+
+  getBigInt64() {
+    const int64 = this.view.getBigInt64(this.offset);
+    this.offset += 8;
+    return int64;
+  }
+
+  getBigUint64() {
+    const int64 = this.view.getBigUint64(this.offset);
+    this.offset += 8;
+    return int64;
+  }
+
   getTextUTF8() {
     return textDecoder.decode(this.bytes.subarray(this.offset, this.ending));
   }
 
-  getString() {
+  getAscii() {
     let text = '';
     const length = this.ending - 1;
 
@@ -151,6 +181,15 @@ export class Reader {
       text += String.fromCharCode(this.bytes[i]);
 
     return text;
+  }
+
+  getString() {
+    return textDecoder.decode(
+      this.bytes.subarray(
+        this.offset,
+        (this.offset = this.bytes.indexOf(0, this.offset) + 1) - 1
+      )
+    );
   }
 
   decode(decoder) {

@@ -37,7 +37,7 @@ export function makeErrorEncodeParameter(task, error, index) {
 }
 
 export function highlightErrorSQL(sql, position) {
-  const max = 86;
+  const max = 64;
 
   let left = sql
     .slice(0, position - 1)

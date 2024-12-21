@@ -6,10 +6,10 @@ import { Task } from './task.js';
 import { Queue } from './utils/queue.js';
 import { Reader } from './protocol/reader.js';
 import { Writer } from './protocol/writer.js';
-import { TypesMap } from './protocol/types.js';
+import { Origin } from './store/origin.js';
 import { PostgresError } from './response/error.js';
 import { Connection } from './protocol/connection.js';
-import { getConnectionOptions } from './utils/options.js';
+import { normalizeOptions } from './utils/options.js';
 import { setCommit, setRollback } from './utils/queries.js';
 import { listen, unlisten, notify } from './request/listen.js';
 import {
@@ -29,8 +29,9 @@ export class PostgresClient {
   pool = null;
   types = null;
   stream = null;
+  origin = null;
+  options = null;
   waitReady = null;
-  connection = null;
 
   isReady = true;
   isIsolated = false;
@@ -41,18 +42,19 @@ export class PostgresClient {
   queue = new Queue();
   reader = new Reader(this);
   writer = new Writer(this);
+  connection = new Connection(this);
 
   constructor(options, pool = null) {
     if (pool) {
       this.pool = pool;
       this.options = options;
       this.types = pool.types;
+      this.origin = pool.origin;
     } else {
-      this.types = new TypesMap();
-      this.options = getConnectionOptions(options);
+      this.options = normalizeOptions(options);
+      this.origin = Origin.get(options);
+      this.types = this.origin.types;
     }
-
-    this.connection = new Connection(this);
   }
 
   connect() {
@@ -156,7 +158,7 @@ export class PostgresClient {
     await this.connection.disconnect();
 
     this.types.clear();
-    this.options = getConnectionOptions(options);
+    this.options = normalizeOptions(options);
 
     await this.connection.connect();
   }

@@ -25,9 +25,10 @@ export class Query {
   encoders = [];
 
   constructor(task) {
-    task.client.statements.set(task.sql, this);
-
-    this.name = task.client.statements.size.toString(36);
+    if (task.client.options.isSaveStatements) {
+      task.client.statements.set(task.sql, this);
+      this.name = task.client.statements.size.toString(36);
+    }
 
     task.client.writer
       .lock()

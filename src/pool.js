@@ -1,17 +1,19 @@
 import { PostgresClient } from './client.js';
-import { TypesMap } from './protocol/types.js';
 import { PostgresError } from './response/error.js';
+import { Origin } from './store/origin.js';
 import { Task } from './task.js';
-import { getConnectionOptions } from './utils/options.js';
+import { normalizeOptions } from './utils/options.js';
 
 export class PostgresPool extends Array {
-  types = new TypesMap();
+  types = null;
+  origin = null;
 
   constructor(options) {
-    options = getConnectionOptions(options);
-
+    options = normalizeOptions(options);
     super(options.maxConnections);
-    this.options = options;
+
+    this.origin = Origin.get(options);
+    this.types = this.origin.types;
 
     for (let i = 0; i < this.length; i++)
       this[i] = new PostgresClient(options, this);

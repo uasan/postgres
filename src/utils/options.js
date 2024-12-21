@@ -1,18 +1,20 @@
 import { noop } from '#native';
 import { DEFAULT_PARAMS } from '../constants.js';
 
-export const getConnectionOptions = ({
-  port = 5432,
-  host = '127.0.0.1',
-  path = '',
+export const normalizeOptions = ({
   signal,
   parameters,
+  path = '',
+  port = 5432,
+  host = '127.0.0.1',
   timeout = 1_000_000,
   database = 'postgres',
   username = 'postgres',
   password = '',
+  sysPrefix = '_',
   onMessage = noop,
   maxConnections = 1,
+  isSaveStatements = true,
 } = {}) => ({
   port,
   host,
@@ -22,8 +24,10 @@ export const getConnectionOptions = ({
   database,
   username,
   password,
+  sysPrefix,
   onMessage,
   maxConnections,
+  isSaveStatements,
   parameters: {
     ...DEFAULT_PARAMS,
     ...parameters,

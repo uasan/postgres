@@ -1,18 +1,15 @@
+import { noop } from '#native';
 import { PostgresError } from '../response/error.js';
+import { BUFFER_LENGTH } from '../constants.js';
+import { makeErrorCopyFrom } from '../utils/copy.js';
 import {
   NULL,
+  COPY_SIGN,
   MESSAGE_COPY_DATA,
   MESSAGE_COPY_DONE,
   MESSAGE_COPY_FAIL,
-  COPY_SIGN,
 } from '../protocol/messages.js';
-import { BUFFER_LENGTH } from '../constants.js';
-import { makeErrorCopyFrom } from '../utils/copy.js';
-import { noop } from '#native';
 
-export function copyBothResponse() {
-  //
-}
 class UnderlyingSink {
   task = null;
   writer = null;

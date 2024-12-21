@@ -8,6 +8,7 @@ const decodeUint4 = ({ view, offset }) => view.getUint32(offset);
 const decodeFloat4 = ({ view, offset }) => view.getFloat32(offset);
 const decodeFloat8 = ({ view, offset }) => view.getFloat64(offset);
 const decodeInt8 = ({ view, offset }) => view.getBigInt64(offset);
+const decodeUint8 = ({ view, offset }) => view.getBigUint64(offset);
 
 function encodeInt2(writer, value) {
   writer.setInt32(2).setInt16(value);
@@ -23,6 +24,10 @@ function encodeUint4(writer, value) {
 
 function encodeInt8(writer, value) {
   writer.setInt32(8).setBigInt64(BigInt(value));
+}
+
+function encodeUint8(writer, value) {
+  writer.setInt32(8).setBigUint64(BigInt(value));
 }
 
 function encodeFloat4(writer, value) {
@@ -148,4 +153,13 @@ types
     decode: decodeUint4,
     encode: encodeUint4,
     serialize: serializeNumber,
+  })
+  .addType({
+    id: 3220,
+    array: 3221,
+    name: 'pg_lsn',
+    quote: identity,
+    decode: decodeUint8,
+    encode: encodeUint8,
+    serialize: serializeBigInt,
   });

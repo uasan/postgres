@@ -5,10 +5,11 @@ import { restoreListeners } from '../request/listen.js';
 import { MESSAGE_TERMINATE } from './messages.js';
 import { noop } from '../utils/native.js';
 import { PostgresError } from '../response/error.js';
+import { TRANSACTION_ACTIVE } from '../constants.js';
 
 export class Connection {
-  timeout = 0;
   retries = 0;
+  onRead = noop;
 
   isReady = false;
   isEnded = false;
@@ -21,16 +22,10 @@ export class Connection {
 
   constructor(client) {
     this.client = client;
-    this.timeout = client.options.timeout;
 
-    this.params = {
-      path: client.options.path,
-      host: client.options.host,
-      port: client.options.port,
-      onread: {
-        callback: client.reader.read.bind(client.reader),
-        buffer: client.reader.getBuffer.bind(client.reader),
-      },
+    this.onRead = {
+      callback: client.reader.read.bind(client.reader),
+      buffer: client.reader.getBuffer.bind(client.reader),
     };
   }
 
@@ -48,7 +43,7 @@ export class Connection {
   onClose = () => {
     let isFinally = false;
 
-    if (this.client.isTransaction()) {
+    if (this.client.state === TRANSACTION_ACTIVE) {
       isFinally = true;
       this.isAbortTransaction = !this.client.task;
     } else if (PostgresError.is(this.error)) {
@@ -78,7 +73,10 @@ export class Connection {
 
   onTimeout = () => {
     if (this.isKeepAlive()) {
-      this.client.stream.setTimeout(this.timeout, this.onTimeout);
+      this.client.stream.setTimeout(
+        this.client.options.timeout,
+        this.onTimeout
+      );
     } else {
       this.disconnect();
     }
@@ -115,12 +113,20 @@ export class Connection {
     this.isEnded = false;
     this.disconnecting?.resolve();
 
-    this.client.stream = createConnection(this.params, this.onConnect)
+    this.client.stream = createConnection(
+      {
+        onread: this.onRead,
+        path: this.client.options.path,
+        host: this.client.options.host,
+        port: this.client.options.port,
+      },
+      this.onConnect
+    )
       .on('error', this.onError)
       .once('close', this.onClose)
       .setNoDelay(true)
       .setKeepAlive(true, 60_000)
-      .setTimeout(this.timeout, this.onTimeout);
+      .setTimeout(this.client.options.timeout, this.onTimeout);
 
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();

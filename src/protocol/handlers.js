@@ -1,6 +1,7 @@
 import { notificationResponse } from '../response/notify.js';
+import { copyInResponse } from '../request/copyFrom.js';
+import { copyBothResponse } from '../replica/copy.js';
 import { errorResponse, noticeResponse } from '../response/error.js';
-import { copyInResponse, copyBothResponse } from '../request/copyFrom.js';
 import { copyData, copyDone, copyOutResponse } from '../response/copyTo.js';
 import {
   authentication,

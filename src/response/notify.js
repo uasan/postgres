@@ -11,7 +11,7 @@ export async function notificationResponse({ reader, listeners }) {
     reader.offset = i;
     reader.ending = ending;
 
-    const payload = reader.bytes[i] ? reader.getString() : undefined;
+    const payload = reader.bytes[i] ? reader.getAscii() : undefined;
 
     for (const handler of handlers) {
       try {

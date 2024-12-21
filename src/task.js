@@ -101,7 +101,7 @@ export class Task {
     this.resolve = resolve;
 
     if (this.client.stream === null) {
-      this.client.connect().catch(noop);
+      this.client.connection.connect().catch(noop);
     }
 
     if (

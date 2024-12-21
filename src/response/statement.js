@@ -62,11 +62,11 @@ export function portalSuspended({ task }) {
 
 export function commandComplete({ task, reader }) {
   if (task.onComplete !== noop) {
-    task.onComplete(reader.getString().split(' '));
+    task.onComplete(reader.getAscii().split(' '));
   } else if (task.isData) {
     task.resolve(task.data);
   } else {
-    const words = reader.getString().split(' ');
+    const words = reader.getAscii().split(' ');
 
     switch (words[0]) {
       case 'UPDATE':

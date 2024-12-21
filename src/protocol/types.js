@@ -48,6 +48,10 @@ export class TypesMap extends Map {
     return type;
   }
 
+  getType(id) {
+    return types.get(id) ?? this.get(id);
+  }
+
   addType({ array, ...data }) {
     const type = assign(new Type(), data);
 
