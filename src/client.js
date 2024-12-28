@@ -11,12 +11,12 @@ import { PostgresError } from './response/error.js';
 import { Connection } from './protocol/connection.js';
 import { normalizeOptions } from './utils/options.js';
 import { setCommit, setRollback } from './utils/queries.js';
-import { listen, unlisten, notify } from './request/listen.js';
 import {
   TRANSACTION_ACTIVE,
   TRANSACTION_ERROR,
   TRANSACTION_INACTIVE,
 } from './constants.js';
+import { stringify } from './utils/string.js';
 
 export class PostgresClient {
   pid = 0;
@@ -137,7 +137,9 @@ export class PostgresClient {
         }
       }
     } catch (error) {
-      console.error(error);
+      if (error) {
+        console.error(error);
+      }
     }
   }
 
@@ -233,6 +235,40 @@ export class PostgresClient {
     return this.connection.disconnect(error);
   }
 
+  isKeepAlive() {
+    return (
+      this.task !== null || this.queue.length > 0 || this.listeners.size > 0
+    );
+  }
+
+  async onReconnected() {
+    if (this.listeners.size) {
+      await this.query('LISTEN ' + [...this.listeners.keys()].join(';LISTEN '));
+    }
+  }
+
+  async listen(name, action) {
+    if (typeof action !== 'function') {
+      throw PostgresError.of('Listening handler must be function');
+    }
+
+    this.listeners.set(name, action);
+    await this.query(`LISTEN ${name}`);
+  }
+
+  async unlisten(name) {
+    if (this.listeners.delete(name)) {
+      await this.query(`UNLISTEN ${name}`);
+    }
+  }
+
+  async notify(name, value) {
+    await this.query('SELECT pg_catalog.pg_notify($1::text, $2::text)', [
+      name,
+      value === undefined ? undefined : stringify(value),
+    ]);
+  }
+
   async disconnect(error) {
     if (error) {
       await this.connection.disconnect(error);
@@ -242,7 +278,3 @@ export class PostgresClient {
     }
   }
 }
-
-PostgresClient.prototype.notify = notify;
-PostgresClient.prototype.listen = listen;
-PostgresClient.prototype.unlisten = unlisten;

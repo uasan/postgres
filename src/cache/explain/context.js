@@ -21,20 +21,13 @@ export class ContextExplain {
   }
 
   static async create(task) {
-    const sql = `BEGIN;
-    SET LOCAL random_page_cost TO 100000;
-
-    --SET LOCAL enable_seqscan TO 0;
-    SET LOCAL enable_nestloop TO 0;
-    
-    --SET LOCAL from_collapse_limit TO 1;
-    --SET LOCAL join_collapse_limit TO 1;
-    
-    EXPLAIN (VERBOSE true, FORMAT JSON, COSTS false, GENERIC_PLAN true)
-    ${task.sql};
-    ROLLBACK`;
-
-    const plans = await task.client.prepare().setDataAsValue().execute(sql);
+    const plans = await task.client
+      .prepare()
+      .setDataAsValue()
+      .execute(
+        'EXPLAIN (VERBOSE true, FORMAT JSON, COSTS false, GENERIC_PLAN true)' +
+          task.sql
+      );
 
     console.dir(plans, {
       depth: null,

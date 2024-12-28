@@ -5,6 +5,7 @@ export class Table {
 
   name = '';
   schema = '';
+  fullName = '';
 
   keys = [];
   cols = [];
@@ -14,8 +15,8 @@ export class Table {
     const column = new Column();
 
     column.name = name;
-
     this.columns.set(name, column);
+
     return column;
   }
 

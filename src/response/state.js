@@ -13,6 +13,10 @@ export function setNoData(task) {
     task.reject(task.errorNoData);
   } else if (task.onReady === noop) {
     task.onReady = resolveData;
+
+    if (task.cache) {
+      task.cache.save();
+    }
   }
 }
 

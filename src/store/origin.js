@@ -1,7 +1,7 @@
 import { TypesMap } from '../protocol/types.js';
 import { Table } from './table.js';
 
-const databases = new Map();
+const origins = new Map();
 
 export class Origin {
   schemas = new Map();
@@ -13,6 +13,7 @@ export class Origin {
 
     table.name = name;
     table.schema = schema;
+    table.fullName = schema + '.' + name;
 
     if (this.schemas.has(schema)) {
       this.schemas.get(schema).set(name, table);
@@ -43,12 +44,12 @@ export class Origin {
   static get({ path, host, port, database }) {
     const key = (path || host + ':' + port) + '/' + database;
 
-    if (databases.has(key)) {
-      return databases.get(key);
+    if (origins.has(key)) {
+      return origins.get(key);
     }
 
     const db = new this();
-    databases.set(key, db);
+    origins.set(key, db);
     return db;
   }
 }

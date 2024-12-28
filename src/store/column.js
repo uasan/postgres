@@ -4,4 +4,7 @@ export class Column {
 
   position = 0;
   isKey = false;
+
+  oldValue = undefined;
+  newValue = undefined;
 }

@@ -27,8 +27,8 @@ async function test() {
     $14::int4[] AS "int4[]",
     $15::text[] AS "text[]",
     $16::uuid[] AS "uuid[]",
+    $17::pg_lsn::text AS lsn,
     '{}'::text[] AS "empty[]",
-    '{pg_catalog.pg_policy}'::regclass[],
     '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest"`;
 
   const values = [
@@ -54,6 +54,7 @@ async function test() {
       'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
       'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
     ],
+    25571522192n,
   ];
 
   const result = await db.query(sql, values);

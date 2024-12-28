@@ -1,6 +1,6 @@
 import { BigInt, identity } from '#native';
 import { types } from '../protocol/types.js';
-import { ensureFinite } from '../utils/number.js';
+import { ensureFinite, slashLSN } from '../utils/number.js';
 
 const decodeInt2 = ({ view, offset }) => view.getInt16(offset);
 const decodeInt4 = ({ view, offset }) => view.getInt32(offset);
@@ -40,6 +40,11 @@ function encodeFloat8(writer, value) {
 
 const serializeBigInt = value => BigInt(value).toString();
 const serializeNumber = value => ensureFinite(Number(value)).toString();
+
+export const serializeLSN = value =>
+  slashLSN(BigInt(value).toString(16).toUpperCase());
+
+export const deserializeLSN = value => BigInt('0x' + value.replace('/', ''));
 
 types
   .addType({
@@ -161,5 +166,5 @@ types
     quote: identity,
     decode: decodeUint8,
     encode: encodeUint8,
-    serialize: serializeBigInt,
+    serialize: serializeLSN,
   });

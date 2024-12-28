@@ -38,7 +38,7 @@ class UnderlyingSink {
   }
 
   async close() {
-    this.writer.setBytes(MESSAGE_COPY_DONE).unlock();
+    this.writer.type(MESSAGE_COPY_DONE).end().sync().flush().unlock();
 
     try {
       await this.task;
@@ -140,7 +140,7 @@ class Writer {
     }
 
     this.isClosed = true;
-    this.writer.setBytes(MESSAGE_COPY_DONE).unlock();
+    this.writer.type(MESSAGE_COPY_DONE).end().sync().flush().unlock();
 
     try {
       return await this.task;

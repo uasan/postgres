@@ -17,36 +17,60 @@ const replica = new PostgresReplication({
   database: 'smartapps',
 });
 
-function onChange({ schema, name }, action, newValues, oldValues) {
-  console.log(
-    action + ': ' + schema + '.' + name,
-    {
-      newValues,
-      oldValues,
-    },
-    '\n'
-  );
+function setOldValues(fields, column) {
+  fields[column.name] = column.oldValue;
+  return fields;
+}
+
+function setNewValues(fields, column) {
+  fields[column.name] = column.newValue;
+  return fields;
 }
 
 const handler = {
-  onDelete(table, oldValues) {
-    onChange(table, 'DELETE', undefined, oldValues);
+  onBegin(state) {
+    console.log('');
+    console.log('BEGIN:', state);
   },
 
-  onUpdate(table, newValues, oldValues) {
-    onChange(table, 'UPDATE', newValues, oldValues);
+  onInsert(state, table) {
+    console.log('INSERT:', table.fullName, {
+      ...state,
+      new: table.cols.reduce(setNewValues, {}),
+    });
   },
 
-  onInsert(table, newValues) {
-    onChange(table, 'INSERT', newValues);
+  onUpdate(state, table) {
+    console.log('UPDATE:', table.fullName, {
+      ...state,
+      old: table.cols.reduce(setOldValues, {}),
+      new: table.cols.reduce(setNewValues, {}),
+    });
   },
 
-  onTruncate(table) {
-    onChange(table, 'TRUNCATE');
+  onDelete(state, table) {
+    console.log('DELETE:', table.fullName, {
+      ...state,
+      old: table.cols.reduce(setOldValues, {}),
+    });
   },
 
-  onMessage(prefix, payload) {
-    console.log('MESSAGE: ', { prefix, payload });
+  onTruncate(state, table) {
+    console.log('TRUNCATE:', table.fullName, state);
+  },
+
+  onMessage(state, message) {
+    console.log('MESSAGE:', {
+      ...state,
+      message: {
+        type: message.type,
+        payload: message.text(),
+      },
+    });
+  },
+
+  onCommit(state) {
+    console.log('COMMIT:', state, '\n');
   },
 };
 
@@ -68,6 +92,12 @@ async function test() {
 
     SELECT pg_logical_emit_message(true, 'my_prefix', 'Text Payload');
   `);
+
+  // setTimeout(async () => {
+  //   console.log(
+  //     await replica.query(`SELECT to_json(_.*) FROM pg_replication_slots AS _`)
+  //   );
+  // }, 1000);
 }
 
-test().catch(console.error);
+await test().catch(console.error);

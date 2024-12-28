@@ -16,3 +16,8 @@ export function parseInt16(string) {
   if (isNaN(n)) throw null;
   return n;
 }
+
+export const slashLSN = text =>
+  text.length > 8
+    ? text.slice(0, text.length - 8) + '/' + text.slice(text.length - 8)
+    : '0/' + text;

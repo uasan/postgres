@@ -8,13 +8,14 @@ import { TRANSACTION_INACTIVE } from './constants.js';
 import { Slot } from './replica/slot.js';
 import { Origin } from './store/origin.js';
 import { WAL } from './replica/wal.js';
+import { sendCopyDone } from './replica/copy.js';
+import { LSN } from './replica/lsn.js';
 
 export class PostgresReplication {
   pid = 0;
   secret = 0;
   transactions = 0;
 
-  wal = null;
   task = null;
   types = null;
   stream = null;
@@ -23,17 +24,19 @@ export class PostgresReplication {
   waitReady = null;
 
   isReady = true;
-  isIsolated = false;
+  isIsolated = true;
+  isCopyMode = false;
 
   state = TRANSACTION_INACTIVE;
 
-  listeners = new Map();
-
-  slot = new Slot(this);
   queue = new Queue();
   reader = new Reader(this);
   writer = new Writer(this);
   connection = new Connection(this);
+
+  lsn = new LSN(this);
+  wal = new WAL(this);
+  slot = new Slot(this);
 
   constructor(options) {
     this.options = normalizeOptions(options);
@@ -43,26 +46,66 @@ export class PostgresReplication {
     this.options.timeout = 0;
     this.options.parameters.replication = 'database';
     this.options.parameters.session_replication_role = 'replica';
+
+    this.wal.init(this);
   }
 
-  async subscribe(names, handler) {
-    this.wal = new WAL(this, handler);
-    await this.slot.start(names);
+  async subscribe(publications, handler) {
+    this.wal.handler = handler;
+    this.slot.publications = publications;
+
+    await this.slot.create();
+    await this.slot.start();
   }
 
   prepare() {
     return new Task(this);
   }
 
-  query(sql) {
-    return new Task(this).execute(sql);
+  async query(sql) {
+    if (this.isCopyMode) {
+      await sendCopyDone(this);
+    }
+    return await new Task(this).execute(sql);
   }
 
-  clear() {}
+  clear() {
+    this.pid = 0;
+    this.secret = 0;
+
+    this.stream = null;
+    this.isReady = true;
+    this.isCopyMode = false;
+
+    this.reader.clear();
+    this.writer.clear();
+
+    if (this.waitReady) {
+      this.waitReady.reject();
+      this.waitReady = null;
+    }
+
+    for (let task = this.queue.head; task; task = task.next) {
+      task.isSent = false;
+      task.statement = null;
+    }
+  }
+
+  onReconnected() {
+    if (this.slot.lsn) {
+      this.slot.reconnect();
+    }
+  }
+
+  isKeepAlive() {
+    return true;
+  }
 
   cancelTasks() {}
 
   abort(error) {
-    console.error(error);
+    if (error) {
+      console.error(error);
+    }
   }
 }

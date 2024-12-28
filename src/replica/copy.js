@@ -1,8 +1,8 @@
-import { now } from '#native';
-import { MESSAGE_COPY_DATA } from '../protocol/messages.js';
+import { MESSAGE_COPY_DONE } from '../protocol/messages.js';
 
-function setData({ wal, reader }) {
+function setData({ lsn, wal, reader }) {
   if (reader.bytes[reader.offset] === 119) {
+    lsn.setWAL(wal, reader.view.getBigUint64(reader.offset + 1));
     reader.offset += 25;
 
     switch (reader.bytes[reader.offset++]) {
@@ -26,14 +26,6 @@ function setData({ wal, reader }) {
         wal.onDelete(reader);
         break;
 
-      case 67:
-        wal.onCommit(reader);
-        break;
-
-      case 84:
-        wal.onTruncate(reader);
-        break;
-
       case 89:
         wal.onType(reader);
         break;
@@ -42,30 +34,40 @@ function setData({ wal, reader }) {
         wal.onMessage(reader);
         break;
 
+      case 84:
+        wal.onTruncate(reader);
+        break;
+
       case 79:
         wal.onOrigin(reader);
         break;
+
+      case 67:
+        wal.onCommit(reader);
+        lsn.send(lsn.bigint);
+        break;
     }
   } else if (reader.bytes[reader.ending - 1]) {
-    wal.lsn = reader.view.getBigUint64(reader.offset + 1);
-    standbyStatusUpdate(reader.client);
-    console.log('PONG', wal.lsn);
+    lsn.send(reader.view.getBigUint64(reader.offset + 1));
   }
 }
 
-function standbyStatusUpdate(client) {
-  client.writer
-    .type(MESSAGE_COPY_DATA)
-    .setUint8(114)
-    .setBigUint64(client.wal.lsn)
-    .setBigUint64(client.wal.lsn)
-    .setBigUint64(client.wal.lsn)
-    .setBigInt64(now())
-    .setUint8(0)
-    .end();
-}
-
 export function copyBothResponse(client) {
+  client.writer.lock();
+
+  client.isCopyMode = true;
   client.task.setData = setData;
   client.task.resolve();
+}
+
+export async function sendCopyDone(client) {
+  client.isCopyMode = false;
+  client.slot.lsn = client.lsn.toString();
+  client.writer.type(MESSAGE_COPY_DONE).end().flush().unlock();
+
+  await client.task;
+  console.log('DONE', client.slot.lsn);
+
+  client.waitReady = Promise.withResolvers();
+  client.waitReady.promise.then(client.slot.restart);
 }

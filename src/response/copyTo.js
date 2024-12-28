@@ -45,6 +45,6 @@ export function copyData(client) {
 
 export function copyDone({ task, writer }) {
   writer.unlock();
-  task.setData = noop;
+  //task.setData = noop;
   task.controller = null;
 }

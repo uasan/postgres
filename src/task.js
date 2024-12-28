@@ -1,4 +1,4 @@
-import { noop, nullArray } from '#native';
+import { noop, nullArray, nullObject } from '#native';
 import { Query } from './statements/query.js';
 import { Describer } from './statements/describer.js';
 import { File } from './response/saveToFile.js';
@@ -19,7 +19,7 @@ import {
   setDataEntries,
   setValueToArray,
 } from './response/data.js';
-import { CacheResults } from './cache/results.js';
+import { checkCache } from './cache/results.js';
 
 export class Task {
   sql = '';
@@ -29,7 +29,6 @@ export class Task {
 
   isSent = false;
   isData = false;
-  isError = false;
   isCorked = false;
   isNoDecode = false;
   isDescribe = false;
@@ -70,7 +69,7 @@ export class Task {
     if (values) {
       this.values = values;
 
-      if (this.cache && CacheResults.check(this)) {
+      if (this.cache && checkCache(this)) {
         return this.data;
       }
     } else {
@@ -89,7 +88,7 @@ export class Task {
     this.isExecuted = true;
 
     try {
-      return this.cache ? CacheResults.save(this, await this) : await this;
+      return await this;
     } catch (error) {
       //throw error;
       throw new PostgresError(error);
@@ -101,7 +100,7 @@ export class Task {
     this.resolve = resolve;
 
     if (this.client.stream === null) {
-      this.client.connection.connect().catch(noop);
+      this.client.connection.connect().catch(console.error);
     }
 
     if (
@@ -189,7 +188,7 @@ export class Task {
   }
 
   setCache() {
-    this.isCache = true;
+    this.cache = nullObject;
     return this;
   }
 

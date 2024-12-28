@@ -1,7 +1,6 @@
 import { createConnection } from 'net';
 import { handshake } from '../request/init.js';
 import { randomTimeout } from '#native';
-import { restoreListeners } from '../request/listen.js';
 import { MESSAGE_TERMINATE } from './messages.js';
 import { noop } from '../utils/native.js';
 import { PostgresError } from '../response/error.js';
@@ -15,6 +14,7 @@ export class Connection {
   isEnded = false;
   isAbortTransaction = false;
 
+  task = null;
   error = null;
   connected = null;
   connecting = null;
@@ -72,7 +72,7 @@ export class Connection {
   };
 
   onTimeout = () => {
-    if (this.isKeepAlive()) {
+    if (this.client.isKeepAlive()) {
       this.client.stream.setTimeout(
         this.client.options.timeout,
         this.onTimeout
@@ -128,32 +128,38 @@ export class Connection {
       .setKeepAlive(true, 60_000)
       .setTimeout(this.client.options.timeout, this.onTimeout);
 
+    this.client.writer.lock();
+
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();
 
-    if (this.client.task) {
+    if (this.client.task && this.task !== this.client.task) {
       this.client.queue.unshift(this.client.task);
     }
 
-    this.client.task = this.client.prepare();
-    this.client.task.reject = this.connecting.reject;
-    this.client.task.onReady = this.connecting.resolve;
+    this.task ??= this.client.prepare();
+    this.client.task = this.task;
 
-    this.client.writer.lock();
+    this.task.reject = this.connecting.reject;
+    this.task.onReady = this.connecting.resolve;
 
     try {
       await this.connecting.promise;
 
-      this.retries = 0;
       this.isReady = true;
 
-      if (this.client.listeners.size) {
-        restoreListeners.call(this.client);
+      if (this.retries) {
+        this.retries = 0;
+        this.client.onReconnected();
       }
 
       this.client.writer.unlock();
-      this.client.task?.send();
 
+      if (this.task !== this.client.task) {
+        this.client.task?.send();
+      }
+
+      this.task = null;
       this.connected.resolve();
     } catch (e) {
       this.connecting = null;
@@ -170,16 +176,8 @@ export class Connection {
     }
   }
 
-  isKeepAlive() {
-    return (
-      this.client.task !== null ||
-      this.client.queue.length > 0 ||
-      this.client.listeners.size > 0
-    );
-  }
-
   isNeedReconnect() {
-    return !this.isEnded && this.isKeepAlive();
+    return !this.isEnded && this.client.isKeepAlive();
   }
 
   async reconnect() {

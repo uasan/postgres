@@ -24,11 +24,11 @@ const db = isPostgres
 const { performance } = globalThis;
 
 const sql = `SELECT
-  'c5207a27-2614-4ed3-97e2-f3fdad40b3de'::uuid AS "int",
-  'c5207a27-2614-4ed3-97e2-f3fdad40b3de'::uuid AS "bool",
-  'c5207a27-2614-4ed3-97e2-f3fdad40b3de'::uuid AS "text",
-  'c5207a27-2614-4ed3-97e2-f3fdad40b3de'::uuid AS "uuid",
-  'c5207a27-2614-4ed3-97e2-f3fdad40b3de' AS "timestamptz"`;
+  $1::int,
+  $2::bool,
+  $3::text,
+  $4::uuid,
+  $5::timestamptz`;
 
 const values = [
   1,

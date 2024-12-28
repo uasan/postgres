@@ -65,8 +65,14 @@ export function commandComplete({ task, reader }) {
     task.onComplete(reader.getAscii().split(' '));
   } else if (task.isData) {
     task.resolve(task.data);
+
+    if (task.cache && reader.getAscii().startsWith('SELECT')) {
+      task.cache.save();
+    }
   } else {
     const words = reader.getAscii().split(' ');
+
+    //console.log('COMPLETE', words);
 
     switch (words[0]) {
       case 'UPDATE':
