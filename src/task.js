@@ -1,11 +1,14 @@
 import { noop, nullArray, nullObject } from '#native';
+
+import { checkCache } from './cache/task.js';
 import { Query } from './statements/query.js';
-import { Describer } from './statements/describer.js';
 import { File } from './response/saveToFile.js';
 import { Iterator } from './response/iterator.js';
 import { PostgresError } from './response/error.js';
+import { Describer } from './statements/describer.js';
 import { MESSAGE_QUERY } from './protocol/messages.js';
 import { getDescribeTable, makeCopyFromSQL } from './utils/copy.js';
+
 import {
   getData,
   initArray,
@@ -19,7 +22,6 @@ import {
   setDataEntries,
   setValueToArray,
 } from './response/data.js';
-import { checkCache } from './cache/results.js';
 
 export class Task {
   sql = '';

@@ -4,6 +4,8 @@ import { Table } from './table.js';
 const origins = new Map();
 
 export class Origin {
+  cache = null;
+
   schemas = new Map();
   relations = new Map();
   types = new TypesMap();
@@ -13,7 +15,6 @@ export class Origin {
 
     table.name = name;
     table.schema = schema;
-    table.fullName = schema + '.' + name;
 
     if (this.schemas.has(schema)) {
       this.schemas.get(schema).set(name, table);

@@ -88,7 +88,6 @@ export function commandComplete({ task, reader }) {
         break;
 
       case 'SELECT':
-      case 'FETCH':
         setNoData(task);
         break;
 

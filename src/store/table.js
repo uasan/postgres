@@ -2,10 +2,10 @@ import { Column } from './column.js';
 
 export class Table {
   oid = 0;
+  cache = null;
 
   name = '';
   schema = '';
-  fullName = '';
 
   keys = [];
   cols = [];
@@ -22,5 +22,9 @@ export class Table {
 
   getColumn(name) {
     return this.columns.get(name) ?? this.setColumn(name);
+  }
+
+  getName() {
+    return `"${this.schema}"."${this.name}"`;
   }
 }

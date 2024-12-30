@@ -29,19 +29,18 @@ function setNewValues(fields, column) {
 
 const handler = {
   onBegin(state) {
-    console.log('');
     console.log('BEGIN:', state);
   },
 
   onInsert(state, table) {
-    console.log('INSERT:', table.fullName, {
+    console.log('INSERT:', table.getName(), {
       ...state,
       new: table.cols.reduce(setNewValues, {}),
     });
   },
 
   onUpdate(state, table) {
-    console.log('UPDATE:', table.fullName, {
+    console.log('UPDATE:', table.getName(), {
       ...state,
       old: table.cols.reduce(setOldValues, {}),
       new: table.cols.reduce(setNewValues, {}),
@@ -49,14 +48,14 @@ const handler = {
   },
 
   onDelete(state, table) {
-    console.log('DELETE:', table.fullName, {
+    console.log('DELETE:', table.getName(), {
       ...state,
       old: table.cols.reduce(setOldValues, {}),
     });
   },
 
   onTruncate(state, table) {
-    console.log('TRUNCATE:', table.fullName, state);
+    console.log('TRUNCATE:', table.getName(), state);
   },
 
   onMessage(state, message) {
@@ -93,11 +92,11 @@ async function test() {
     SELECT pg_logical_emit_message(true, 'my_prefix', 'Text Payload');
   `);
 
-  // setTimeout(async () => {
-  //   console.log(
-  //     await replica.query(`SELECT to_json(_.*) FROM pg_replication_slots AS _`)
-  //   );
-  // }, 1000);
+  setTimeout(async () => {
+    console.log(
+      await replica.query(`SELECT to_json(_.*) FROM pg_replication_slots AS _`)
+    );
+  }, 1000);
 }
 
 await test().catch(console.error);

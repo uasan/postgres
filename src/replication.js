@@ -8,8 +8,9 @@ import { TRANSACTION_INACTIVE } from './constants.js';
 import { Slot } from './replica/slot.js';
 import { Origin } from './store/origin.js';
 import { WAL } from './replica/wal.js';
-import { sendCopyDone } from './replica/copy.js';
+//import { sendCopyDone } from './replica/copy.js';
 import { LSN } from './replica/lsn.js';
+import { PostgresClient } from './client.js';
 
 export class PostgresReplication {
   pid = 0;
@@ -20,6 +21,7 @@ export class PostgresReplication {
   types = null;
   stream = null;
   origin = null;
+  client = null;
   options = null;
   waitReady = null;
 
@@ -43,6 +45,8 @@ export class PostgresReplication {
     this.origin = Origin.get(options);
     this.types = this.origin.types;
 
+    this.client = new PostgresClient(options);
+
     this.options.timeout = 0;
     this.options.parameters.replication = 'database';
     this.options.parameters.session_replication_role = 'replica';
@@ -63,10 +67,10 @@ export class PostgresReplication {
   }
 
   async query(sql) {
-    if (this.isCopyMode) {
-      await sendCopyDone(this);
-    }
-    return await new Task(this).execute(sql);
+    // if (this.isCopyMode) {
+    //   await sendCopyDone(this);
+    // }
+    return await new Task(this.client).setDataAsValue().execute(sql);
   }
 
   clear() {

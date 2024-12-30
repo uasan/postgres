@@ -3,6 +3,7 @@ import { DEFAULT_PARAMS } from '../constants.js';
 
 export const normalizeOptions = ({
   signal,
+  cache,
   parameters,
   path = '',
   port = 5432,
@@ -19,6 +20,7 @@ export const normalizeOptions = ({
   port,
   host,
   path,
+  cache,
   signal,
   timeout,
   database,

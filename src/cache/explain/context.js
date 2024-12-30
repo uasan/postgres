@@ -1,26 +1,41 @@
-import { setRelations } from './relations.js';
-import { TableExplain } from './table.js';
+import { CacheOrigin } from '../nodes/origin.js';
+import { CacheTable } from '../nodes/table.js';
+import { setTablesPublications } from '../replica/publication.js';
+import { setConditions, setRelations } from './relations.js';
 
-export class ContextExplain {
+export class CacheContext {
+  origin = null;
   tables = new Map();
+  unTables = [];
 
   aliases = new Map();
   outputs = new Set();
   conditions = new Set();
 
-  constructor(plans) {
-    setRelations(this, plans);
+  constructor({ origin, options }) {
+    this.origin = origin;
+    origin.cache ??= new CacheOrigin(options);
   }
 
   setAlias(alias, schema, name) {
-    this.aliases.set(
-      alias,
-      this.tables.get(schema + '.' + name) ??
-        new TableExplain(this, schema, name)
-    );
+    const table = this.origin.getTable(schema, name);
+
+    if (this.tables.has(table) === false) {
+      table.cache ??= new CacheTable();
+
+      this.tables.set(table, {});
+
+      if (!table.oid && !this.unTables.includes(table)) {
+        this.unTables.push(table);
+      }
+    }
+
+    this.aliases.set(alias, table);
   }
 
   static async create(task) {
+    const context = new this(task.client);
+
     const plans = await task.client
       .prepare()
       .setDataAsValue()
@@ -29,11 +44,19 @@ export class ContextExplain {
           task.sql
       );
 
-    console.dir(plans, {
-      depth: null,
-      colors: true,
-    });
+    setRelations(context, plans);
 
-    return new this(plans);
+    if (context.unTables.length) {
+      await setTablesPublications(context);
+    }
+
+    setConditions(context);
+
+    // console.dir(context.tables, {
+    //   depth: null,
+    //   colors: true,
+    // });
+
+    return context;
   }
 }

@@ -49,7 +49,7 @@ function setContext(context, plan) {
   }
 }
 
-function setColumns(context) {
+export function setColumns(context) {
   for (let name of context.outputs) {
     if (name.includes('.')) {
       const index = name.indexOf('.');
@@ -69,7 +69,7 @@ function addCondition(context, sql) {
   }
 }
 
-function setConditions(context) {
+export function setConditions(context) {
   for (let sql of context.conditions) {
     sql;
   }
@@ -79,7 +79,4 @@ export function setRelations(context, plans) {
   for (const plan of plans) {
     setContext(context, plan);
   }
-
-  setColumns(context);
-  setConditions(context);
 }

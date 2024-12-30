@@ -1,8 +1,8 @@
 export const NULL = new Uint8Array([255, 255, 255, 255]);
 export const INT16_ONE_ONE = new Uint8Array([0, 1, 0, 1]);
 
-export const PREPARED_PORTAL = 80;
 export const PREPARED_QUERY = 83;
+export const PREPARED_PORTAL = 80;
 
 export const MESSAGES_EXEC_SYNC_FLUSH = new Uint8Array([
   69, 0, 0, 0, 9, 0, 0, 0, 0, 0, 83, 0, 0, 0, 4, 72, 0, 0, 0, 4,

@@ -69,10 +69,10 @@ export class WAL {
       const column = table.getColumn(reader.getString());
 
       column.position = i;
+      column.isKey = isKey;
       column.type = this.types.getType(reader.getUint32());
 
       if (isKey) {
-        column.isKey = true;
         table.keys.push(column);
       }
 

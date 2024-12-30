@@ -42,7 +42,7 @@ async function test() {
   // `;
 
   console.log('RESULT', await db.prepare().setCache().execute(sql, []));
-  console.log('RESULT', await db.prepare().setCache().execute(sql, []));
+  //console.log('RESULT', await db.prepare().setCache().execute(sql, []));
 }
 
 test().catch(console.error);

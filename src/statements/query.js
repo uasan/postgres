@@ -4,10 +4,10 @@ import {
   MESSAGE_BIND,
   MESSAGE_PARSE,
   INT16_ONE_ONE,
-  MESSAGE_DESCRIBE,
   PREPARED_QUERY,
-  MESSAGES_EXEC_SYNC_FLUSH,
   MESSAGE_EXECUTE,
+  MESSAGE_DESCRIBE,
+  MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
 import { makeErrorEncodeParameter } from '../utils/error.js';
 
