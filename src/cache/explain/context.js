@@ -23,11 +23,11 @@ export class CacheContext {
     if (this.tables.has(table) === false) {
       table.cache ??= new CacheTable();
 
-      this.tables.set(table, {});
-
       if (!table.oid && !this.unTables.includes(table)) {
         this.unTables.push(table);
       }
+
+      this.tables.set(table, new Map());
     }
 
     this.aliases.set(alias, table);
@@ -52,7 +52,7 @@ export class CacheContext {
 
     setConditions(context);
 
-    // console.dir(context.tables, {
+    // console.dir(plans, {
     //   depth: null,
     //   colors: true,
     // });

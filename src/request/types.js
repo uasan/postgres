@@ -47,7 +47,7 @@ async function onReadyResolveTypes() {
     const rows = await new Task(task.client).forceExecute(SELECT_TYPES, [
       [...task.unknownTypes],
     ]);
-
+    console.count('onReadyResolveTypes');
     for (let i = 0; i < rows.length; i++) {
       task.client.types.setType(rows[i]);
     }

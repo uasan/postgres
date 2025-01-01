@@ -32,6 +32,7 @@ async function test() {
     SELECT coalesce("skill_name", null) AS dd
     FROM smartlibrary.skills
     LEFT JOIN smartpeople.users_skills AS us ON us.uid = 'c5207a27-2614-4ed3-97e2-f3fdad40b3de'
+    LEFT JOIN ludicloud.users_roles USING(uid)
     WHERE us.uid IS NULL
     LIMIT 1
   `;
@@ -41,8 +42,28 @@ async function test() {
   // FROM smartlibrary.skills
   // `;
 
-  console.log('RESULT', await db.prepare().setCache().execute(sql, []));
+  await db.prepare().setCache().execute(sql, []);
   //console.log('RESULT', await db.prepare().setCache().execute(sql, []));
+
+  setTimeout(
+    async () =>
+      await db.prepare().execute(`
+    INSERT INTO ludicloud.users_roles (uid, role)
+      VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user');
+
+    UPDATE ludicloud.users_roles
+    SET role = 'smartpeople_hr'
+    WHERE uid = 'c9a2af07-f4ba-4097-bf56-19abe720aa4c' AND role = 'smartpeople_user';
+
+    DELETE FROM ludicloud.users_roles
+    WHERE uid = 'c9a2af07-f4ba-4097-bf56-19abe720aa4c' AND role = 'smartpeople_hr';
+
+    --TRUNCATE ludicloud.users_roles;
+
+    SELECT pg_logical_emit_message(true, 'my_prefix', 'Text Payload');
+  `),
+    100
+  );
 }
 
 test().catch(console.error);

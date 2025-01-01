@@ -8,19 +8,27 @@ async function saveCacheResult() {
 
   const stm = this.task.statement;
 
-  stm.cache ??= await CacheQuery.create(this.task);
-  stm.cache.set(this.key, this.task.data);
+  try {
+    stm.cache ??= await CacheQuery.create(this.task);
+    stm.cache.set(this.key, this.task.data);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export function checkCache(task) {
-  const key = stringify(task.values);
-  const stm = task.client.statements.get(task.sql);
+  if (task.client.isTransaction()) {
+    task.cache = null;
+  } else {
+    const key = stringify(task.values);
+    const stm = task.client.statements.get(task.sql);
 
-  if (stm?.cache?.has(key)) {
-    task.data = stm.cache.get(key);
-    return true;
+    if (stm?.cache?.has(key)) {
+      task.data = stm.cache.get(key);
+      return true;
+    }
+
+    task.cache = { key, task, save: saveCacheResult };
   }
-
-  task.cache = { key, task, save: saveCacheResult };
   return false;
 }

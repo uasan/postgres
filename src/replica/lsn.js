@@ -11,7 +11,7 @@ export class LSN {
   }
 
   send(bigint) {
-    console.log('LSN', bigint);
+    //console.log('LSN', bigint);
 
     this.bigint = bigint;
     this.writer

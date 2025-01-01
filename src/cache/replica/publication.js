@@ -1,7 +1,12 @@
-import { selectTableMeta } from './queries.js';
+import { getColsName, selectTableMeta } from './queries.js';
 
 export async function setTablesPublications({ origin, unTables }) {
-  const rows = await origin.cache.replica.query(selectTableMeta(unTables));
+  const pubs = [];
+  const drops = [];
+
+  const rows = await origin.cache.replica.query(
+    selectTableMeta(origin, unTables)
+  );
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -28,7 +33,29 @@ export async function setTablesPublications({ origin, unTables }) {
         }
       }
 
-      console.log(row);
+      if (row.isPubColumns === false) {
+        if (row.isPubTable) {
+          drops.push(table.getName());
+        }
+        pubs.push(
+          table.getName() + '(' + table.keys.map(getColsName).join(',') + ')'
+        );
+      }
     }
+  }
+
+  if (pubs.length) {
+    let sql = origin.cache.publication;
+
+    if (rows.some(row => row.isPub)) {
+      sql = 'ALTER PUBLICATION ' + sql;
+      if (drops.length) sql += ' DROP TABLE ' + drops.join(',');
+      sql += ' ADD TABLE ' + pubs.join(',');
+    } else {
+      sql = 'CREATE PUBLICATION ' + sql;
+      sql += ' FOR TABLE ' + pubs.join(',');
+    }
+
+    await origin.cache.replica.query(sql);
   }
 }

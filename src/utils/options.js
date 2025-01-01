@@ -2,6 +2,7 @@ import { noop } from '#native';
 import { DEFAULT_PARAMS } from '../constants.js';
 
 export const normalizeOptions = ({
+  ns = '_',
   signal,
   cache,
   parameters,
@@ -12,11 +13,11 @@ export const normalizeOptions = ({
   database = 'postgres',
   username = 'postgres',
   password = '',
-  sysPrefix = '_',
   onMessage = noop,
   maxConnections = 1,
   isSaveStatements = true,
 } = {}) => ({
+  ns,
   port,
   host,
   path,
@@ -26,7 +27,6 @@ export const normalizeOptions = ({
   database,
   username,
   password,
-  sysPrefix,
   onMessage,
   maxConnections,
   isSaveStatements,

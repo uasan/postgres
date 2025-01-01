@@ -1,6 +1,9 @@
-const getTablesName = table => table.getName();
+import { quoteString } from '../../utils/string.js';
 
-export function selectTableMeta(tables) {
+export const getTablesName = table => table.getName();
+export const getColsName = column => '"' + column.name + '"';
+
+export function selectTableMeta(origin, tables) {
   return `SELECT json_agg(_.*) FROM (
   SELECT
     t.oid::bigint,
@@ -20,7 +23,7 @@ export function selectTableMeta(tables) {
   ) AS t
   LEFT JOIN pg_catalog.pg_attribute AS c ON c.attrelid = t.oid AND c.attnum > 0 AND c.atttypid > 0
   LEFT JOIN pg_catalog.pg_index AS i ON i.indrelid = t.oid AND c.attnum = ANY(i.indkey) AND (i.indisreplident OR (i.indisprimary AND t.relreplident = 'd'))
-  LEFT JOIN pg_catalog.pg_publication AS p ON p.pubname = 'cache'
+  LEFT JOIN pg_catalog.pg_publication AS p ON p.pubname = ${quoteString(origin.cache.publication)}
   LEFT JOIN pg_catalog.pg_publication_rel AS pr ON pr.prpubid = p.oid AND pr.prrelid = t.oid
   GROUP BY t.oid, t.pos
   ORDER BY t.pos

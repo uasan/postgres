@@ -74,7 +74,7 @@ const handler = {
 };
 
 async function test() {
-  await replica.subscribe(['cache'], handler);
+  await replica.subscribe(['_cache'], handler);
 
   await db.query(`
     INSERT INTO ludicloud.users_roles (uid, role)

@@ -11,7 +11,7 @@ export class Slot {
   }
 
   async create() {
-    this.name ||= getRandomString(this.client.options.sysPrefix);
+    this.name ||= getRandomString(this.client.options.ns);
 
     const { consistent_point } = await this.client
       .prepare()
@@ -52,7 +52,7 @@ export class Slot {
     }
   }
 
-  restart = async () => {
+  restart = () => {
     this.start().catch(console.error);
   };
 }
