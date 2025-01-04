@@ -15,7 +15,6 @@ export const normalizeOptions = ({
   password = '',
   onMessage = noop,
   maxConnections = 1,
-  isSaveStatements = true,
 } = {}) => ({
   ns,
   port,
@@ -29,7 +28,6 @@ export const normalizeOptions = ({
   password,
   onMessage,
   maxConnections,
-  isSaveStatements,
   parameters: {
     ...DEFAULT_PARAMS,
     ...parameters,

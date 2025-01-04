@@ -39,6 +39,7 @@ export class PostgresClient {
   listeners = new Map();
   statements = new Map();
 
+  queries = new Set();
   queue = new Queue();
   reader = new Reader(this);
   writer = new Writer(this);
@@ -50,6 +51,7 @@ export class PostgresClient {
       this.options = options;
       this.types = pool.types;
       this.origin = pool.origin;
+      this.statements = pool.statements;
     } else {
       this.options = normalizeOptions(options);
       this.origin = Origin.get(options);
@@ -177,7 +179,7 @@ export class PostgresClient {
 
     this.reader.clear();
     this.writer.clear();
-    this.statements.clear();
+    this.queries.clear();
 
     if (this.waitReady) {
       this.waitReady.reject();

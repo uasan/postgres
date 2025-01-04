@@ -3,10 +3,12 @@ export class CacheTable {
   queries = new Set();
 
   invalidate(xid) {
-    this.version = xid;
+    if (this.version !== xid) {
+      this.version = xid;
 
-    for (const query of this.queries) {
-      query.clear();
+      for (const query of this.queries) {
+        query.clear();
+      }
     }
   }
 }

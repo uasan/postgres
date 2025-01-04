@@ -23,11 +23,11 @@ export function rowDescription({ task, reader }) {
 
   for (let i = 0; i < length; i++) {
     reader.ending = reader.bytes.indexOf(0, reader.offset);
+
     columns.push(reader.getTextUTF8());
     reader.offset = reader.ending + 7;
 
     decoders.push(task.isNoDecode ? rawType : getType(task, reader.getInt32()));
-
     reader.offset += 8;
   }
 
@@ -102,7 +102,6 @@ export function emptyQueryResponse({ task }) {
 }
 
 export function readyForQuery(client) {
-  const { task } = client;
   const state = client.reader.bytes[client.reader.offset];
 
   if (client.state !== state) {
@@ -111,11 +110,8 @@ export function readyForQuery(client) {
     client.transactions = state === TRANSACTION_ACTIVE ? 1 : 0;
   }
 
-  task.onReady();
-
-  if (client.task === task) {
-    client.task = client.queue.dequeue();
-  }
+  client.task.onReady();
+  client.task = client.queue.dequeue();
 
   if (client.task === null) {
     client.isReady = true;
@@ -127,6 +123,11 @@ export function readyForQuery(client) {
   }
 }
 
+export function parseComplete({ task }) {
+  if (task.statement.isReady) {
+    task.onDescribe();
+  }
+}
+
 export function bindComplete() {}
-export function parseComplete() {}
 export function closeComplete() {}

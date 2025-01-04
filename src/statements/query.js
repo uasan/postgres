@@ -1,4 +1,5 @@
 import { nullArray } from '#native';
+import { nextID, textEncoder } from '../utils/string.js';
 import {
   NULL,
   MESSAGE_BIND,
@@ -10,8 +11,6 @@ import {
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
 import { makeErrorEncodeParameter } from '../utils/error.js';
-
-import { textEncoder } from '../utils/string.js';
 
 export class Query {
   name = '';
@@ -25,10 +24,10 @@ export class Query {
   encoders = [];
 
   constructor(task) {
-    if (task.client.options.isSaveStatements) {
-      task.client.statements.set(task.sql, this);
-      this.name = task.client.statements.size.toString(36);
-    }
+    this.name = nextID(task.client.options);
+
+    task.client.queries.add(this);
+    task.client.statements.set(task.sql, this);
 
     task.client.writer
       .lock()
@@ -46,6 +45,7 @@ export class Query {
 
   onError(task) {
     task.client.writer.sync().unlock();
+    task.client.queries.delete(this);
     task.client.statements.delete(task.sql);
   }
 
@@ -64,6 +64,18 @@ export class Query {
     ]);
 
     return this;
+  }
+
+  adopt(task) {
+    task.client.queries.add(this);
+    task.client.writer
+      .lock()
+      .type(MESSAGE_PARSE)
+      .string(this.name)
+      .string(task.sql)
+      .setInt16(0)
+      .end()
+      .flush();
   }
 
   execute(task) {

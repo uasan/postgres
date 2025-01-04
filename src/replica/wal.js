@@ -26,7 +26,6 @@ function setTupleData(reader, cols, key) {
 
 export class WAL {
   types = null;
-  client = null;
   origin = null;
   handler = null;
   relations = null;

@@ -57,8 +57,8 @@ async function test() {
     25571522192n,
   ];
 
-  const result = await db.query(sql, values);
-  console.log(JSON.parse(JSON.stringify(result[0])));
+  const result = await db.prepare().setDataAsObject().execute(sql, values);
+  console.log(JSON.parse(JSON.stringify(result)));
 
   await db.disconnect();
 }

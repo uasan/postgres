@@ -3,32 +3,35 @@ export const handler = {
     console.log('BEGIN:', state);
   },
 
-  onInsert({ xid }, { cache }) {
-    if (cache.version !== xid) {
-      cache.invalidate(xid);
+  onInsert({ xid }, { cache, keys }) {
+    cache?.invalidate(xid);
+
+    for (let i = 0; i < keys.length; i++) {
+      keys[i].cache?.invalidate(xid, keys[i].newValue);
     }
   },
 
-  onUpdate({ xid }, { cache }) {
-    if (cache.version !== xid) {
-      cache.invalidate(xid);
+  onUpdate({ xid }, { cache, keys }) {
+    cache?.invalidate(xid);
+
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i].oldValue !== undefined) {
+        keys[i].cache?.invalidate(xid, keys[i].oldValue);
+      }
+      keys[i].cache?.invalidate(xid, keys[i].newValue);
     }
   },
 
   onDelete({ xid }, { cache, keys }) {
-    if (cache.version !== xid) {
-      cache.invalidate(xid);
-    }
+    cache?.invalidate(xid);
 
     for (let i = 0; i < keys.length; i++) {
-      keys[i].cache?.get(keys[i].oldValue)?.invalidate(xid);
+      keys[i].cache?.invalidate(xid, keys[i].oldValue);
     }
   },
 
   onTruncate({ xid }, { cache }) {
-    if (cache.version !== xid) {
-      cache.invalidate(xid);
-    }
+    cache?.invalidate(xid);
   },
 
   onMessage() {

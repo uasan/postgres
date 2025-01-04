@@ -34,7 +34,6 @@ export class Task {
   isCorked = false;
   isNoDecode = false;
   isDescribe = false;
-  isExecuted = false;
   isSimpleQuery = false;
 
   next = null;
@@ -78,22 +77,29 @@ export class Task {
       this.isSimpleQuery = true;
     }
 
-    if (this.client.task !== this) {
-      if (this.client.task) {
-        this.client.queue.enqueue(this);
-      } else {
-        this.client.task = this;
-        this.client.isReady = false;
-      }
+    if (this.client.task === null) {
+      this.client.task = this;
+      this.client.isReady = false;
+    } else {
+      this.client.queue.enqueue(this);
     }
-
-    this.isExecuted = true;
 
     try {
       return await this;
     } catch (error) {
       //throw error;
       throw new PostgresError(error);
+    }
+  }
+
+  forceExecute(sql, values) {
+    this.isCorked = true;
+    this.client.task = null;
+
+    try {
+      return this.execute(sql, values);
+    } finally {
+      this.send();
     }
   }
 
@@ -129,9 +135,18 @@ export class Task {
       }
     } else if (this.client.statements.has(this.sql)) {
       this.statement = this.client.statements.get(this.sql);
-      this.statement.execute(this);
+
+      if (this.client.queries.has(this.statement)) {
+        this.statement.execute(this);
+      } else {
+        this.statement.adopt(this);
+      }
     } else {
       this.statement = new Query(this);
+    }
+
+    if (this.isCorked) {
+      this.client.writer.lock();
     }
 
     return this.next;
@@ -156,15 +171,6 @@ export class Task {
     return this;
   }
 
-  forceExecute(sql, values) {
-    this.client.task = this;
-    const promise = this.execute(sql, values);
-
-    if (!this.isSent) this.send();
-
-    return promise;
-  }
-
   describe(sql) {
     this.isDescribe = true;
     return this.execute(sql, nullArray);
@@ -184,13 +190,17 @@ export class Task {
   onDescribe() {
     this.statement.execute(this);
 
-    if (this.limit === 0) {
+    if (this.limit === 0 && !this.isCorked) {
       this.client.writer.unlock();
     }
   }
 
-  setCache() {
-    this.cache = nullObject;
+  setCache(options) {
+    if (options === false) {
+      this.cache = null;
+    } else {
+      this.cache = nullObject;
+    }
     return this;
   }
 

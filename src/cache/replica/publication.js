@@ -1,8 +1,9 @@
 import { getColsName, selectTableMeta } from './queries.js';
 
-export async function setTablesPublications({ origin, unTables }) {
+export async function setTablesPublications(context) {
   const pubs = [];
   const drops = [];
+  const { origin, unTables } = context;
 
   const rows = await origin.cache.replica.query(
     selectTableMeta(origin, unTables)
@@ -56,6 +57,17 @@ export async function setTablesPublications({ origin, unTables }) {
       sql += ' FOR TABLE ' + pubs.join(',');
     }
 
-    await origin.cache.replica.query(sql);
+    try {
+      await origin.cache.replica.query(sql, true);
+    } catch (error) {
+      if (error.code === '23505' || error.code === '42710') {
+        await setTablesPublications(context);
+      } else {
+        origin.cache.replica.executeNextTask();
+        throw error;
+      }
+    }
   }
+
+  origin.cache.replica.executeNextTask();
 }

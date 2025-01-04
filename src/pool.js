@@ -7,6 +7,7 @@ import { normalizeOptions } from './utils/options.js';
 export class PostgresPool extends Array {
   types = null;
   origin = null;
+  statements = new Map();
 
   constructor(options) {
     options = normalizeOptions(options);

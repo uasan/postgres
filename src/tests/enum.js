@@ -1,22 +1,12 @@
-import { PostgresPool } from '../pool.js';
+import { PostgresClient } from '../client.js';
 
-const db = new PostgresPool({
-  max: 1,
+const db = new PostgresClient({
   host: '127.0.0.1',
   port: 5432,
   username: 'api_ludicloud',
   password: 'pass',
   database: 'smartapps',
 });
-
-// const db = new PostgresPool({
-//   max: 1,
-//   host: '127.0.0.1',
-//   port: 9090,
-//   username: 'api_ludicloud_v2',
-//   password: 'pass',
-//   database: 'smartapps-v2',
-// });
 
 async function test() {
   let sql = `
@@ -28,9 +18,14 @@ async function test() {
   const params = [['users_search']];
 
   try {
-    const result = await db.query(sql, params);
+    const p2 = db.query('SELECT 1', []);
+    const p1 = db.query(sql, params);
+
+    const result = await p1;
 
     console.log(result[0]);
+
+    console.log(await p2);
   } catch (error) {
     console.error(error);
   }

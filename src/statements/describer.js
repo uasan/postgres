@@ -18,9 +18,9 @@ export class Describer {
   constructor(task) {
     this.task = task;
 
-    if (task.client.statements.has(task.sql)) {
-      const statement = task.client.statements.get(task.sql);
+    const statement = task.client.statements.get(task.sql);
 
+    if (statement?.isReady) {
       this.columns = statement.columns;
       this.decoders = statement.decoders;
       this.encoders = statement.encoders;

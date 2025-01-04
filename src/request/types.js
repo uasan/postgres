@@ -30,31 +30,35 @@ function addTypeUnknown(task, id) {
   return task.client.types.create(id);
 }
 
-export function resolveTypes(task) {
-  task.cork().isSent = false;
+export async function resolveTypes(task) {
+  const { unknownTypes } = task;
 
+  task.isSent = false;
+  task.unknownTypes = null;
   task.client.writer.sync();
   task.client.queue.unshift(task);
 
-  task.client.task = Object.create(task);
-  task.client.task.onReady = onReadyResolveTypes;
-}
-
-async function onReadyResolveTypes() {
-  const task = Object.getPrototypeOf(this);
-
   try {
+    task.client.task = Object.create(task);
+
+    await {
+      then(resolve) {
+        task.client.task.onReady = resolve;
+      },
+    };
+
+    task.client.queue.unshift(task);
     const rows = await new Task(task.client).forceExecute(SELECT_TYPES, [
-      [...task.unknownTypes],
+      [...unknownTypes],
     ]);
-    console.count('onReadyResolveTypes');
+
     for (let i = 0; i < rows.length; i++) {
       task.client.types.setType(rows[i]);
     }
 
     task.uncork();
   } catch (error) {
-    task.client.queue.dequeue();
+    console.error(error);
     task.client.writer.sync();
     task.reject(error);
   }

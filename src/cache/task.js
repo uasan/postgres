@@ -1,7 +1,7 @@
 import { stringify } from '../utils/string.js';
 import { CacheQuery } from './nodes/query.js';
 
-async function saveCacheResult() {
+function saveCacheResult() {
   if (this.task.statement.cache?.has(this.key)) {
     return;
   }
@@ -9,7 +9,7 @@ async function saveCacheResult() {
   const stm = this.task.statement;
 
   try {
-    stm.cache ??= await CacheQuery.create(this.task);
+    stm.cache ??= new CacheQuery(this.task);
     stm.cache.set(this.key, this.task.data);
   } catch (error) {
     console.error(error);

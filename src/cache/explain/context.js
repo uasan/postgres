@@ -33,7 +33,7 @@ export class CacheContext {
     this.aliases.set(alias, table);
   }
 
-  static async create(task) {
+  static async analyze(task, query) {
     const context = new this(task.client);
 
     const plans = await task.client
@@ -52,11 +52,15 @@ export class CacheContext {
 
     setConditions(context);
 
+    for (const [{ cache }, columns] of context.tables) {
+      if (columns.size === 0) {
+        cache.queries.add(query);
+      }
+    }
+
     // console.dir(plans, {
     //   depth: null,
     //   colors: true,
     // });
-
-    return context;
   }
 }

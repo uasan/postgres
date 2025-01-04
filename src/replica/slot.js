@@ -42,8 +42,6 @@ export class Slot {
       this.lsn = this.client.lsn.toString();
     }
 
-    console.log('RECONNECT', this.name, this.lsn);
-
     try {
       await this.create();
       await this.start();

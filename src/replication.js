@@ -66,11 +66,17 @@ export class PostgresReplication {
     return new Task(this);
   }
 
-  async query(sql) {
+  async query(sql, isForced = false) {
     // if (this.isCopyMode) {
     //   await sendCopyDone(this);
     // }
-    return await new Task(this.client).setDataAsValue().execute(sql);
+    return isForced
+      ? await new Task(this.client).setDataAsValue().forceExecute(sql)
+      : await new Task(this.client).setDataAsValue().cork().execute(sql);
+  }
+
+  executeNextTask() {
+    this.client.task?.uncork();
   }
 
   clear() {
