@@ -1,12 +1,18 @@
-import { noop } from '#native';
-import { setComplete } from '../response/complete.js';
+function resolveData() {
+  this.resolve(this.data);
+}
 
 export class SimpleQuery {
   columns = [];
   decoders = [];
 
-  complete = setComplete;
-  getCountRows = noop;
+  complete({ task }) {
+    if (task.isData === false && task.errorNoData) {
+      task.reject(task.errorNoData);
+    } else {
+      task.onReady = resolveData;
+    }
+  }
 
   execute() {
     //

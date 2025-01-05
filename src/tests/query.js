@@ -18,11 +18,11 @@ async function test() {
       []
     );
 
-    result.select = await db
+    result.simpleSelect = await db
       .query(
-        ` SELECT '1';
-          SELECT '2';
-          SELECT '3';`
+        ` SELECT '1' AS one;
+          SELECT '2' AS two;
+          SELECT '3' AS three;`
       )
       .catch(console.error);
 
