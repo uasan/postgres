@@ -24,6 +24,7 @@ async function test() {
       us.skill_id,
       u.first_name
     FROM ludicloud.users AS u
+    JOIN ludicloud.users_locations AS ul ON (ul.uid = u.uid)
     JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
     JOIN smartlibrary.skills AS sk ON(sk.skill_id = us.skill_id AND sk.catalog_id = any($2))
     WHERE u.uid IN($1, $3) AND last_name % 'aaa'
@@ -63,7 +64,7 @@ async function test() {
     DELETE FROM ludicloud.users_roles
     WHERE uid = 'c9a2af07-f4ba-4097-bf56-19abe720aa4c' AND role = 'smartpeople_hr';
 
-    --TRUNCATE ludicloud.users_roles;
+    DELETE FROM ludicloud.users_locations;
 
     SELECT pg_logical_emit_message(true, 'my_prefix', 'Text Payload');
     COMMIT;

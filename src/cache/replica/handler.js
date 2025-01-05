@@ -1,6 +1,6 @@
 export const handler = {
-  onBegin(state) {
-    console.log('BEGIN:', state);
+  onBegin() {
+    //console.log('BEGIN:', state);
   },
 
   onInsert({ xid }, { cache, keys }) {
@@ -38,7 +38,7 @@ export const handler = {
     //
   },
 
-  onCommit(state) {
-    console.log('COMMIT:', state, '\n');
+  onCommit() {
+    //console.log('COMMIT:', state, '\n');
   },
 };

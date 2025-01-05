@@ -165,8 +165,13 @@ export class Connection {
       this.connecting = null;
       this.client.task = null;
 
-      if (isNotReconnect || PostgresError.is(e) || !this.isNeedReconnect()) {
-        throw new PostgresError((this.error = e));
+      if (
+        isNotReconnect ||
+        !this.isNeedReconnect() ||
+        PostgresError.isFatal(e)
+      ) {
+        this.error = e;
+        throw new PostgresError(e);
       } else {
         await this.connected.promise;
       }

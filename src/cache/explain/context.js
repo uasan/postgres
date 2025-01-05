@@ -52,11 +52,12 @@ export class CacheContext {
 
     setConditions(context);
 
-    for (const [{ cache }, columns] of context.tables) {
-      if (columns.size === 0) {
-        cache.queries.add(query);
+    for (const [{ keys, cache }, columns] of context.tables)
+      if (keys.length) {
+        if (columns.size === 0) {
+          cache.queries.add(query);
+        }
       }
-    }
 
     // console.dir(plans, {
     //   depth: null,

@@ -95,6 +95,10 @@ export class PostgresError extends Error {
     return error ? !!error[isPostgresError] || error instanceof this : false;
   }
 
+  static isFatal(error) {
+    return error.severity === 'FATAL' && error.code !== '57P03';
+  }
+
   static of(message) {
     return new this({ message });
   }
@@ -118,7 +122,7 @@ export class PostgresError extends Error {
 export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
-  if (error.severity === 'FATAL') {
+  if (PostgresError.isFatal(error)) {
     connection.error = error;
   }
 

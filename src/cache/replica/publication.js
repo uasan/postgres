@@ -34,7 +34,7 @@ export async function setTablesPublications(context) {
         }
       }
 
-      if (row.isPubColumns === false) {
+      if (row.isPubColumns === false && table.keys.length) {
         if (row.isPubTable) {
           drops.push(table.getName());
         }
@@ -46,15 +46,16 @@ export async function setTablesPublications(context) {
   }
 
   if (pubs.length) {
-    let sql = origin.cache.publication;
+    let sql = '';
+    let name = origin.cache.publication;
 
     if (rows.some(row => row.isPub)) {
-      sql = 'ALTER PUBLICATION ' + sql;
-      if (drops.length) sql += ' DROP TABLE ' + drops.join(',');
-      sql += ' ADD TABLE ' + pubs.join(',');
+      if (drops.length) {
+        sql = `ALTER PUBLICATION "${name}" DROP TABLE ${drops.join(',')};`;
+      }
+      sql += `ALTER PUBLICATION "${name}" ADD TABLE ${pubs.join(',')}`;
     } else {
-      sql = 'CREATE PUBLICATION ' + sql;
-      sql += ' FOR TABLE ' + pubs.join(',');
+      sql = `CREATE PUBLICATION "${name}" FOR TABLE ${pubs.join(',')}`;
     }
 
     try {

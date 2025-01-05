@@ -93,6 +93,10 @@ export class Task {
   }
 
   forceExecute(sql, values) {
+    if (this.client.task?.isSent === false) {
+      this.client.queue.unshift(this.client.task);
+    }
+
     this.isCorked = true;
     this.client.task = null;
 

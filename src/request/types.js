@@ -33,7 +33,6 @@ function addTypeUnknown(task, id) {
 export async function resolveTypes(task) {
   const { unknownTypes } = task;
 
-  task.isSent = false;
   task.unknownTypes = null;
   task.client.writer.sync();
   task.client.queue.unshift(task);
@@ -56,6 +55,7 @@ export async function resolveTypes(task) {
       task.client.types.setType(rows[i]);
     }
 
+    task.isSent = false;
     task.uncork();
   } catch (error) {
     console.error(error);
