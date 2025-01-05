@@ -1,5 +1,5 @@
 import { noop } from '#native';
-import { resolveCount } from './state.js';
+import { readCountRows } from './complete.js';
 import { openSync, write, writeSync, closeSync, unlinkSync } from 'node:fs';
 
 const DEFAULT_OPTIONS = {
@@ -17,7 +17,6 @@ export class File {
     this.options = options;
 
     task.data = null;
-    task.onReady = resolveCount;
     task.setData = initSaveToFile;
 
     task.isSimpleQuery = false;
@@ -93,13 +92,20 @@ function onError(error) {
   this.onError = noop;
 }
 
-function onComplete(info) {
+function onComplete() {
   try {
     if (this.file?.fd) closeSync(this.file.fd);
   } catch (error) {
     console.error(error);
   }
 
+  this.count = readCountRows(this.client);
+
+  if (this.count === 0 && this.errorNoData) {
+    this.reject(this.errorNoData);
+  } else {
+    this.resolve(this.count);
+  }
+
   this.file = null;
-  this.resolve(Number(info[1]));
 }

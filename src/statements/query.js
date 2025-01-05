@@ -1,5 +1,7 @@
-import { nullArray } from '#native';
+import { noop, nullArray } from '#native';
+import { setComplete } from '../response/complete.js';
 import { nextID, textEncoder } from '../utils/string.js';
+import { makeErrorEncodeParameter } from '../utils/error.js';
 import {
   NULL,
   MESSAGE_BIND,
@@ -10,18 +12,20 @@ import {
   MESSAGE_DESCRIBE,
   MESSAGES_EXEC_SYNC_FLUSH,
 } from '../protocol/messages.js';
-import { makeErrorEncodeParameter } from '../utils/error.js';
 
 export class Query {
   name = '';
-  cache = null;
-  params = nullArray;
-
-  isReady = false;
 
   columns = [];
   decoders = [];
   encoders = [];
+
+  cache = null;
+  isReady = false;
+  params = nullArray;
+
+  getCountRows = noop;
+  complete = setComplete;
 
   constructor(task) {
     this.name = nextID(task.client.options);

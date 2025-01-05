@@ -54,7 +54,7 @@ export class PostgresClient {
       this.statements = pool.statements;
     } else {
       this.options = normalizeOptions(options);
-      this.origin = Origin.get(options);
+      this.origin = Origin.get(this.options);
       this.types = this.origin.types;
     }
   }

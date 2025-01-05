@@ -42,12 +42,13 @@ export class PostgresReplication {
 
   constructor(options) {
     this.options = normalizeOptions(options);
-    this.origin = Origin.get(options);
+    this.origin = Origin.get(this.options);
     this.types = this.origin.types;
 
     this.client = new PostgresClient(options);
 
     this.options.timeout = 0;
+    this.options.cache = null;
     this.options.parameters.replication = 'database';
     this.options.parameters.session_replication_role = 'replica';
 

@@ -1,5 +1,4 @@
 import { noop } from '#native';
-import { setCountData, setNoData } from './state.js';
 import { getType, resolveTypes, rawType } from '../request/types.js';
 import { TRANSACTION_ACTIVE, TRANSACTION_INACTIVE } from '../constants.js';
 import { SimpleQuery } from '../statements/simple.js';
@@ -56,49 +55,22 @@ export function dataRow({ task, reader }) {
   task.setData(reader);
 }
 
+export function emptyQueryResponse({ task }) {
+  task.reject({ message: 'Empty query string' });
+}
+
 export function portalSuspended({ task }) {
   task.resolve(true);
 }
 
-export function commandComplete({ task, reader }) {
-  if (task.onComplete !== noop) {
-    task.onComplete(reader.getAscii().split(' '));
-  } else if (task.isData) {
-    task.resolve(task.data);
-
-    if (task.cache && reader.getAscii().startsWith('SELECT')) {
-      task.cache.save();
-    }
+export function commandComplete(client) {
+  if (client.task.onComplete !== noop) {
+    client.task.onComplete();
+  } else if (client.task.statement) {
+    client.task.statement.complete(client);
   } else {
-    const words = reader.getAscii().split(' ');
-
-    //console.log('COMPLETE', words);
-
-    switch (words[0]) {
-      case 'UPDATE':
-      case 'DELETE':
-      case 'MERGE':
-      case 'MOVE':
-      case 'COPY':
-        setCountData(task, words[1]);
-        break;
-
-      case 'INSERT':
-        setCountData(task, words[2]);
-        break;
-
-      case 'SELECT':
-        setNoData(task);
-        break;
-
-      default:
-        task.onReady = task.resolve;
-    }
+    client.task.onReady = client.task.resolve;
   }
-}
-
-export function emptyQueryResponse({ task }) {
-  task.reject({ message: 'Empty query string' });
 }
 
 export function readyForQuery(client) {

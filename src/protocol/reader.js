@@ -75,6 +75,8 @@ export class Reader {
 
       const handle = handlers[bytes[offset]];
 
+      //console.log(handle.name);
+
       this.offset = offset + 5;
       this.ending = offset + size;
 
@@ -171,9 +173,8 @@ export class Reader {
     return textDecoder.decode(this.bytes.subarray(this.offset, this.ending));
   }
 
-  getAscii() {
+  getAscii(length = this.ending) {
     let text = '';
-    const length = this.ending - 1;
 
     for (let i = this.offset; i < length; i++)
       text += String.fromCharCode(this.bytes[i]);
