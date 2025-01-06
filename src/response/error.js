@@ -49,7 +49,6 @@ export class PostgresError extends Error {
     sql,
     hint,
     where,
-    detail,
     message,
     severity,
     position,
@@ -66,10 +65,6 @@ export class PostgresError extends Error {
       }
     }
 
-    if (detail) {
-      message += '\n' + detail.trim();
-    }
-
     if (where) {
       message += '\n' + where.trim();
     }
@@ -84,7 +79,10 @@ export class PostgresError extends Error {
       if (position >= 0) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {
-        this.sql = sql.trim().replace(/\s+/g, ' ').slice(0, 320);
+        Object.defineProperty(this, 'sql', {
+          enumerable: false,
+          value: sql.trim().replace(/\s+/g, ' ').slice(0, 320),
+        });
       }
     }
 
