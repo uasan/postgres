@@ -20,6 +20,7 @@ const fields = {
   99: 'column',
   100: 'datatype',
   110: 'constraint',
+  112: 'internalPosition',
   113: 'query',
   115: 'schema',
   116: 'table',
@@ -48,10 +49,13 @@ export class PostgresError extends Error {
   constructor({
     sql,
     hint,
+    query,
     where,
+    detail,
     message,
     severity,
     position,
+    internalPosition,
     [isPostgresError]: isPostgres,
     ...fields
   }) {
@@ -62,6 +66,14 @@ export class PostgresError extends Error {
 
       if (severity !== 'ERROR') {
         this.severity = severity;
+      }
+    }
+
+    if (detail) {
+      if (fields.constraint) {
+        fields.detail = detail;
+      } else {
+        message += '\n' + detail.trim();
       }
     }
 
@@ -79,10 +91,15 @@ export class PostgresError extends Error {
       if (position >= 0) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {
-        Object.defineProperty(this, 'sql', {
-          enumerable: false,
-          value: sql.trim().replace(/\s+/g, ' ').slice(0, 320),
-        });
+        message += '\n' + sql;
+      }
+    }
+
+    if (query) {
+      if (internalPosition) {
+        message += '\n' + highlightErrorSQL(query, internalPosition);
+      } else {
+        message += '\n' + query;
       }
     }
 

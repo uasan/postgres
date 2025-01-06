@@ -12,7 +12,7 @@ async function test() {
   try {
     const result = {};
 
-    await db.query('CREATE TEMP TABLE test (value text)');
+    await db.query('CREATE TEMP TABLE test (value text not null primary key)');
     result.insert = await db.query(
       `INSERT INTO test (value) VALUES('AAA')`,
       []
@@ -30,7 +30,7 @@ async function test() {
       .query(`SELECT * FROM test`, [])
       .catch(console.error);
 
-    result.update = await db.query('UPDATE test SET value = null', []);
+    result.update = await db.query(`UPDATE test SET value = 'BBB'`, []);
     result.delete = await db.query('DELETE FROM test WHERE value IS NULL', []);
 
     console.log(result);

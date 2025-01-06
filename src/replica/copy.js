@@ -44,7 +44,6 @@ function setData({ lsn, wal, reader }) {
 
       case 67:
         wal.onCommit(reader);
-        lsn.send(lsn.bigint);
         break;
     }
   } else if (reader.bytes[reader.ending - 1]) {
