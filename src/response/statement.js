@@ -73,6 +73,12 @@ export function commandComplete(client) {
   }
 }
 
+export function parseComplete({ task }) {
+  if (task.statement.isReady) {
+    task.onDescribe();
+  }
+}
+
 export function readyForQuery(client) {
   const state = client.reader.bytes[client.reader.offset];
 
@@ -92,12 +98,6 @@ export function readyForQuery(client) {
       client.waitReady.resolve();
       client.waitReady = null;
     }
-  }
-}
-
-export function parseComplete({ task }) {
-  if (task.statement.isReady) {
-    task.onDescribe();
   }
 }
 

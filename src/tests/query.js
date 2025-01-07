@@ -35,7 +35,7 @@ async function test() {
 
     console.log(result);
 
-    await db.disconnect();
+    //await db.disconnect();
   } catch (error) {
     console.error(error);
   }

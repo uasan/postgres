@@ -122,10 +122,9 @@ export class Connection {
       },
       this.onConnect
     )
+      .setNoDelay(true)
       .on('error', this.onError)
       .once('close', this.onClose)
-      .setNoDelay(true)
-      .setKeepAlive(true, 60_000)
       .setTimeout(this.client.options.timeout, this.onTimeout);
 
     this.client.writer.lock();

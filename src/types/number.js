@@ -109,6 +109,15 @@ types
     serialize: serializeNumber,
   })
   .addType({
+    id: 5069,
+    array: 271,
+    name: 'xid8',
+    quote: identity,
+    decode: decodeUint8,
+    encode: encodeUint8,
+    serialize: serializeBigInt,
+  })
+  .addType({
     id: 29,
     array: 1012,
     name: 'cid',

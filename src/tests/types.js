@@ -29,7 +29,8 @@ async function test() {
     $16::uuid[] AS "uuid[]",
     $17::pg_lsn::text AS lsn,
     '{}'::text[] AS "empty[]",
-    '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest"`;
+    '2 years 1 months 2 weeks 3 hours 1 microseconds'::interval AS "intervalTest",
+    $18::xid AS xid`;
 
   const values = [
     true,
@@ -55,10 +56,11 @@ async function test() {
       'c5207a27-2614-4ed3-97e2-f3fdad40b3de',
     ],
     25571522192n,
+    4294967295,
   ];
 
   const result = await db.prepare().setDataAsObject().execute(sql, values);
-  console.log(JSON.parse(JSON.stringify(result)));
+  console.log(result);
 
   await db.disconnect();
 }
