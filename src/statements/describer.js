@@ -48,17 +48,19 @@ export class Describer {
   }
 
   setParams() {
-    this.isReady = true;
     return this;
   }
 
-  execute(task) {
+  onReady(task) {
+    this.isReady = true;
+
     task.client.writer
       .type(MESSAGE_CLOSE)
       .setUint8(PREPARED_QUERY)
       .setUint8(0)
       .end()
-      .sync();
+      .sync()
+      .unlock();
 
     task.resolve(this);
   }

@@ -85,21 +85,19 @@ export class PostgresError extends Error {
       message += '\n' + hint.trim();
     }
 
-    if (sql) {
+    if (query) {
+      if (internalPosition) {
+        message += '\n' + highlightErrorSQL(query, internalPosition);
+      } else {
+        message += '\n' + query;
+      }
+    } else if (sql) {
       sql = String(sql);
 
       if (position >= 0) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {
         message += '\n' + sql;
-      }
-    }
-
-    if (query) {
-      if (internalPosition) {
-        message += '\n' + highlightErrorSQL(query, internalPosition);
-      } else {
-        message += '\n' + query;
       }
     }
 

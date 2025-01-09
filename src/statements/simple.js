@@ -14,7 +14,7 @@ export class SimpleQuery {
     }
   }
 
-  execute() {
+  onReady() {
     //
   }
 }

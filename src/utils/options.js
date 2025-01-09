@@ -14,7 +14,7 @@ export const normalizeOptions = ({
   username = 'postgres',
   password = '',
   onMessage = noop,
-  maxConnections = 1,
+  maxConnections = 2,
 } = {}) => ({
   ns,
   port,

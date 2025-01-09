@@ -23,6 +23,7 @@ export class Query {
   cache = null;
   isReady = false;
   params = nullArray;
+  tasksWaitReady = null;
 
   getCountRows = noop;
   complete = setComplete;
@@ -54,7 +55,6 @@ export class Query {
   }
 
   setParams(length) {
-    this.isReady = true;
     this.params = new Uint8Array([
       0,
       ...textEncoder.encode(this.name),
@@ -71,6 +71,7 @@ export class Query {
   }
 
   adopt(task) {
+    this.tasksWaitReady ??= new Set();
     task.client.queries.add(this);
     task.client.writer
       .lock()
@@ -82,16 +83,36 @@ export class Query {
       .flush();
   }
 
+  onReady(task) {
+    this.isReady = true;
+    this.run(task);
+
+    if (this.tasksWaitReady) {
+      this.tasksWaitReady.delete(task);
+
+      for (const task of this.tasksWaitReady) {
+        this.run(task);
+      }
+
+      this.tasksWaitReady = null;
+    }
+  }
+
+  run(task) {
+    this.execute(task);
+    if (task.limit === 0 && !task.isCorked) {
+      task.client.writer.unlock();
+    }
+  }
+
   execute(task) {
     const { values } = task;
-    const { writer } = task.client;
-
     const { encoders } = this;
-    const { length } = encoders;
+    const { writer } = task.client;
 
     writer.type(MESSAGE_BIND).setBytes(this.params);
 
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < encoders.length; i++) {
       if (values[i] == null) {
         writer.setBytes(NULL);
       } else {

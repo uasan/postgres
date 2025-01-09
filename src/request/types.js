@@ -55,7 +55,6 @@ export async function resolveTypes(task) {
       task.client.types.setType(rows[i]);
     }
 
-    task.isSent = false;
     task.uncork();
   } catch (error) {
     console.error(error);

@@ -3,6 +3,18 @@ import { getType, resolveTypes, rawType } from '../request/types.js';
 import { TRANSACTION_ACTIVE, TRANSACTION_INACTIVE } from '../constants.js';
 import { SimpleQuery } from '../statements/simple.js';
 
+export function emptyQueryResponse({ task }) {
+  task.reject({ message: 'Empty query string' });
+}
+
+export function parseComplete({ task }) {
+  if (task.statement.isReady) {
+    task.statement.run(task);
+  } else {
+    task.statement.tasksWaitReady?.add(task);
+  }
+}
+
 export function parameterDescription({ task, reader }) {
   const length = reader.getInt16();
   const { encoders } = task.statement.setParams(length);
@@ -33,7 +45,7 @@ export function rowDescription({ task, reader }) {
   if (task.unknownTypes) {
     resolveTypes(task);
   } else {
-    task.onDescribe();
+    task.statement.onReady(task);
   }
 }
 
@@ -41,7 +53,7 @@ export function noData({ task }) {
   if (task.unknownTypes) {
     resolveTypes(task);
   } else {
-    task.onDescribe();
+    task.statement.onReady(task);
   }
 }
 
@@ -55,10 +67,6 @@ export function dataRow({ task, reader }) {
   task.setData(reader);
 }
 
-export function emptyQueryResponse({ task }) {
-  task.reject({ message: 'Empty query string' });
-}
-
 export function portalSuspended({ task }) {
   task.resolve(true);
 }
@@ -70,12 +78,6 @@ export function commandComplete(client) {
     client.task.statement.complete(client);
   } else {
     client.task.onReady = client.task.resolve;
-  }
-}
-
-export function parseComplete({ task }) {
-  if (task.statement.isReady) {
-    task.onDescribe();
   }
 }
 

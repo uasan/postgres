@@ -170,6 +170,8 @@ export class Task {
 
     if (!this.isSent) {
       this.send();
+    } else if (!this.statement.isReady) {
+      this.statement.onReady(this);
     }
 
     return this;
@@ -189,14 +191,6 @@ export class Task {
     this.execute(sql, values);
 
     return Iterator(this);
-  }
-
-  onDescribe() {
-    this.statement.execute(this);
-
-    if (this.limit === 0 && !this.isCorked) {
-      this.client.writer.unlock();
-    }
   }
 
   setCache(options) {
