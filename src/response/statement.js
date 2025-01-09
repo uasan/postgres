@@ -10,7 +10,7 @@ export function emptyQueryResponse({ task }) {
 export function parseComplete({ task }) {
   if (task.statement.isReady) {
     task.statement.run(task);
-  } else {
+  } else if (task.statement.task !== task) {
     task.statement.tasksWaitReady?.add(task);
   }
 }

@@ -23,12 +23,15 @@ export class Query {
   cache = null;
   isReady = false;
   params = nullArray;
+
+  task = null;
   tasksWaitReady = null;
 
   getCountRows = noop;
   complete = setComplete;
 
   constructor(task) {
+    this.task = task;
     this.name = nextID(task.client.options);
 
     task.client.queries.add(this);
@@ -49,6 +52,9 @@ export class Query {
   }
 
   onError(task) {
+    this.task = null;
+    this.tasksWaitReady = null;
+
     task.client.writer.sync().unlock();
     task.client.queries.delete(this);
     task.client.statements.delete(task.sql);
@@ -84,12 +90,12 @@ export class Query {
   }
 
   onReady(task) {
+    this.task = null;
     this.isReady = true;
+
     this.run(task);
 
     if (this.tasksWaitReady) {
-      this.tasksWaitReady.delete(task);
-
       for (const task of this.tasksWaitReady) {
         this.run(task);
       }
