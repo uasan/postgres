@@ -11,7 +11,8 @@ export function parseComplete({ task }) {
   if (task.statement.isReady) {
     task.statement.run(task);
   } else if (task.statement.task !== task) {
-    task.statement.tasksWaitReady?.add(task);
+    task.statement.tasksWaitReady ??= new Set();
+    task.statement.tasksWaitReady.add(task);
   }
 }
 

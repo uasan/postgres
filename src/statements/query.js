@@ -77,7 +77,6 @@ export class Query {
   }
 
   adopt(task) {
-    this.tasksWaitReady ??= new Set();
     task.client.queries.add(this);
     task.client.writer
       .lock()
@@ -106,6 +105,7 @@ export class Query {
 
   run(task) {
     this.execute(task);
+
     if (task.limit === 0 && !task.isCorked) {
       task.client.writer.unlock();
     }
