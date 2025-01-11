@@ -35,6 +35,9 @@ export function makeErrorEncodeParameter(task, error, index) {
   return { sql, position, message, status: 422 };
 }
 
+export const shortSQL = sql =>
+  sql.replace(/\s+/g, ' ').trimStart().slice(0, 320);
+
 export function highlightErrorSQL(sql, position) {
   const max = 64;
 

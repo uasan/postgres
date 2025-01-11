@@ -173,9 +173,9 @@ export class PostgresClient {
     this.transactions = 0;
 
     this.stream = null;
-    this.isReady = true;
     this.isIsolated = false;
     this.state = TRANSACTION_INACTIVE;
+    this.isReady = this.queue.length === 0;
 
     this.reader.clear();
     this.writer.clear();
@@ -196,16 +196,13 @@ export class PostgresClient {
     this.writer.reject(error);
 
     if (this.task) {
-      this.task.onError(error);
-      this.task.reject(error);
+      this.task.error(error);
       this.task = null;
     }
 
     for (let task = this.queue.head; task; task = task.next)
       if (isFinally || task.isSent) {
-        this.queue.dequeue();
-        task.onError(error);
-        task.reject(error);
+        this.queue.dequeue().error(error);
       } else {
         break;
       }

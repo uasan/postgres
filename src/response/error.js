@@ -2,6 +2,7 @@ import {
   formatError,
   STATUS_CODES,
   highlightErrorSQL,
+  shortSQL,
 } from '../utils/error.js';
 
 //https://www.postgresql.org/docs/current/protocol-error-fields.html
@@ -89,15 +90,15 @@ export class PostgresError extends Error {
       if (internalPosition) {
         message += '\n' + highlightErrorSQL(query, internalPosition);
       } else {
-        message += '\n' + query;
+        message += '\n' + shortSQL(query);
       }
     } else if (sql) {
       sql = String(sql);
 
-      if (position >= 0) {
+      if (position) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {
-        message += '\n' + sql;
+        message += '\n' + shortSQL(sql);
       }
     }
 
@@ -143,13 +144,7 @@ export function errorResponse({ pid, task, reader, connection }) {
     if (task.sql) {
       error.sql ??= task.sql;
     }
-
-    if (task.statement?.isReady === false) {
-      task.statement.onError(task);
-    }
-
-    task.onError(error);
-    task.reject(error);
+    task.error(error);
   } else {
     connection.disconnect(error);
     console.error(new PostgresError(error));

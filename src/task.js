@@ -276,4 +276,13 @@ export class Task {
     );
     return await this.execute(makeCopyFromSQL(table, options), nullArray);
   }
+
+  error(error) {
+    if (this.statement?.isReady === false) {
+      this.statement.onError(this);
+    }
+
+    this.onError(error);
+    this.reject(error);
+  }
 }

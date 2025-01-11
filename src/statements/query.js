@@ -11,6 +11,7 @@ import {
   MESSAGE_EXECUTE,
   MESSAGE_DESCRIBE,
   MESSAGES_EXEC_SYNC_FLUSH,
+  MESSAGE_CLOSE,
 } from '../protocol/messages.js';
 
 export class Query {
@@ -52,12 +53,23 @@ export class Query {
   }
 
   onError(task) {
-    this.task = null;
-    this.tasksWaitReady = null;
+    if (this.task === task) {
+      this.task = null;
+
+      if (this.tasksWaitReady) {
+        for (const task of this.tasksWaitReady) {
+          this.close(task);
+        }
+        this.tasksWaitReady = null;
+      }
+
+      task.client.statements.delete(task.sql);
+    } else {
+      this.tasksWaitReady?.delete(task);
+    }
 
     task.client.writer.sync().unlock();
     task.client.queries.delete(this);
-    task.client.statements.delete(task.sql);
   }
 
   setParams(length) {
@@ -154,5 +166,16 @@ export class Query {
 
   end(task) {
     task.client.writer.sync().unlock();
+  }
+
+  close(task) {
+    task.client.queries.delete(this);
+    task.client.writer
+      .type(MESSAGE_CLOSE)
+      .setUint8(PREPARED_QUERY)
+      .string(this.name)
+      .end()
+      .sync()
+      .unlock();
   }
 }
