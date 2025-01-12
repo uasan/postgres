@@ -80,14 +80,14 @@ export function setComplete(client) {
 
     case 'MERGE':
     case 'FETCH':
-      this.complete = completeCount;
       this.getCountRows = getCountSix;
+      this.complete = this.decoders.length ? completeReturning : completeCount;
       break;
 
     case 'COPY':
     case 'MOVE':
-      this.complete = completeCount;
       this.getCountRows = getCountFive;
+      this.complete = this.decoders.length ? completeReturning : completeCount;
       break;
 
     default:
