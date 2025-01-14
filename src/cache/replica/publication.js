@@ -19,6 +19,7 @@ export async function setTablesPublications(context) {
       table.oid = row.oid;
       table.keys.length = 0;
       table.cols.length = row.cols.length;
+      table.cache.version ||= row.xid;
 
       for (let c = 0; c < row.cols.length; c++) {
         const column = table.getColumn(row.cols[c].name);
@@ -34,7 +35,11 @@ export async function setTablesPublications(context) {
         }
       }
 
-      if (row.isPubColumns === false && table.keys.length) {
+      if (row.isOrdinary === false) {
+        //
+      } else if (row.isLogged === false) {
+        //
+      } else if (row.isPubColumns === false && table.keys.length) {
         if (row.isPubTable) {
           drops.push(table.getName());
         }

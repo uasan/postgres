@@ -7,6 +7,9 @@ export function selectTableMeta(origin, tables) {
   return `SELECT json_agg(_.*) FROM (
   SELECT
     t.oid::bigint,
+    pg_catalog.pg_current_xact_id()::text::json AS xid,
+    bool_and(t.logged) AS "isLogged",
+    bool_and(t.ordinary) AS "isOrdinary",
     bool_and(p.oid IS NOT NULL) AS "isPub",
     bool_and(pr.prpubid IS NOT NULL) AS "isPubTable",
     bool_and(pr.prattrs = i.indkey) IS TRUE AS "isPubColumns", 
@@ -16,7 +19,7 @@ export function selectTableMeta(origin, tables) {
       'isKey', i.indrelid IS NOT NULL OR t.relreplident = 'f'
     ) ORDER BY c.attnum) AS cols
   FROM (
-    SELECT t.oid, t.relreplident, n.pos
+    SELECT t.oid, t.relreplident, n.pos, t.relpersistence = 'p' AS logged, t.relkind = 'r' AS ordinary
     FROM pg_catalog.pg_class AS t
     JOIN pg_catalog.pg_namespace AS s ON s.oid = t.relnamespace
     JOIN unnest(ARRAY['${tables.map(getTablesName).join("'::regclass,'")}'::regclass]) WITH ORDINALITY AS n(oid, pos) ON n.oid= t.oid

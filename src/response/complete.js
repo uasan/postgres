@@ -91,7 +91,9 @@ export function setComplete(client) {
       break;
 
     default:
-      this.complete = completeResolve;
+      this.complete = this.decoders.length
+        ? completeReturning
+        : completeResolve;
   }
 
   this.complete(client);

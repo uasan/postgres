@@ -90,7 +90,7 @@ export class PostgresError extends Error {
       if (internalPosition) {
         message += '\n' + highlightErrorSQL(query, internalPosition);
       } else {
-        message += '\n' + shortSQL(query);
+        message += '\nSQL: ' + shortSQL(query);
       }
     } else if (sql) {
       sql = String(sql);
@@ -98,7 +98,7 @@ export class PostgresError extends Error {
       if (position) {
         message += '\n' + highlightErrorSQL(sql, position);
       } else {
-        message += '\n' + shortSQL(sql);
+        message += '\nSQL: ' + shortSQL(sql);
       }
     }
 
