@@ -1,7 +1,8 @@
 import { CacheOrigin } from '../nodes/origin.js';
 import { CacheTable } from '../nodes/table.js';
+import { setRelations } from './relations.js';
+import { setConditions } from './conditions.js';
 import { setTablesPublications } from '../replica/publication.js';
-import { setConditions, setRelations } from './relations.js';
 
 export class CacheContext {
   origin = null;
@@ -59,9 +60,9 @@ export class CacheContext {
         }
       }
 
-    // console.dir(plans, {
-    //   depth: null,
-    //   colors: true,
-    // });
+    console.dir(plans, {
+      depth: null,
+      colors: true,
+    });
   }
 }

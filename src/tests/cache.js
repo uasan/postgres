@@ -22,13 +22,14 @@ async function test() {
   const sql1 = `
     SELECT
       us.skill_id,
-      u.first_name
+      u.first_name,
+      sk.skill_name
     FROM ludicloud.users AS u
     JOIN ludicloud.users_locations AS ul ON (ul.uid = u.uid)
     JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
     JOIN smartpeople.import_data_skills AS ds ON (us.uid = u.uid)
-    JOIN smartlibrary.skills AS sk ON(sk.skill_id = us.skill_id AND sk.catalog_id = any($2))
-    WHERE u.uid IN($1, $3) AND last_name % 'aaa'
+    LEFT JOIN smartlibrary.skills AS sk USING(skill_id)
+    WHERE (u.uid = $1 OR u.uid = $2) AND us.skill_id = $3
     ORDER BY last_name
   `;
 
@@ -48,8 +49,8 @@ async function test() {
 
   for (let i = 0; i < 10; i++) {
     db.prepare().setCache().execute(sql1, [id1, id1, id1]);
-    db.prepare().setCache().execute(sql2, [id1]);
-    db.prepare().setCache().execute(sql3, []);
+    //db.prepare().setCache().execute(sql2, [id1]);
+    //db.prepare().setCache().execute(sql3, []);
   }
 
   setTimeout(async () => {

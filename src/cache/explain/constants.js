@@ -9,3 +9,4 @@ export const KEY_FILTER = 'Filter';
 export const KEY_HASH_COND = 'Hash Cond';
 export const KEY_INDEX_COND = 'Index Cond';
 export const KEY_JOIN_FILTER = 'Join Filter';
+export const KEY_RECHECK_COND = 'Recheck Cond';

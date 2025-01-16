@@ -1,14 +1,16 @@
+import { addCondition } from './conditions.js';
 import {
+  KEY_PLAN,
+  KEY_PLANS,
   KEY_ALIAS,
   KEY_FILTER,
+  KEY_OUTPUT,
+  KEY_SCHEMA,
+  KEY_REL_NAME,
   KEY_HASH_COND,
   KEY_INDEX_COND,
   KEY_JOIN_FILTER,
-  KEY_OUTPUT,
-  KEY_PLAN,
-  KEY_PLANS,
-  KEY_REL_NAME,
-  KEY_SCHEMA,
+  KEY_RECHECK_COND,
 } from './constants.js';
 
 function setContext(context, plan) {
@@ -38,6 +40,10 @@ function setContext(context, plan) {
     addCondition(context, plan[KEY_JOIN_FILTER]);
   }
 
+  if (plan[KEY_RECHECK_COND]) {
+    addCondition(context, plan[KEY_RECHECK_COND]);
+  }
+
   if (plan[KEY_PLAN]) {
     setContext(context, plan[KEY_PLAN]);
   }
@@ -63,20 +69,8 @@ export function setColumns(context) {
   }
 }
 
-function addCondition(context, sql) {
-  if (sql.includes(' = ')) {
-    context.conditions.add(sql.slice(1, -1));
-  }
-}
-
-export function setConditions(context) {
-  for (let sql of context.conditions) {
-    sql;
-  }
-}
-
 export function setRelations(context, plans) {
-  for (const plan of plans) {
-    setContext(context, plan);
+  for (let i = 0; i < plans.length; i++) {
+    setContext(context, plans[i]);
   }
 }
