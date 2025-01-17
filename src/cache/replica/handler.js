@@ -1,6 +1,12 @@
+import { CacheTable } from '../nodes/table.js';
+
 export const handler = {
   onBegin() {
     //console.log('BEGIN:', state);
+  },
+
+  onTable(table) {
+    table.cache ??= new CacheTable();
   },
 
   onInsert({ xid }, { cache, keys }) {

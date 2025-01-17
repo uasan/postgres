@@ -1,5 +1,4 @@
 import { CacheOrigin } from '../nodes/origin.js';
-import { CacheTable } from '../nodes/table.js';
 import { setRelations } from './relations.js';
 import { setConditions } from './conditions.js';
 import { setTablesPublications } from '../replica/publication.js';
@@ -22,8 +21,6 @@ export class CacheContext {
     const table = this.origin.getTable(schema, name);
 
     if (this.tables.has(table) === false) {
-      table.cache ??= new CacheTable();
-
       if (!table.oid && !this.unTables.includes(table)) {
         this.unTables.push(table);
       }
@@ -54,15 +51,17 @@ export class CacheContext {
     setConditions(context);
 
     for (const [{ keys, cache }, columns] of context.tables)
-      if (keys.length) {
-        if (columns.size === 0) {
-          cache.queries.add(query);
+      if (cache) {
+        if (keys.length) {
+          if (columns.size === 0) {
+            cache.queries.add(query);
+          }
         }
       }
 
-    console.dir(plans, {
-      depth: null,
-      colors: true,
-    });
+    // console.dir(plans, {
+    //   depth: null,
+    //   colors: true,
+    // });
   }
 }

@@ -78,6 +78,12 @@ export class WAL {
       table.cols[i] = column;
       reader.offset += 4;
     }
+
+    try {
+      this.handler.onTable(table);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   onType() {
