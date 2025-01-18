@@ -71,7 +71,6 @@ export class Task {
       this.values = values;
 
       if (this.cache && checkCache(this)) {
-        console.log('CACHE-HIT', this.sql);
         return this.data;
       }
     } else {
