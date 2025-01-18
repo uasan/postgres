@@ -51,7 +51,7 @@ export class WAL {
     }
   }
 
-  onRelation(reader) {
+  onTable(reader) {
     const table = this.origin.setRelation(
       reader.getUint32(),
       reader.getString() || 'pg_catalog',
@@ -80,7 +80,7 @@ export class WAL {
     }
 
     try {
-      this.handler.onTable(table);
+      this.handler.onTable(this.state, table);
     } catch (error) {
       console.error(error);
     }

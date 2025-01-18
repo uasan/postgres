@@ -5,12 +5,12 @@ export const handler = {
     //console.log('BEGIN:', state);
   },
 
-  onTable(table) {
-    table.cache ??= new CacheTable();
+  onTable({ xid }, table) {
+    table.cache ??= new CacheTable(xid);
   },
 
   onInsert({ xid }, { cache, keys }) {
-    cache?.invalidate(xid);
+    cache.invalidate(xid);
 
     for (let i = 0; i < keys.length; i++) {
       keys[i].cache?.invalidate(xid, keys[i].newValue);
@@ -18,7 +18,7 @@ export const handler = {
   },
 
   onUpdate({ xid }, { cache, keys }) {
-    cache?.invalidate(xid);
+    cache.invalidate(xid);
 
     for (let i = 0; i < keys.length; i++) {
       if (keys[i].oldValue !== undefined) {
@@ -29,7 +29,7 @@ export const handler = {
   },
 
   onDelete({ xid }, { cache, keys }) {
-    cache?.invalidate(xid);
+    cache.invalidate(xid);
 
     for (let i = 0; i < keys.length; i++) {
       keys[i].cache?.invalidate(xid, keys[i].oldValue);
@@ -37,7 +37,7 @@ export const handler = {
   },
 
   onTruncate({ xid }, { cache }) {
-    cache?.invalidate(xid);
+    cache.invalidate(xid);
   },
 
   onMessage() {

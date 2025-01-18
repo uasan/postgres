@@ -11,7 +11,7 @@ function setData({ lsn, wal, reader }) {
         break;
 
       case 82:
-        wal.onRelation(reader);
+        wal.onTable(reader);
         break;
 
       case 73:

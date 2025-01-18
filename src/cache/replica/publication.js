@@ -40,8 +40,7 @@ export async function setTablesPublications(context) {
       } else if (row.isLogged === false) {
         //
       } else if (row.isPubColumns === false && table.keys.length) {
-        table.cache ??= new CacheTable();
-        table.cache.version ||= row.xid;
+        table.cache ??= new CacheTable(row.xid);
 
         if (row.isPubTable) {
           drops.push(table.getName());
