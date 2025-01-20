@@ -5,7 +5,7 @@ export function addCondition(context, sql) {
 }
 
 function setConditionVariable(context, { table, column }, index) {
-  console.log(table.name, column.name, index);
+  //console.log(table.name, column.name, index);
 }
 
 export function setConditions(context) {
@@ -28,7 +28,9 @@ export function setConditions(context) {
 
         if (txt.startsWith('= $')) {
           setConditionVariable(context, keys[i], parseInt(txt.slice(3), 10));
-        } else console.log(sql);
+        } else {
+          //console.log(sql);
+        }
         break;
       }
   }
