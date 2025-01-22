@@ -39,15 +39,17 @@ export async function setTablesPublications(context) {
         //
       } else if (row.isLogged === false) {
         //
-      } else if (row.isPubColumns === false && table.keys.length) {
+      } else {
         table.cache ??= new CacheTable(row.xid);
 
-        if (row.isPubTable) {
-          drops.push(table.getName());
+        if (row.isPubColumns === false && table.keys.length) {
+          if (row.isPubTable) {
+            drops.push(table.getName());
+          }
+          pubs.push(
+            table.getName() + '(' + table.keys.map(getColsName).join(',') + ')'
+          );
         }
-        pubs.push(
-          table.getName() + '(' + table.keys.map(getColsName).join(',') + ')'
-        );
       }
     }
   }
