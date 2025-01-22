@@ -170,7 +170,7 @@ export class Task {
 
     if (!this.isSent) {
       this.send();
-    } else if (!this.statement.isReady) {
+    } else if (this.statement?.isReady === false) {
       this.statement.onReady(this);
     }
 
