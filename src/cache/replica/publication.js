@@ -39,10 +39,12 @@ export async function setTablesPublications(context) {
         //
       } else if (row.isLogged === false) {
         //
+      } else if (table.keys.length === 0) {
+        //
       } else {
         table.cache ??= new CacheTable(row.xid);
 
-        if (row.isPubColumns === false && table.keys.length) {
+        if (row.isPubColumns === false) {
           if (row.isPubTable) {
             drops.push(table.getName());
           }
