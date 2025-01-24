@@ -136,9 +136,9 @@ export class Query {
       } else {
         try {
           encoders[i].encode(writer, values[i]);
-        } catch (error) {
+        } catch {
           writer.clearLastMessage().sync();
-          task.reject(makeErrorEncodeParameter(task, error, i));
+          task.reject(makeErrorEncodeParameter(task, i));
           return;
         }
       }

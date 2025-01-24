@@ -19,20 +19,14 @@ export const STATUS_CODES = {
   '22P03': 422,
 };
 
-export function makeErrorEncodeParameter(task, error, index) {
+export function makeErrorEncodeParameter(task, index) {
   const { sql } = task;
   const { name } = task.statement.encoders[index];
 
-  let position = sql.indexOf('$' + (index + 1)) + 1;
-  let message = `Invalid value param $${index + 1}::${name}`;
+  const position = sql.indexOf('$' + (index + 1)) + 1;
+  const message = `Invalid value param $${index + 1}::${name} = ${stringify(task.values[index])}`;
 
-  if (error) {
-    message += ': ' + error.message || error;
-  } else {
-    message += ' = ' + stringify(task.values[index]);
-  }
-
-  return { sql, position, message, status: 422 };
+  return { status: 422, sql, position, message };
 }
 
 export const shortSQL = sql =>

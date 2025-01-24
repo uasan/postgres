@@ -74,8 +74,8 @@ export class Describer {
       try {
         sql += this.encoders[i].getSQL(values[i]);
         sql += source[++i];
-      } catch (error) {
-        throw new PostgresError(makeErrorEncodeParameter(this.task, error, i));
+      } catch {
+        throw new PostgresError(makeErrorEncodeParameter(this.task, i));
       }
 
     return sql;
