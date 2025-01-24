@@ -9,8 +9,8 @@ function saveCacheResult() {
   const stm = this.task.statement;
 
   try {
-    stm.cache ??= new CacheQuery(this.task);
-    stm.cache.set(this.key, this.task.data);
+    stm.cache ??= CacheQuery.create(this.task);
+    stm.cache.save(this, this.task.data);
   } catch (error) {
     console.error(error);
   }

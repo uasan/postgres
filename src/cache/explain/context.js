@@ -59,6 +59,8 @@ export class CacheContext {
         }
       }
 
+    task.statement.cache = query;
+
     // console.dir(plans, {
     //   depth: null,
     //   colors: true,
