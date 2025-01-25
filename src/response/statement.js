@@ -21,7 +21,7 @@ export function parameterDescription({ task, reader }) {
   const { encoders } = task.statement.setParams(length);
 
   for (let i = 0; i < length; i++) {
-    encoders.push(getType(task, reader.getInt32()));
+    encoders[i] = getType(task, reader.getInt32());
   }
 }
 
@@ -31,15 +31,17 @@ export function rowDescription({ task, reader }) {
   }
 
   const length = reader.getInt16();
-  const { columns, decoders } = task.statement;
+  const columns = new Array(length);
+  const decoders = new Array(length);
+
+  task.statement.columns = columns;
+  task.statement.decoders = decoders;
 
   for (let i = 0; i < length; i++) {
-    reader.ending = reader.bytes.indexOf(0, reader.offset);
+    columns[i] = reader.getString();
+    reader.offset += 6;
 
-    columns.push(reader.getTextUTF8());
-    reader.offset = reader.ending + 7;
-
-    decoders.push(task.isNoDecode ? rawType : getType(task, reader.getInt32()));
+    decoders[i] = task.isNoDecode ? rawType : getType(task, reader.getInt32());
     reader.offset += 8;
   }
 

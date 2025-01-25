@@ -173,15 +173,6 @@ export class Reader {
     return textDecoder.decode(this.bytes.subarray(this.offset, this.ending));
   }
 
-  getAscii(length = this.ending) {
-    let text = '';
-
-    for (let i = this.offset; i < length; i++)
-      text += String.fromCharCode(this.bytes[i]);
-
-    return text;
-  }
-
   getString() {
     return textDecoder.decode(
       this.bytes.subarray(
@@ -189,6 +180,15 @@ export class Reader {
         (this.offset = this.bytes.indexOf(0, this.offset) + 1) - 1
       )
     );
+  }
+
+  getAscii(length = this.ending) {
+    let text = '';
+
+    for (let i = this.offset; i < length; i++)
+      text += String.fromCharCode(this.bytes[i]);
+
+    return text;
   }
 
   decode(decoder) {

@@ -1,10 +1,12 @@
+import { nullArray } from '#native';
+
 function resolveData() {
   this.resolve(this.data);
 }
 
 export class SimpleQuery {
-  columns = [];
-  decoders = [];
+  columns = nullArray;
+  decoders = nullArray;
 
   complete({ task }) {
     if (task.isData === false && task.errorNoData) {

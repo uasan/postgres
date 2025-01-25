@@ -1,19 +1,20 @@
-import {
-  MESSAGE_PARSE,
-  MESSAGE_DESCRIBE,
-  PREPARED_QUERY,
-  MESSAGE_CLOSE,
-} from '../protocol/messages.js';
+import { nullArray } from '#native';
 import { PostgresError } from '../response/error.js';
 import { makeErrorEncodeParameter } from '../utils/error.js';
+import {
+  MESSAGE_PARSE,
+  MESSAGE_CLOSE,
+  PREPARED_QUERY,
+  MESSAGE_DESCRIBE,
+} from '../protocol/messages.js';
 
 export class Describer {
   task = null;
   isReady = false;
 
-  columns = [];
-  decoders = [];
-  encoders = [];
+  columns = nullArray;
+  decoders = nullArray;
+  encoders = nullArray;
 
   constructor(task) {
     this.task = task;
@@ -47,7 +48,10 @@ export class Describer {
     task.client.writer.sync().unlock();
   }
 
-  setParams() {
+  setParams(length) {
+    if (length) {
+      this.encoders = new Array(length);
+    }
     return this;
   }
 

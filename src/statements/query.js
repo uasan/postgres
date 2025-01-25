@@ -17,9 +17,9 @@ import {
 export class Query {
   name = '';
 
-  columns = [];
-  decoders = [];
-  encoders = [];
+  columns = nullArray;
+  decoders = nullArray;
+  encoders = nullArray;
 
   cache = null;
   isReady = false;
@@ -84,6 +84,10 @@ export class Query {
       (length >>> 8) & 0xff,
       (length >>> 0) & 0xff,
     ]);
+
+    if (length) {
+      this.encoders = new Array(length);
+    }
 
     return this;
   }
