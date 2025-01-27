@@ -12,7 +12,7 @@ function initData() {
   }
 
   if (--this.count < 1) {
-    this.count = this.limit >> 1;
+    this.count = this.limit;
     this.statement.next(this);
   }
 }

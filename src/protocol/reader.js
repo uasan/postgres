@@ -62,18 +62,17 @@ export class Reader {
 
     let size = 0;
     let offset = this.offset;
-    const { client, bytes, view } = this;
 
     length += this.length;
 
     while (length > 4) {
-      size = view.getUint32(offset + 1) + 1;
+      size = this.view.getUint32(offset + 1) + 1;
 
       if (size > length) {
         break;
       }
 
-      const handle = handlers[bytes[offset]];
+      const handle = handlers[this.bytes[offset]];
 
       //console.log(handle.name);
 
@@ -81,9 +80,9 @@ export class Reader {
       this.ending = offset + size;
 
       try {
-        handle(client);
+        handle(this.client);
       } catch (error) {
-        client.abort(error);
+        this.client.abort(error);
         break;
       }
 
