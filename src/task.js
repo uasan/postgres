@@ -15,12 +15,13 @@ import {
   initObject,
   setDataValue,
   setDataFields,
-  pushDataArray,
   setDataLookup,
   initObjectNull,
   pushDataObject,
-  setDataEntries,
-  setValueToArray,
+  setDataArrays,
+  setTuples,
+  setDataArray,
+  initFixedArray,
 } from './response/data.js';
 
 export class Task {
@@ -31,6 +32,7 @@ export class Task {
 
   isSent = false;
   isData = false;
+  isDone = false;
   isCorked = false;
   isNoDecode = false;
   isDescribe = false;
@@ -182,9 +184,9 @@ export class Task {
     return this.execute(sql, nullArray);
   }
 
-  iterate(sql, values = nullArray, limit = 1) {
+  iterate(sql, values = nullArray, limit = 16) {
     if (limit === 1 && this.addData === pushDataObject) {
-      this.setDataAsObject();
+      this.asObject();
     }
 
     this.limit = limit;
@@ -212,28 +214,14 @@ export class Task {
     return this;
   }
 
-  setDataAsArrayObjects() {
+  asObjects() {
     this.initData = initArray;
     this.addData = pushDataObject;
     this.setData = setDataFields;
     return this;
   }
 
-  setDataAsEntries() {
-    this.initData = initArray;
-    this.addData = pushDataArray;
-    this.setData = setDataEntries;
-    return this;
-  }
-
-  setDataAsEntry() {
-    this.initData = initArray;
-    this.addData = getData;
-    this.setData = setDataEntries;
-    return this;
-  }
-
-  setDataAsObject() {
+  asObject() {
     this.data = null;
     this.initData = initObject;
     this.addData = getData;
@@ -241,7 +229,28 @@ export class Task {
     return this;
   }
 
-  setDataAsLookup(deep = 1) {
+  asArrays() {
+    this.initData = initArray;
+    this.addData = noop;
+    this.setData = setDataArrays;
+    return this;
+  }
+
+  asArray() {
+    this.initData = initFixedArray;
+    this.addData = noop;
+    this.setData = setDataArray;
+    return this;
+  }
+
+  asTuples() {
+    this.initData = initArray;
+    this.addData = noop;
+    this.setData = setTuples;
+    return this;
+  }
+
+  asLookup(deep = 1) {
     this.data = null;
     this.count = deep;
     this.initData = initObjectNull;
@@ -250,14 +259,7 @@ export class Task {
     return this;
   }
 
-  setDataAsValues() {
-    this.initData = initArray;
-    this.addData = getData;
-    this.setData = setValueToArray;
-    return this;
-  }
-
-  setDataAsValue() {
+  asValue() {
     this.data = undefined;
     this.initData = noop;
     this.addData = noop;

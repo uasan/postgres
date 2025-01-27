@@ -13,18 +13,16 @@ export function initObjectNull() {
   this.data = create(null);
 }
 
+export function initFixedArray() {
+  this.data = new Array(this.statement.decoders.length);
+}
+
 export function getData() {
   return this.data;
 }
 
 export function pushDataObject() {
   const data = {};
-  this.data.push(data);
-  return data;
-}
-
-export function pushDataArray() {
-  const data = [];
   this.data.push(data);
   return data;
 }
@@ -38,21 +36,34 @@ export function setDataFields(reader) {
   }
 }
 
-export function setDataEntries(reader) {
-  const row = this.addData();
+export function setDataArrays(reader) {
+  const { decoders } = this.statement;
+  const row = new Array(decoders.length);
+
+  for (let i = 0; i < decoders.length; i++) {
+    row[i] = reader.decode(decoders[i]);
+  }
+  this.data.push(row);
+}
+
+export function setDataArray(reader) {
   const { decoders } = this.statement;
 
   for (let i = 0; i < decoders.length; i++) {
-    row.push(reader.decode(decoders[i]));
+    this.data[i] = reader.decode(decoders[i]);
+  }
+}
+
+export function setTuples(reader) {
+  const { decoders } = this.statement;
+
+  for (let i = 0; i < decoders.length; i++) {
+    this.data.push(reader.decode(decoders[i]));
   }
 }
 
 export function setDataValue(reader) {
   this.data = reader.decode(this.statement.decoders[0]);
-}
-
-export function setValueToArray(reader) {
-  this.data.push(reader.decode(this.statement.decoders[0]));
 }
 
 export function setDataLookup(reader) {

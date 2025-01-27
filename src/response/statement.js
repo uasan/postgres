@@ -70,10 +70,6 @@ export function dataRow({ task, reader }) {
   task.setData(reader);
 }
 
-export function portalSuspended({ task }) {
-  task.resolve(true);
-}
-
 export function commandComplete(client) {
   if (client.task.onComplete !== noop) {
     client.task.onComplete();
@@ -107,4 +103,5 @@ export function readyForQuery(client) {
 }
 
 export function bindComplete() {}
+export function portalSuspended() {}
 export function closeComplete() {}

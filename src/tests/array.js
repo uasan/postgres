@@ -17,7 +17,7 @@ async function test() {
     [null, null],
   ];
 
-  const result = await db.prepare().setDataAsObject().execute(sql, [values]);
+  const result = await db.prepare().setDataAsValues().execute(sql, [values]);
   console.log('RESULT', result);
 }
 

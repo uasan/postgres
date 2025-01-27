@@ -159,7 +159,6 @@ export class Query {
   }
 
   next(task) {
-    task.isData = false;
     task.client.writer
       .type(MESSAGE_EXECUTE)
       .setUint8(0)
