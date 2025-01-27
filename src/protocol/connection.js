@@ -8,7 +8,6 @@ import { TRANSACTION_ACTIVE } from '../constants.js';
 
 export class Connection {
   retries = 0;
-  onRead = noop;
 
   isReady = false;
   isEnded = false;
@@ -16,6 +15,8 @@ export class Connection {
 
   task = null;
   error = null;
+  client = null;
+  onRead = null;
   connected = null;
   connecting = null;
   disconnecting = null;
