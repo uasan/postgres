@@ -19,7 +19,6 @@
     "temporal-polyfill": "latest"
   },
   "devDependencies": {
-    "postgres": "git://github.com/porsager/postgres.git#master",
     "@babel/eslint-parser": "latest",
     "eslint": "latest",
     "eslint-config-prettier": "latest",
