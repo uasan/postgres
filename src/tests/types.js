@@ -59,7 +59,7 @@ async function test() {
     4294967295,
   ];
 
-  const result = await db.prepare().setDataAsObject().execute(sql, values);
+  const result = await db.prepare().asObject().execute(sql, values);
   console.log(result);
 
   await db.disconnect();

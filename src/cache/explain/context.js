@@ -36,7 +36,7 @@ export class CacheContext {
 
     const plans = await task.client
       .prepare()
-      .setDataAsValue()
+      .asValue()
       .execute(
         'EXPLAIN (VERBOSE true, FORMAT JSON, COSTS false, GENERIC_PLAN true)' +
           task.sql

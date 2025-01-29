@@ -15,7 +15,7 @@ export class Slot {
 
     const { consistent_point } = await this.client
       .prepare()
-      .setDataAsObject()
+      .asObject()
       .execute(
         `CREATE_REPLICATION_SLOT "${this.name}" TEMPORARY LOGICAL pgoutput (SNAPSHOT 'nothing')`
       );

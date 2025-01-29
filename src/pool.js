@@ -1,5 +1,6 @@
 import { PostgresClient } from './client.js';
 import { PostgresError } from './response/error.js';
+import { SQL } from './sql.js';
 import { Origin } from './store/origin.js';
 import { Task } from './task.js';
 import { normalizeOptions } from './utils/options.js';
@@ -46,6 +47,10 @@ export class PostgresPool extends Array {
     }
 
     return client;
+  }
+
+  sql(source, ...values) {
+    return new SQL(source, values, this);
   }
 
   prepare() {

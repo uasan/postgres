@@ -1,11 +1,11 @@
 export const setCommit = client =>
   client.transactions > 1
-    ? `RELEASE SAVEPOINT ${client.options.ns + --client.transactions}`
+    ? 'RELEASE SAVEPOINT ' + client.options.ns + --client.transactions
     : 'COMMIT';
 
 export const setRollback = client =>
   client.transactions > 1
-    ? `ROLLBACK TO SAVEPOINT ${client.options.ns + --client.transactions}`
+    ? 'ROLLBACK TO SAVEPOINT ' + client.options.ns + --client.transactions
     : 'ROLLBACK';
 
 export const SELECT_TYPES = `SELECT

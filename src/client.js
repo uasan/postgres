@@ -17,6 +17,7 @@ import {
   TRANSACTION_INACTIVE,
 } from './constants.js';
 import { stringify } from './utils/string.js';
+import { SQL } from './sql.js';
 
 export class PostgresClient {
   pid = 0;
@@ -69,6 +70,10 @@ export class PostgresClient {
 
   query(sql, values) {
     return new Task(this).execute(sql, values);
+  }
+
+  sql(source, ...values) {
+    return new SQL(source, values, this);
   }
 
   async ready() {

@@ -9,15 +9,14 @@ const db = new PostgresClient({
 });
 
 async function test() {
-  const sql = `SELECT $1::text[], 'AAAA' AS a, 'BBBB' AS b`;
-
   const values = [
     ['A', 'B'],
     [null, null],
     [null, null],
   ];
 
-  const result = await db.prepare().setDataAsValues().execute(sql, [values]);
+  const result = await db.sql`SELECT ${values}::text[]`;
+
   console.log('RESULT', result);
 }
 
