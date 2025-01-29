@@ -195,7 +195,7 @@ export class Task {
     return Iterator(this);
   }
 
-  setCache(options) {
+  useCache(options) {
     if (options === false) {
       this.cache = null;
     } else {

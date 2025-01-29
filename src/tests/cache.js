@@ -48,9 +48,9 @@ async function test() {
   `;
 
   for (let i = 0; i < 10; i++) {
-    db.prepare().setCache().execute(sql1, [id1, id1, id1]);
-    //db.prepare().setCache().execute(sql2, [id1]);
-    //db.prepare().setCache().execute(sql3, []);
+    db.prepare().useCache().execute(sql1, [id1, id1, id1]);
+    //db.prepare().useCache().execute(sql2, [id1]);
+    //db.prepare().useCache().execute(sql3, []);
   }
 
   setTimeout(async () => {
