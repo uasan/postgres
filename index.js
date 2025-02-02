@@ -1,3 +1,4 @@
+export { SQL } from './src/sql.js';
 export { PostgresPool } from './src/pool.js';
 export { PostgresClient } from './src/client.js';
 

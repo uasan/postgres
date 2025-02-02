@@ -38,8 +38,9 @@ async function test() {
       console.error(error);
     }
 
-    if (performance.now() - time >= 1000) {
+    if (performance.now() - time > 1000) {
       console.log('RPS', count);
+      //console.log('POOL', ...db.map(({ queue }) => queue.length));
 
       count = 0;
       time = performance.now();

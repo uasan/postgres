@@ -1,17 +1,3 @@
-import { Task } from './task.js';
-
-function concat(sql, source, values) {
-  for (let i = 0; i < values.length; ) {
-    if (typeof values[i]?.toSQL === 'function') {
-      sql.source[sql.source.length - 1] +=
-        values[i].toSQL(sql.context) + source[++i];
-    } else {
-      sql.values.push(values[i]);
-      sql.source.push(source[++i]);
-    }
-  }
-}
-
 export class SQL {
   values = [];
   source = [];
@@ -19,15 +5,22 @@ export class SQL {
   task = null;
   client = null;
 
-  getTask() {
-    return (this.task ??= new Task(this.client));
-  }
-
   constructor(source, values, client) {
     this.client = client;
-
     this.source.push(source[0]);
-    concat(this, source, values);
+
+    for (let i = 0; i < values.length; ) {
+      if (typeof values[i]?.toSQL === 'function') {
+        values[i].toSQL(this, source[++i]);
+      } else {
+        this.values.push(values[i]);
+        this.source.push(source[++i]);
+      }
+    }
+  }
+
+  getTask() {
+    return (this.task ??= this.client.prepare());
   }
 
   then(resolve, reject) {
@@ -74,6 +67,17 @@ export class SQL {
   log() {
     console.log(this.toString(), this.values);
     return this;
+  }
+
+  toSQL({ source, values }, string) {
+    source[source.length - 1] += this.source[0];
+
+    for (let i = 0; i < this.values.length; ) {
+      values.push(this.values[i]);
+      source.push(this.source[++i]);
+    }
+
+    source[source.length - 1] += string;
   }
 
   toString() {
