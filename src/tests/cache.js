@@ -29,6 +29,7 @@ async function test() {
     JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
     JOIN smartpeople.import_data_skills AS ds ON (us.uid = u.uid)
     LEFT JOIN smartlibrary.skills AS sk USING(skill_id)
+    JOIN smartlibrary.jobs_access AS ja USING(catalog_id)
     WHERE (u.uid = $1 OR u.uid = $2) AND us.skill_id = $3
     ORDER BY last_name
   `;
@@ -55,9 +56,16 @@ async function test() {
 
   setTimeout(async () => {
     await db.prepare().execute(`
-      BEGIN;
+    BEGIN;
+    
     INSERT INTO ludicloud.users_roles (uid, role)
-      VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user');
+    VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user');
+
+    DELETE FROM smartlibrary.jobs_access
+    WHERE (catalog_id, access_type, uid) = ('8da897fa-ee25-44f6-a434-1fe44dbfe045', 'editor', 'c9a2af07-f4ba-4097-bf56-19abe720aa4c'); 
+
+    INSERT INTO smartlibrary.jobs_access (catalog_id, access_type, uid)
+    VALUES ('8da897fa-ee25-44f6-a434-1fe44dbfe045', 'editor', 'c9a2af07-f4ba-4097-bf56-19abe720aa4c');
 
     UPDATE ludicloud.users_roles
     SET role = 'smartpeople_hr'

@@ -1,3 +1,4 @@
+import { selectTypes } from '../utils/queries.js';
 import { Message } from './message.js';
 
 function setTupleData(reader, cols, key) {
@@ -25,20 +26,24 @@ function setTupleData(reader, cols, key) {
 }
 
 export class WAL {
-  types = null;
+  client = null;
   origin = null;
   handler = null;
   relations = null;
+
+  types = null;
+  unknownTypes = null;
 
   state = {
     xid: 0,
     lsn: 0n,
   };
 
-  init({ origin }) {
-    this.origin = origin;
-    this.types = origin.types;
-    this.relations = origin.relations;
+  init(client) {
+    this.types = client.types;
+    this.client = client;
+    this.origin = client.origin;
+    this.relations = client.origin.relations;
   }
 
   onBegin(reader) {
@@ -51,7 +56,17 @@ export class WAL {
     }
   }
 
-  onTable(reader) {
+  onType(reader) {
+    const oid = reader.getUint32();
+
+    if (this.types.has(oid) === false) {
+      this.unknownTypes ??= [];
+      this.unknownTypes.push(oid);
+      this.types.create(oid);
+    }
+  }
+
+  async onTable(reader) {
     const table = this.origin.setRelation(
       reader.getUint32(),
       reader.getString() || 'pg_catalog',
@@ -84,10 +99,27 @@ export class WAL {
     } catch (error) {
       console.error(error);
     }
-  }
 
-  onType() {
-    //console.log('Type');
+    if (this.unknownTypes) {
+      reader.pause();
+
+      try {
+        const rows = await this.client.query(
+          selectTypes(this.unknownTypes),
+          true
+        );
+
+        for (let i = 0; i < rows.length; i++) {
+          this.types.setType(rows[i]);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+
+      this.unknownTypes = null;
+      this.client.executeNextTask();
+      reader.resume();
+    }
   }
 
   onInsert(reader) {

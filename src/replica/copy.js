@@ -10,10 +10,6 @@ function setData({ lsn, wal, reader }) {
         wal.onBegin(reader);
         break;
 
-      case 82:
-        wal.onTable(reader);
-        break;
-
       case 73:
         wal.onInsert(reader);
         break;
@@ -24,6 +20,14 @@ function setData({ lsn, wal, reader }) {
 
       case 68:
         wal.onDelete(reader);
+        break;
+
+      case 67:
+        wal.onCommit(reader);
+        break;
+
+      case 82:
+        wal.onTable(reader);
         break;
 
       case 89:
@@ -40,10 +44,6 @@ function setData({ lsn, wal, reader }) {
 
       case 79:
         wal.onOrigin(reader);
-        break;
-
-      case 67:
-        wal.onCommit(reader);
         break;
     }
   } else if (reader.bytes[reader.ending - 1]) {
