@@ -16,7 +16,7 @@ import '../types/record/type.js';
 
 import { Task } from '../task.js';
 import { types } from '../protocol/types.js';
-import { SELECT_TYPES } from '../utils/queries.js';
+import { selectTypes } from '../utils/queries.js';
 
 export const rawType = types.get(17);
 
@@ -24,8 +24,11 @@ export const getType = (task, id) =>
   types.get(id) ?? task.client.types.get(id) ?? addTypeUnknown(task, id);
 
 function addTypeUnknown(task, id) {
-  task.unknownTypes ??= new Set();
-  task.unknownTypes.add(id);
+  if (task.unknownTypes === null) {
+    task.unknownTypes = [id];
+  } else if (task.unknownTypes.includes(id) === false) {
+    task.unknownTypes.push(id);
+  }
 
   return task.client.types.create(id);
 }
@@ -47,9 +50,9 @@ export async function resolveTypes(task) {
     };
 
     task.client.queue.unshift(task);
-    const rows = await new Task(task.client).forceExecute(SELECT_TYPES, [
-      [...unknownTypes],
-    ]);
+    const rows = await new Task(task.client)
+      .asValue()
+      .forceExecute(selectTypes(unknownTypes));
 
     for (let i = 0; i < rows.length; i++) {
       task.client.types.setType(rows[i]);
