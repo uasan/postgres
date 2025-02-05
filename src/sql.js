@@ -10,8 +10,8 @@ export class SQL {
     this.source.push(source[0]);
 
     for (let i = 0; i < values.length; ) {
-      if (typeof values[i]?.toSQL === 'function') {
-        values[i].toSQL(this, source[++i]);
+      if (typeof values[i]?.injectSQL === 'function') {
+        values[i].injectSQL(this, source[++i]);
       } else {
         this.values.push(values[i]);
         this.source.push(source[++i]);
@@ -69,7 +69,7 @@ export class SQL {
     return this;
   }
 
-  toSQL({ source, values }, string) {
+  injectSQL({ source, values }, string) {
     source[source.length - 1] += this.source[0];
 
     for (let i = 0; i < this.values.length; ) {
