@@ -284,6 +284,7 @@ export class Task {
       if (this.isSent) this.client.cancelRequest();
       else this.client.queue.delete(this);
 
+      this.isDone = true;
       this.reject();
     }
   }
@@ -292,7 +293,7 @@ export class Task {
     if (this.statement?.isReady === false) {
       this.statement.onError(this);
     }
-
+    this.isDone = true;
     this.onError(error);
     this.reject(error);
   }
