@@ -279,6 +279,15 @@ export class Task {
     return await this.execute(makeCopyFromSQL(table, options), nullArray);
   }
 
+  cancel() {
+    if (this.isDone === false) {
+      if (this.isSent) this.client.cancelRequest();
+      else this.client.queue.delete(this);
+
+      this.reject();
+    }
+  }
+
   error(error) {
     if (this.statement?.isReady === false) {
       this.statement.onError(this);

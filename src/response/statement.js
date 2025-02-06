@@ -89,6 +89,7 @@ export function readyForQuery(client) {
     client.transactions = state === TRANSACTION_ACTIVE ? 1 : 0;
   }
 
+  client.task.isDone = true;
   client.task.onReady();
   client.task = client.queue.dequeue();
 

@@ -36,4 +36,17 @@ export class Queue {
 
     this.head = task;
   }
+
+  delete(task) {
+    if (task.prev && task.next) {
+      task.prev.next = task.next;
+    } else if (task.prev) {
+      this.tail = task.prev;
+    } else if (task.next) {
+      this.head = task.next;
+    }
+
+    task.prev = null;
+    task.next = null;
+  }
 }
