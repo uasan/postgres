@@ -1,4 +1,3 @@
-import { nullObject } from '#native';
 import {
   formatError,
   STATUS_CODES,
@@ -60,7 +59,7 @@ export class PostgresError extends Error {
     internalPosition,
     [isPostgresError]: isPostgres,
     ...fields
-  } = nullObject) {
+  }) {
     super(message);
 
     if (isPostgres && severity) {
