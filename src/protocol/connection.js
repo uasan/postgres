@@ -155,10 +155,6 @@ export class Connection {
 
       this.client.writer.unlock();
 
-      if (this.task !== this.client.task) {
-        this.client.task?.send();
-      }
-
       this.task = null;
       this.connected.resolve();
     } catch (e) {

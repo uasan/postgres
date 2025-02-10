@@ -33,10 +33,10 @@ export class Task {
   isSent = false;
   isData = false;
   isDone = false;
-  isCorked = false;
   isNoDecode = false;
   isDescribe = false;
   isSimpleQuery = false;
+  isForceExecute = false;
 
   next = null;
   file = null;
@@ -82,6 +82,8 @@ export class Task {
     if (this.client.task === null) {
       this.client.task = this;
       this.client.isReady = false;
+    } else if (this.isForceExecute) {
+      this.client.queue.unshift(this);
     } else {
       this.client.queue.enqueue(this);
     }
@@ -95,18 +97,8 @@ export class Task {
   }
 
   forceExecute(sql, values) {
-    if (this.client.task?.isSent === false) {
-      this.client.queue.unshift(this.client.task);
-    }
-
-    this.isCorked = true;
-    this.client.task = null;
-
-    try {
-      return this.execute(sql, values);
-    } finally {
-      this.send();
-    }
+    this.isForceExecute = true;
+    return this.execute(sql, values);
   }
 
   then(resolve, reject) {
@@ -117,11 +109,7 @@ export class Task {
       this.client.connection.connect().catch(console.error);
     }
 
-    if (
-      !this.isSent &&
-      !this.client.writer.promise &&
-      !this.client.writer.isLocked
-    ) {
+    if (!this.isSent && this.client.task === this) {
       this.send();
     }
   }
@@ -129,7 +117,11 @@ export class Task {
   send() {
     this.isSent = true;
 
-    //console.log('SEND', this.sql.trim());
+    // console.trace(
+    //   'SEND',
+    //   this.sql?.trim?.().replace(/\s+/g, ' ').slice(0, 80),
+    //   this.values
+    // );
 
     if (this.isSimpleQuery) {
       this.client.writer.type(MESSAGE_QUERY).string(this.sql).end();
@@ -151,32 +143,7 @@ export class Task {
       this.statement = new Query(this);
     }
 
-    if (this.isCorked) {
-      this.client.writer.lock();
-    }
-
     return this.next;
-  }
-
-  cork() {
-    this.isCorked = true;
-    return this;
-  }
-
-  uncork() {
-    this.isCorked = false;
-
-    if (this.client.writer.isLocked) {
-      this.client.writer.unlock();
-    }
-
-    if (!this.isSent) {
-      this.send();
-    } else if (this.statement?.isReady === false) {
-      this.statement.onReady(this);
-    }
-
-    return this;
   }
 
   describe(sql) {

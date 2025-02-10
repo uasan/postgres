@@ -39,17 +39,9 @@ export async function resolveTypes(task) {
   task.unknownTypes = null;
   task.client.writer.sync();
   task.client.queue.unshift(task);
+  task.client.task = Object.create(task);
 
   try {
-    task.client.task = Object.create(task);
-
-    await {
-      then(resolve) {
-        task.client.task.onReady = resolve;
-      },
-    };
-
-    task.client.queue.unshift(task);
     const rows = await new Task(task.client)
       .asValue()
       .forceExecute(selectTypes(unknownTypes));
@@ -58,7 +50,7 @@ export async function resolveTypes(task) {
       task.client.types.setType(rows[i]);
     }
 
-    task.uncork();
+    task.statement.onReady(task);
   } catch (error) {
     console.error(error);
     task.client.writer.sync();

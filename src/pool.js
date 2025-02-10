@@ -1,14 +1,19 @@
-import { PostgresClient } from './client.js';
-import { PostgresError } from './response/error.js';
 import { SQL } from './sql.js';
-import { Origin } from './store/origin.js';
 import { Task } from './task.js';
+import { Queue } from './utils/queue.js';
+import { Origin } from './store/origin.js';
+import { PostgresClient } from './client.js';
 import { normalizeOptions } from './utils/options.js';
 
 export class PostgresPool extends Array {
+  task;
+  stream;
+
   types = null;
   origin = null;
   options = null;
+
+  queue = new Queue();
   statements = new Map();
 
   constructor(options) {
@@ -27,26 +32,13 @@ export class PostgresPool extends Array {
   }
 
   getClient(i = 0) {
-    let client = this[i];
-
-    if (client.isReady && client.isIsolated === false) {
-      return client;
-    }
-
-    while (++i < this.length) {
-      if (
-        this[i].isIsolated === false &&
-        (client.isIsolated || this[i].queue.length < client.queue.length)
-      ) {
-        client = this[i];
+    do {
+      if (this[i].isReady && this[i].isIsolated === false) {
+        return this[i];
       }
-    }
+    } while (++i < this.length);
 
-    if (client.isIsolated) {
-      throw PostgresError.poolOverflow();
-    }
-
-    return client;
+    return this;
   }
 
   sql(source, ...values) {
@@ -61,6 +53,12 @@ export class PostgresPool extends Array {
     return new Task(this.getClient()).execute(sql, values);
   }
 
+  async begin() {
+    const task = this.prepare();
+    await task.execute('BEGIN');
+    return task.client;
+  }
+
   listen(name, handler) {
     return this[0].listen(name, handler);
   }
@@ -71,10 +69,6 @@ export class PostgresPool extends Array {
 
   notify(name, value) {
     return this[0].notify(name, value);
-  }
-
-  isolate() {
-    return this.getClient(1).isolate();
   }
 
   isTransaction() {

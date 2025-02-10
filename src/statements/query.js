@@ -122,7 +122,7 @@ export class Query {
   run(task) {
     this.execute(task);
 
-    if (task.limit === 0 && !task.isCorked) {
+    if (task.limit === 0) {
       task.client.writer.unlock();
     }
   }

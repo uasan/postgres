@@ -27,6 +27,12 @@ export class Queue {
     return task;
   }
 
+  dequeueTo(client) {
+    const task = this.dequeue();
+    task.client = client;
+    return task;
+  }
+
   unshift(task) {
     if (this.length++) {
       task.next = this.head;

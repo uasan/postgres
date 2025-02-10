@@ -37,10 +37,10 @@ export class PostgresClient {
   isReady = true;
   isIsolated = false;
 
+  queries = new Set();
   listeners = new Map();
   statements = new Map();
 
-  queries = new Set();
   queue = new Queue();
   reader = new Reader(this);
   writer = new Writer(this);
@@ -83,16 +83,6 @@ export class PostgresClient {
     }
   }
 
-  isolate() {
-    this.isolated = true;
-    return this;
-  }
-
-  unIsolate() {
-    this.isIsolated = false;
-    return this.pool ?? this;
-  }
-
   isTransaction() {
     return this.state === TRANSACTION_ACTIVE;
   }
@@ -113,6 +103,8 @@ export class PostgresClient {
         await this.query('ROLLBACK');
         throw PostgresError.abortTransaction(this);
     }
+
+    return this;
   }
 
   async commit() {
@@ -127,6 +119,8 @@ export class PostgresClient {
         await this.query('ROLLBACK');
         throw PostgresError.abortTransaction(this);
     }
+
+    return this.isTransaction() ? this : this.pool ?? this;
   }
 
   async rollback() {
@@ -148,6 +142,8 @@ export class PostgresClient {
         console.error(error);
       }
     }
+
+    return this.isTransaction() ? this : this.pool ?? this;
   }
 
   async startTransaction(action, payload) {
@@ -241,7 +237,10 @@ export class PostgresClient {
 
   isKeepAlive() {
     return (
-      this.task !== null || this.queue.length > 0 || this.listeners.size > 0
+      this.task !== null ||
+      this.queue.length > 0 ||
+      this.pool?.queue.length > 0 ||
+      this.listeners.size > 0
     );
   }
 

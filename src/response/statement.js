@@ -91,7 +91,11 @@ export function readyForQuery(client) {
 
   client.task.isDone = true;
   client.task.onReady();
-  client.task = client.queue.dequeue();
+  client.task =
+    client.queue.dequeue() ??
+    (client.isIsolated === false && client.pool?.queue.length
+      ? client.pool?.queue.dequeueTo(client)
+      : null);
 
   if (client.task === null) {
     client.isReady = true;
@@ -100,6 +104,8 @@ export function readyForQuery(client) {
       client.waitReady.resolve();
       client.waitReady = null;
     }
+  } else if (client.task.isSent === false) {
+    client.task.send();
   }
 }
 

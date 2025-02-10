@@ -12,29 +12,17 @@ const options = {
 const pool = new PostgresPool(options);
 
 async function test() {
-  let db = pool.isolate();
+  let db = await pool.begin();
 
   try {
-    await db.begin();
-
-    await {
-      then(resolve) {
-        setTimeout(resolve, 10000);
-      },
-    };
-
     console.log(await db.query(`SELECT 'QUERY' AS test`, []));
 
-    await db.commit();
-
-    db = db.unIsolate();
+    console.log((await db.commit()) === pool);
   } catch (error) {
     console.error(error);
   } finally {
     console.log(await db.query(`SELECT 'FINALLY' AS test`, []));
   }
-
-  await pool.disconnect();
 }
 
 test();

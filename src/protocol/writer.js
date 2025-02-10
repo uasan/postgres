@@ -6,10 +6,10 @@ import { BUFFER_LENGTH, BUFFER_MAX_LENGTH } from '../constants.js';
 export class Writer {
   length = 0;
   offset = 0;
+  ending = 0;
   reject = noop;
   client = null;
   promise = null;
-  subarray = null;
   isLocked = true;
 
   buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: BUFFER_MAX_LENGTH });
@@ -54,60 +54,49 @@ export class Writer {
 
   promisify = {
     then: (resolve, reject) => {
+      this.client.stream.write(
+        this.bytes.subarray(this.ending, this.length),
+        null,
+        resolve
+      );
+
       this.reject = reject;
-      this.client.stream.write(this.subarray, null, resolve);
+      this.ending = this.length;
     },
   };
 
   async write() {
-    let task = this.client.queue.head;
-
-    for (let offset = 0, ending = 0; this.length !== ending; offset = ending) {
-      ending = this.length;
-      this.subarray = this.bytes.subarray(offset, ending);
-
+    do {
       try {
+        //console.log('A', this.offset, this.ending, this.length);
         await this.promisify;
+        // console.log('B', this.offset, this.ending, this.length);
+        // console.log();
       } catch {
         break;
       }
+    } while (this.ending !== this.length);
 
-      if (this.isLocked === false && (task ??= this.client.queue.head)) {
-        while (task?.isSent) task = task.next;
-
-        if (task) {
-          if (task.isCorked) continue;
-
-          if (this.length === ending) {
-            this.length = ending = 0;
-            this.offset = offset = 0;
-          }
-
-          while (
-            (task = task.send()) &&
-            this.isLocked === false &&
-            this.length < BUFFER_LENGTH
-          );
-        }
-      }
-    }
+    //71079
+    //70878
+    //590727
 
     this.length = 0;
     this.offset = 0;
+    this.ending = 0;
 
     this.reject = noop;
     this.promise = null;
-    this.subarray = null;
     //this.buffer.resize(BUFFER_LENGTH);
   }
 
   clear() {
     this.length = 0;
     this.offset = 0;
+    this.ending = 0;
 
     this.reject();
     this.promise = null;
-    this.subarray = null;
     this.buffer.resize(BUFFER_LENGTH);
     return this;
   }
