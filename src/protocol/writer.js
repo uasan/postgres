@@ -10,7 +10,6 @@ export class Writer {
   reject = noop;
   client = null;
   promise = null;
-  isLocked = true;
 
   buffer = new ArrayBuffer(BUFFER_LENGTH, { maxByteLength: BUFFER_MAX_LENGTH });
   bytes = new Uint8Array(this.buffer);
@@ -18,21 +17,6 @@ export class Writer {
 
   constructor(client) {
     this.client = client;
-  }
-
-  lock() {
-    this.isLocked = true;
-    return this;
-  }
-
-  unlock() {
-    this.isLocked = false;
-
-    if (this.length) {
-      this.promise ??= this.write();
-    }
-
-    return this;
   }
 
   alloc(size) {

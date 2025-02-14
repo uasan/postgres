@@ -11,8 +11,9 @@ import { WAL } from './replica/wal.js';
 //import { sendCopyDone } from './replica/copy.js';
 import { LSN } from './replica/lsn.js';
 import { PostgresClient } from './client.js';
+import { BaseClient } from './protocol/client.js';
 
-export class PostgresReplication {
+export class PostgresReplication extends BaseClient {
   pid = 0;
   secret = 0;
   transactions = 0;
@@ -41,6 +42,7 @@ export class PostgresReplication {
   slot = new Slot(this);
 
   constructor(options) {
+    super();
     this.options = normalizeOptions(options);
     this.origin = Origin.get(this.options);
     this.types = this.origin.types;
@@ -72,7 +74,7 @@ export class PostgresReplication {
     //   await sendCopyDone(this);
     // }
     return isForced
-      ? await new Task(this.client).asValue().forceExecute(sql)
+      ? await new Task(this.client).asValue().cork().forceExecute(sql)
       : await new Task(this.client).asValue().cork().execute(sql);
   }
 

@@ -31,12 +31,17 @@ export class PostgresPool extends Array {
     return this[0].connect();
   }
 
-  getClient(i = 0) {
+  getClient() {
+    let i = 0;
+
     do {
       if (this[i].isReady && this[i].isIsolated === false) {
         return this[i];
+      } else if (this[i].stream === null) {
+        this[i].connection.connect().catch(console.error);
+        break;
       }
-    } while (++i < this.length);
+    } while (++i < this.length && this[i].connection.connecting === null);
 
     return this;
   }
@@ -57,6 +62,10 @@ export class PostgresPool extends Array {
     const task = this.prepare();
     await task.execute('BEGIN');
     return task.client;
+  }
+
+  async rollback() {
+    return this;
   }
 
   listen(name, handler) {

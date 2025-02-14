@@ -52,8 +52,6 @@ function setData({ lsn, wal, reader }) {
 }
 
 export function copyBothResponse(client) {
-  client.writer.lock();
-
   client.isCopyMode = true;
   client.task.setData = setData;
   client.task.resolve();
@@ -62,7 +60,7 @@ export function copyBothResponse(client) {
 export async function sendCopyDone(client) {
   client.isCopyMode = false;
   client.slot.lsn = client.lsn.toString();
-  client.writer.type(MESSAGE_COPY_DONE).end().flush().unlock();
+  client.writer.type(MESSAGE_COPY_DONE).end().flush();
 
   await client.task;
   console.log('DONE', client.slot.lsn);

@@ -33,12 +33,12 @@ class UnderlyingSink {
     try {
       await this.task;
     } catch {
-      this.writer.unlock();
+      //
     }
   }
 
   async close() {
-    this.writer.type(MESSAGE_COPY_DONE).end().sync().flush().unlock();
+    this.writer.type(MESSAGE_COPY_DONE).end().sync().flush();
 
     try {
       await this.task;
@@ -112,7 +112,7 @@ class Writer {
   async abort(reason = 'Abort') {
     if (this.isClosed || this.error) return;
 
-    this.writer.type(MESSAGE_COPY_FAIL).string(String(reason)).end().unlock();
+    this.writer.type(MESSAGE_COPY_FAIL).string(String(reason)).end();
 
     try {
       await this.task;
@@ -140,7 +140,7 @@ class Writer {
     }
 
     this.isClosed = true;
-    this.writer.type(MESSAGE_COPY_DONE).end().sync().flush().unlock();
+    this.writer.type(MESSAGE_COPY_DONE).end().sync().flush();
 
     try {
       return await this.task;
@@ -151,7 +151,6 @@ class Writer {
 }
 
 export function copyInResponse({ task, writer }) {
-  writer.lock();
   task.resolve(
     task.copy
       ? new Writer(task, writer)

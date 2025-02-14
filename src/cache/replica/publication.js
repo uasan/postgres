@@ -17,7 +17,6 @@ export async function setTablesPublications(context) {
     if (table.oid !== row.oid) {
       origin.relations.set(row.oid, table);
 
-      table.oid = row.oid;
       table.keys.length = 0;
       table.cols.length = row.cols.length;
 
@@ -71,6 +70,10 @@ export async function setTablesPublications(context) {
 
     try {
       await origin.cache.replica.query(sql, true);
+
+      for (let i = 0; i < rows.length; i++) {
+        unTables[i].oid = rows[i].oid;
+      }
     } catch (error) {
       if (error.code === '23505' || error.code === '42710') {
         await setTablesPublications(context);

@@ -6,8 +6,11 @@ export class CacheOrigin {
   publication = '';
 
   constructor(options) {
-    this.publication =
-      options.ns + 'cache_' + (options.parameters?.application_name ?? '');
+    this.publication = options.ns + 'cache';
+
+    if (options.parameters?.application_name) {
+      this.publication += options.parameters.application_name;
+    }
 
     this.replica = new PostgresReplication({
       ...options,

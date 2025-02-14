@@ -23,14 +23,12 @@ export class Queue {
     }
 
     task.next = null;
-
     return task;
   }
 
   dequeueTo(client) {
-    const task = this.dequeue();
-    task.client = client;
-    return task;
+    this.head.client = client;
+    return this.dequeue();
   }
 
   unshift(task) {

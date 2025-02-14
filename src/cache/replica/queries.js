@@ -22,7 +22,7 @@ export function selectTableMeta(origin, tables) {
     SELECT t.oid, t.relreplident, n.pos, t.relpersistence = 'p' AS logged, t.relkind = 'r' AS ordinary
     FROM pg_catalog.pg_class AS t
     JOIN pg_catalog.pg_namespace AS s ON s.oid = t.relnamespace
-    JOIN unnest(ARRAY['${tables.map(getTablesName).join("'::regclass,'")}'::regclass]) WITH ORDINALITY AS n(oid, pos) ON n.oid= t.oid
+    JOIN unnest(ARRAY['${tables.map(getTablesName).join("','")}']::regclass[]) WITH ORDINALITY AS n(oid, pos) ON n.oid = t.oid
   ) AS t
   LEFT JOIN pg_catalog.pg_attribute AS c ON c.attrelid = t.oid AND c.attnum > 0 AND c.atttypid > 0
   LEFT JOIN pg_catalog.pg_index AS i ON i.indrelid = t.oid AND c.attnum = ANY(i.indkey) AND (i.indisreplident OR (i.indisprimary AND t.relreplident = 'd'))

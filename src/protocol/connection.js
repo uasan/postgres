@@ -128,8 +128,6 @@ export class Connection {
       .once('close', this.onClose)
       .setTimeout(this.client.options.timeout, this.onTimeout);
 
-    this.client.writer.lock();
-
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();
 
@@ -152,8 +150,6 @@ export class Connection {
         this.retries = 0;
         this.client.onReconnected();
       }
-
-      this.client.writer.unlock();
 
       this.task = null;
       this.connected.resolve();
@@ -200,7 +196,6 @@ export class Connection {
       this.connected?.reject(error);
       this.connecting?.reject(error);
 
-      this.client.writer.lock();
       this.client.writer.reject(error);
       this.client.stream.end(MESSAGE_TERMINATE);
     }

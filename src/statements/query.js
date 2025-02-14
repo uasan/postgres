@@ -39,7 +39,6 @@ export class Query {
     task.client.statements.set(task.sql, this);
 
     task.client.writer
-      .lock()
       .type(MESSAGE_PARSE)
       .string(this.name)
       .string(task.sql)
@@ -68,7 +67,7 @@ export class Query {
       this.tasksWaitReady?.delete(task);
     }
 
-    task.client.writer.sync().unlock();
+    task.client.writer.sync();
     task.client.queries.delete(this);
   }
 
@@ -95,7 +94,6 @@ export class Query {
   adopt(task) {
     task.client.queries.add(this);
     task.client.writer
-      .lock()
       .type(MESSAGE_PARSE)
       .string(this.name)
       .string(task.sql)
@@ -108,22 +106,14 @@ export class Query {
     this.task = null;
     this.isReady = true;
 
-    this.run(task);
+    this.execute(task);
 
     if (this.tasksWaitReady) {
       for (const task of this.tasksWaitReady) {
-        this.run(task);
+        this.execute(task);
       }
 
       this.tasksWaitReady = null;
-    }
-  }
-
-  run(task) {
-    this.execute(task);
-
-    if (task.limit === 0) {
-      task.client.writer.unlock();
     }
   }
 
@@ -151,7 +141,6 @@ export class Query {
     writer.setBytes(INT16_ONE_ONE).end();
 
     if (task.limit) {
-      writer.lock();
       this.next(task);
     } else {
       writer.setBytes(MESSAGES_EXEC_SYNC_FLUSH);
@@ -168,7 +157,7 @@ export class Query {
   }
 
   end(task) {
-    task.client.writer.sync().unlock();
+    task.client.writer.sync();
   }
 
   close(task) {
@@ -178,7 +167,6 @@ export class Query {
       .setUint8(PREPARED_QUERY)
       .string(this.name)
       .end()
-      .sync()
-      .unlock();
+      .sync();
   }
 }

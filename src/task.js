@@ -33,6 +33,7 @@ export class Task {
   isSent = false;
   isData = false;
   isDone = false;
+  isCorked = false;
   isNoDecode = false;
   isDescribe = false;
   isSimpleQuery = false;
@@ -98,6 +99,11 @@ export class Task {
 
   forceExecute(sql, values) {
     this.isForceExecute = true;
+
+    if (this.client.task?.isDone) {
+      this.client.task = null;
+    }
+
     return this.execute(sql, values);
   }
 
@@ -142,8 +148,6 @@ export class Task {
     } else {
       this.statement = new Query(this);
     }
-
-    return this.next;
   }
 
   describe(sql) {
@@ -160,6 +164,17 @@ export class Task {
     this.execute(sql, values);
 
     return Iterator(this);
+  }
+
+  cork() {
+    this.isCorked = true;
+    return this;
+  }
+
+  uncork() {
+    this.isCorked = false;
+    this.client.sendTask();
+    return this;
   }
 
   useCache(options) {

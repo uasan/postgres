@@ -2,6 +2,7 @@ import { once } from 'node:events';
 import { createConnection } from 'node:net';
 
 import { noop } from '#native';
+import { SQL } from './sql.js';
 import { Task } from './task.js';
 import { Queue } from './utils/queue.js';
 import { Reader } from './protocol/reader.js';
@@ -9,6 +10,8 @@ import { Writer } from './protocol/writer.js';
 import { Origin } from './store/origin.js';
 import { PostgresError } from './response/error.js';
 import { Connection } from './protocol/connection.js';
+import { BaseClient } from './protocol/client.js';
+
 import { normalizeOptions } from './utils/options.js';
 import { setCommit, setRollback } from './utils/queries.js';
 import {
@@ -17,9 +20,8 @@ import {
   TRANSACTION_INACTIVE,
 } from './constants.js';
 import { stringify } from './utils/string.js';
-import { SQL } from './sql.js';
 
-export class PostgresClient {
+export class PostgresClient extends BaseClient {
   pid = 0;
   secret = 0;
   transactions = 0;
@@ -34,7 +36,7 @@ export class PostgresClient {
   options = null;
   waitReady = null;
 
-  isReady = true;
+  isReady = false;
   isIsolated = false;
 
   queries = new Set();
@@ -47,6 +49,7 @@ export class PostgresClient {
   connection = new Connection(this);
 
   constructor(options, pool = null) {
+    super();
     if (pool) {
       this.pool = pool;
       this.options = options;
@@ -174,9 +177,9 @@ export class PostgresClient {
     this.transactions = 0;
 
     this.stream = null;
+    this.isReady = false;
     this.isIsolated = false;
     this.state = TRANSACTION_INACTIVE;
-    this.isReady = this.queue.length === 0;
 
     this.reader.clear();
     this.writer.clear();

@@ -9,7 +9,7 @@ export function emptyQueryResponse({ task }) {
 
 export function parseComplete({ task }) {
   if (task.statement.isReady) {
-    task.statement.run(task);
+    task.statement.execute(task);
   } else if (task.statement.task !== task) {
     task.statement.tasksWaitReady ??= new Set();
     task.statement.tasksWaitReady.add(task);
@@ -91,21 +91,9 @@ export function readyForQuery(client) {
 
   client.task.isDone = true;
   client.task.onReady();
-  client.task =
-    client.queue.dequeue() ??
-    (client.isIsolated === false && client.pool?.queue.length
-      ? client.pool?.queue.dequeueTo(client)
-      : null);
 
-  if (client.task === null) {
-    client.isReady = true;
-
-    if (client.waitReady) {
-      client.waitReady.resolve();
-      client.waitReady = null;
-    }
-  } else if (client.task.isSent === false) {
-    client.task.send();
+  if (client.task.isCorked === false) {
+    client.sendTask();
   }
 }
 

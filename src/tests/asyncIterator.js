@@ -16,7 +16,7 @@ async function test() {
     SELECT
       value,
       CASE WHEN value = 3 THEN 1 / (value - 2) ELSE null END
-    FROM generate_series(1, 350) AS _(value)`;
+    FROM generate_series(1, 35000) AS _(value)`;
 
   console.time('time');
 

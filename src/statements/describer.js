@@ -30,7 +30,6 @@ export class Describer {
       task.resolve(this);
     } else {
       task.client.writer
-        .lock()
         .type(MESSAGE_PARSE)
         .setUint8(0)
         .string(task.sql)
@@ -45,7 +44,7 @@ export class Describer {
   }
 
   onError(task) {
-    task.client.writer.sync().unlock();
+    task.client.writer.sync();
   }
 
   setParams(length) {
@@ -63,8 +62,7 @@ export class Describer {
       .setUint8(PREPARED_QUERY)
       .setUint8(0)
       .end()
-      .sync()
-      .unlock();
+      .sync();
 
     task.resolve(this);
   }

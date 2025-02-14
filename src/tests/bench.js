@@ -1,7 +1,9 @@
 import { PostgresPool } from '../pool.js';
 
+const maxConnections = 12;
+
 const db = new PostgresPool({
-  maxConnections: 8,
+  maxConnections,
   port: 5432,
   host: '127.0.0.1',
   username: 'postgres',
@@ -34,6 +36,12 @@ async function test() {
     try {
       await db.query(sql, values);
       count++;
+
+      if (db.queue.length < maxConnections) {
+        for (let i = maxConnections - db.queue.length; i--; ) {
+          test();
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -41,11 +49,12 @@ async function test() {
     if (performance.now() - time > 1000) {
       console.log('RPS', count);
 
-      // console.log(
-      //   'QUEUE',
-      //   db.queue.length,
-      //   ...db.map(({ queue }) => queue.length)
-      // );
+      // console.log('QUEUE', db.queue.length, [
+      //   ...db.map(({ isReady, queue }) => ({
+      //     queue: queue.length,
+      //     isReady,
+      //   })),
+      // ]);
 
       count = 0;
       time = performance.now();
@@ -53,4 +62,6 @@ async function test() {
   }
 }
 
-for (let i = 0; i < 1000; i++) test();
+for (let i = 0; i < maxConnections; i++) {
+  test();
+}
