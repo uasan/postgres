@@ -85,7 +85,7 @@ export function readyForQuery(client) {
 
   if (client.state !== state) {
     client.state = state;
-    client.isIsolated ||= state !== TRANSACTION_INACTIVE;
+    client.isIsolated = state !== TRANSACTION_INACTIVE;
     client.transactions = state === TRANSACTION_ACTIVE ? 1 : 0;
   }
 
