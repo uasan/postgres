@@ -6,7 +6,9 @@ import { setTablesPublications } from '../replica/publication.js';
 export class CacheContext {
   origin = null;
   tables = new Map();
+
   unTables = [];
+  noCaches = [];
 
   aliases = new Map();
   outputs = new Set();
@@ -48,18 +50,21 @@ export class CacheContext {
       await setTablesPublications(context);
     }
 
-    setConditions(context);
+    if (context.noCaches.length) {
+      console.warn(context.noCaches);
+    } else {
+      setConditions(context);
 
-    for (const [{ keys, cache }, columns] of context.tables)
-      if (cache) {
-        if (keys.length) {
-          if (columns.size === 0) {
-            cache.queries.add(query);
-          }
+      for (const [{ cache }, columns] of context.tables) {
+        if (columns.size) {
+          cache.queries.add(query);
+        } else {
+          cache.queries.add(query);
         }
       }
 
-    task.statement.cache = query;
+      task.statement.cache = query;
+    }
 
     // console.dir(plans, {
     //   depth: null,

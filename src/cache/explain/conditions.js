@@ -5,7 +5,7 @@ export function addCondition(context, sql) {
 }
 
 function setConditionVariable(context, { table, column }, index) {
-  //console.log(table.name, column.name, index);
+  console.log(table.name, column.name, index, context.tables.get(table));
 }
 
 export function setConditions(context) {

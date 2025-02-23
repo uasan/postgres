@@ -46,12 +46,22 @@ async function test() {
   const sql3 = `
   SELECT count(*) AS id
   FROM smartlibrary.jobs
+  JOIN smartplan.get_cycle_dataset('c5207a27-2614-4ed3-97e2-f3fdad40b3de'::uuid, 'c5207a27-2614-4ed3-97e2-f3fdad40b3de'::uuid) AS t ON t.row_id IS NOT NULL
+  JOIN unnest($1::uuid[]) AS t2(job_id) USING(job_id)
   `;
 
   for (let i = 0; i < 10; i++) {
-    db.prepare().useCache().execute(sql1, [id1, id1, id1]);
-    db.prepare().useCache().execute(sql2, [id1]);
-    db.prepare().useCache().execute(sql3, []);
+    await db.prepare().useCache().execute(sql1, [id1, id1, id1]);
+    await db.prepare().useCache().execute(sql2, [id1]);
+    await db.prepare().useCache().execute(sql3, [id1]);
+
+    {
+      // await {
+      //   then(resolve) {
+      //     setTimeout(resolve, 100);
+      //   },
+      // };
+    }
   }
 
   setTimeout(async () => {

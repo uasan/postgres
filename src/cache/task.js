@@ -10,6 +10,7 @@ function saveCacheResult() {
 
   try {
     stm.cache ??= CacheQuery.create(this.task);
+
     stm.cache.save(this, this.task.data);
   } catch (error) {
     console.error(error);
@@ -21,14 +22,18 @@ export function checkCache(task) {
     task.cache = null;
   } else {
     const key = stringify(task.values);
-    const stm = task.client.statements.get(task.sql);
+    const result = task.client.statements.get(task.sql)?.cache?.get(key);
 
-    if (stm?.cache?.has(key)) {
-      task.data = stm.cache.get(key);
+    if (result) {
+      result.hit++;
+      task.data = result.data;
+
       return true;
+    } else if (result === null) {
+      task.cache = null;
+    } else {
+      task.cache = { key, task, save: saveCacheResult };
     }
-
-    task.cache = { key, task, save: saveCacheResult };
   }
   return false;
 }

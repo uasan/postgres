@@ -35,11 +35,20 @@ export async function setTablesPublications(context) {
       }
 
       if (row.isOrdinary === false) {
-        //
+        context.noCaches.push({
+          relation: table.getName(),
+          reason: 'NO_ORDINARY',
+        });
       } else if (row.isLogged === false) {
-        //
+        context.noCaches.push({
+          relation: table.getName(),
+          reason: 'NO_LOGGED',
+        });
       } else if (table.keys.length === 0) {
-        //
+        context.noCaches.push({
+          relation: table.getName(),
+          reason: 'NO_KEYS',
+        });
       } else {
         table.cache ??= new CacheTable(row.xid);
 

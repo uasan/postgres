@@ -11,6 +11,8 @@ import {
   KEY_INDEX_COND,
   KEY_JOIN_FILTER,
   KEY_RECHECK_COND,
+  KEY_NODE_TYPE,
+  KEY_FUNCTION_NAME,
 } from './constants.js';
 
 function setContext(context, plan) {
@@ -46,6 +48,15 @@ function setContext(context, plan) {
 
   if (plan[KEY_PLAN]) {
     setContext(context, plan[KEY_PLAN]);
+  }
+
+  if (plan[KEY_NODE_TYPE] === 'Function Scan') {
+    if (plan[KEY_SCHEMA] !== 'pg_catalog') {
+      context.noCaches.push({
+        relation: plan[KEY_SCHEMA] + '.' + plan[KEY_FUNCTION_NAME],
+        reason: 'NO_SQL_FUNCTION',
+      });
+    }
   }
 
   if (plan[KEY_PLANS]) {
