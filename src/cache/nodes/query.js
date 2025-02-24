@@ -1,21 +1,34 @@
-import { noop } from '#native';
+import { noop, nullArray } from '#native';
 import { CacheContext } from '../explain/context.js';
 
-export const readOnlyCache = new (class ReadOnlyCacheQuery extends Map {
-  save = noop;
+export const readOnlyCache = {
+  save: noop,
   get() {
     return null;
-  }
-})();
+  },
+};
 
 export class CacheQuery extends Map {
-  save({ key }, data) {
-    this.set(key, {
+  tags = nullArray;
+
+  save({ key, task }, data) {
+    const result = {
+      key,
       data,
       hit: 0,
-      key,
-      map: this,
-    });
+      cache: this,
+      tags: nullArray,
+    };
+
+    if (this.tags !== nullArray) {
+      result.tags = [];
+
+      for (let i = 0; this.tags.length > i; i++) {
+        this.tags[i].set(task, result);
+      }
+    }
+
+    this.set(key, result);
   }
 
   static create(task) {

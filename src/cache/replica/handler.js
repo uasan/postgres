@@ -6,33 +6,43 @@ export const handler = {
   },
 
   onTable({ xid }, table) {
-    table.cache ??= new CacheTable(xid);
+    table.cache ??= new CacheTable(table, xid);
   },
 
   onInsert({ xid }, { cache, keys }) {
-    cache.invalidate(xid);
+    if (cache.version !== xid) {
+      cache.invalidate(xid);
+    }
 
     for (let i = 0; i < keys.length; i++) {
-      keys[i].cache?.invalidate(xid, keys[i].newValue);
+      //console.log('ON_INSERT', cache.name, keys[i].name, keys[i].newValue);
+      keys[i].cache.get(keys[i].newValue)?.invalidate();
     }
   },
 
   onUpdate({ xid }, { cache, keys }) {
-    cache.invalidate(xid);
+    if (cache.version !== xid) {
+      cache.invalidate(xid);
+    }
 
     for (let i = 0; i < keys.length; i++) {
+      //console.log('ON_UPDATE', cache.name, keys[i].name, keys[i].newValue);
+
       if (keys[i].oldValue !== undefined) {
-        keys[i].cache?.invalidate(xid, keys[i].oldValue);
+        keys[i].cache.get(keys[i].oldValue)?.invalidate();
       }
-      keys[i].cache?.invalidate(xid, keys[i].newValue);
+      keys[i].cache.get(keys[i].newValue)?.invalidate();
     }
   },
 
   onDelete({ xid }, { cache, keys }) {
-    cache.invalidate(xid);
+    if (cache.version !== xid) {
+      cache.invalidate(xid);
+    }
 
     for (let i = 0; i < keys.length; i++) {
-      keys[i].cache?.invalidate(xid, keys[i].oldValue);
+      //console.log('ON_DELETE', cache.name, keys[i].name, keys[i].newValue);
+      keys[i].cache.get(keys[i].oldValue)?.invalidate();
     }
   },
 

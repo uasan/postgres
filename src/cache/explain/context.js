@@ -2,8 +2,10 @@ import { CacheOrigin } from '../nodes/origin.js';
 import { setRelations } from './relations.js';
 import { setConditions } from './conditions.js';
 import { setTablesPublications } from '../replica/publication.js';
+import { reportNoCache } from './report.js';
 
 export class CacheContext {
+  query = null;
   origin = null;
   tables = new Map();
 
@@ -14,7 +16,8 @@ export class CacheContext {
   outputs = new Set();
   conditions = new Set();
 
-  constructor({ origin, options }) {
+  constructor({ origin, options }, query) {
+    this.query = query;
     this.origin = origin;
     origin.cache ??= new CacheOrigin(options);
   }
@@ -27,14 +30,14 @@ export class CacheContext {
         this.unTables.push(table);
       }
 
-      this.tables.set(table, new Map());
+      this.tables.set(table, new Set());
     }
 
     this.aliases.set(alias, table);
   }
 
   static async analyze(task, query) {
-    const context = new this(task.client);
+    const context = new this(task.client, query);
 
     const plans = await task.client
       .prepare()
@@ -46,20 +49,18 @@ export class CacheContext {
 
     setRelations(context, plans);
 
-    if (context.unTables.length) {
+    if (context.unTables.length && context.noCaches.length === 0) {
       await setTablesPublications(context);
     }
 
     if (context.noCaches.length) {
-      console.warn(context.noCaches);
-    } else {
+      context.noCaches.forEach(reportNoCache);
+    } else if (context.tables.size) {
       setConditions(context);
 
-      for (const [{ cache }, columns] of context.tables) {
-        if (columns.size) {
-          cache.queries.add(query);
-        } else {
-          cache.queries.add(query);
+      for (const [{ cache }, tags] of context.tables) {
+        if (tags.size === 0) {
+          cache.add(query);
         }
       }
 

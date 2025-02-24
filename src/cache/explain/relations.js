@@ -53,8 +53,8 @@ function setContext(context, plan) {
   if (plan[KEY_NODE_TYPE] === 'Function Scan') {
     if (plan[KEY_SCHEMA] !== 'pg_catalog') {
       context.noCaches.push({
-        relation: plan[KEY_SCHEMA] + '.' + plan[KEY_FUNCTION_NAME],
         reason: 'NO_SQL_FUNCTION',
+        relation: plan[KEY_SCHEMA] + '.' + plan[KEY_FUNCTION_NAME],
       });
     }
   }

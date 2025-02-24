@@ -36,21 +36,21 @@ export async function setTablesPublications(context) {
 
       if (row.isOrdinary === false) {
         context.noCaches.push({
-          relation: table.getName(),
           reason: 'NO_ORDINARY',
+          relation: table.getName(),
         });
       } else if (row.isLogged === false) {
         context.noCaches.push({
-          relation: table.getName(),
           reason: 'NO_LOGGED',
+          relation: table.getName(),
         });
       } else if (table.keys.length === 0) {
         context.noCaches.push({
-          relation: table.getName(),
           reason: 'NO_KEYS',
+          relation: table.getName(),
         });
       } else {
-        table.cache ??= new CacheTable(row.xid);
+        table.cache ??= new CacheTable(table, row.xid);
 
         if (row.isPubColumns === false) {
           if (row.isPubTable) {
