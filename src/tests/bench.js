@@ -34,14 +34,10 @@ let time = performance.now();
 async function test() {
   while (true) {
     try {
-      await db.query(sql, values);
-      count++;
+      await db.prepare().useCache().execute(sql, values);
+      //await db.query(sql, values);
 
-      if (db.queue.length < maxConnections) {
-        for (let i = maxConnections - db.queue.length; i--; ) {
-          test();
-        }
-      }
+      count++;
     } catch (error) {
       console.error(error);
     }
@@ -49,12 +45,12 @@ async function test() {
     if (performance.now() - time > 1000) {
       console.log('RPS', count);
 
-      // console.log('QUEUE', db.queue.length, [
-      //   ...db.map(({ isReady, queue }) => ({
-      //     queue: queue.length,
-      //     isReady,
-      //   })),
-      // ]);
+      console.log('QUEUE', db.queue.length, [
+        ...db.map(({ isReady, queue }) => ({
+          queue: queue.length,
+          isReady,
+        })),
+      ]);
 
       count = 0;
       time = performance.now();
@@ -62,6 +58,6 @@ async function test() {
   }
 }
 
-for (let i = 0; i < maxConnections; i++) {
+for (let i = -2; i < maxConnections; i++) {
   test();
 }

@@ -3,6 +3,7 @@ import { setRelations } from './relations.js';
 import { setConditions } from './conditions.js';
 import { setTablesPublications } from '../replica/publication.js';
 import { reportNoCache } from './report.js';
+import { nullArray } from '#native';
 
 export class CacheContext {
   query = null;
@@ -36,6 +37,15 @@ export class CacheContext {
     this.aliases.set(alias, table);
   }
 
+  addTag(table, tag) {
+    if (this.query.tags === nullArray) {
+      this.query.tags = [tag];
+    } else {
+      this.query.tags.push(tag);
+    }
+    this.tables.get(table).add(tag);
+  }
+
   static async analyze(task, query) {
     const context = new this(task.client, query);
 
@@ -55,7 +65,7 @@ export class CacheContext {
 
     if (context.noCaches.length) {
       context.noCaches.forEach(reportNoCache);
-    } else if (context.tables.size) {
+    } else {
       setConditions(context);
 
       for (const [{ cache }, tags] of context.tables) {

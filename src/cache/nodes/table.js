@@ -1,4 +1,3 @@
-import { nullArray } from '#native';
 import { CacheColumn } from './column.js';
 
 export class CacheTable extends Set {
@@ -20,14 +19,7 @@ export class CacheTable extends Set {
     this.version = xid;
 
     for (const query of this) {
-      if (query.tags !== nullArray) {
-        for (const result of query.values()) {
-          for (let i = 0; result.tags.length > i; i++) {
-            result.tags[i].unset(result);
-          }
-        }
-      }
-      query.clear();
+      query.unsetAll();
     }
   }
 }

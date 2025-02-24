@@ -1,4 +1,4 @@
-import { CacheResult } from './result.js';
+import { CacheTag } from './tag.js';
 
 export class CacheColumn extends Map {
   name = '';
@@ -10,16 +10,19 @@ export class CacheColumn extends Map {
     this.table = table;
   }
 
-  factory(key) {
+  addTag(key, result) {
     if (this.has(key)) {
-      return this.get(key);
+      const tag = this.get(key);
+
+      if (tag.has(result) === false) {
+        result.tags.push(tag.add(result));
+      }
+    } else {
+      const tag = new CacheTag(this, key);
+
+      this.set(key, tag);
+      result.tags.push(tag.add(result));
     }
-
-    const result = new CacheResult(this, key);
-    this.set(key, result);
-
-    console.log('FACTORY', this.table.name, this.name, key);
-
-    return result;
+    //console.log('ADD TAG', this.table.name, this.name, key);
   }
 }

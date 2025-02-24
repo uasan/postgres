@@ -11,6 +11,17 @@ export const readOnlyCache = {
 export class CacheQuery extends Map {
   tags = nullArray;
 
+  unsetAll() {
+    if (this.tags !== nullArray) {
+      for (const result of this.values()) {
+        for (let i = 0; result.tags.length > i; i++) {
+          result.tags[i].unset(result);
+        }
+      }
+    }
+    this.clear();
+  }
+
   save({ key, task }, data) {
     const result = {
       key,

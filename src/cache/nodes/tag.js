@@ -1,4 +1,4 @@
-export class CacheResult extends Set {
+export class CacheTag extends Set {
   key = null;
   version = 0;
   column = null;
@@ -21,15 +21,15 @@ export class CacheResult extends Set {
   invalidate() {
     this.column.delete(this.key);
 
-    console.log(
-      'INVALIDATE',
-      this.column.table.name,
-      this.column.name,
-      this.key
-    );
-
     for (const result of this) {
       result.cache.delete(result.key);
+
+      // console.log(
+      //   'INVALIDATE',
+      //   this.column.table.name,
+      //   this.column.name,
+      //   this.key
+      // );
 
       for (let i = 0; result.tags.length > i; i++) {
         if (this !== result.tags[i]) {

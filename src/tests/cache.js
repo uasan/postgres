@@ -45,11 +45,9 @@ async function test() {
   const sql2 = `
     SELECT *
     FROM smartlibrary.skills
-    LEFT JOIN smartpeople.users_skills AS us ON us.uid = $1
-    LEFT JOIN ludicloud.users_network AS un ON un.uid = $1
-    LEFT JOIN ludicloud.users_roles AS ur ON ur.uid = us.uid
-    WHERE ur.role = $2
-    LIMIT 1
+    LEFT JOIN smartpeople.users_skills AS us ON us.uid = ANY($1)
+    LEFT JOIN ludicloud.users_network AS un ON un.uid = ANY($1)
+    LEFT JOIN ludicloud.users_roles AS ur ON ur.uid = us.uid AND ur.role = $2
   `;
 
   const sql3 = `
@@ -72,14 +70,19 @@ async function test() {
 
   for (let i = 0; i < 10; i++) {
     await db.prepare().useCache().execute(sql1, [id1, id1, id1]);
-    await db.prepare().useCache().execute(sql2, [id1, 'smartpeople_hr']);
+    await db
+      .prepare()
+      .useCache()
+      .execute(sql2, [[id1], 'smartpeople_hr']);
     await db.prepare().useCache().execute(sql3, [id1]);
 
-    await {
-      then(resolve) {
-        setTimeout(resolve, 100);
-      },
-    };
+    if (i === 0) {
+      await {
+        then(resolve) {
+          setTimeout(resolve, 100);
+        },
+      };
+    }
   }
 
   setTimeout(async () => {
