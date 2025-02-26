@@ -3,7 +3,6 @@ import { setRelations } from './relations.js';
 import { setConditions } from './conditions.js';
 import { setTablesPublications } from '../replica/publication.js';
 import { reportNoCache } from './report.js';
-import { nullArray } from '#native';
 
 export class CacheContext {
   query = null;
@@ -38,10 +37,11 @@ export class CacheContext {
   }
 
   addTag(table, tag) {
-    if (this.query.tags === nullArray) {
-      this.query.tags = [tag];
-    } else {
+    if (this.query.isTagged) {
       this.query.tags.push(tag);
+    } else {
+      this.query.tags = [tag];
+      this.query.isTagged = true;
     }
     this.tables.get(table).add(tag);
   }

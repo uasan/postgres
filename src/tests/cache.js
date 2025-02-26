@@ -38,7 +38,7 @@ async function test() {
     --JOIN smartpeople.import_data_skills AS ds ON (us.uid = u.uid)
     LEFT JOIN smartlibrary.skills AS sk USING(skill_id)
     JOIN smartlibrary.jobs_access AS ja USING(catalog_id)
-    WHERE (u.uid = $1 OR u.uid = $2) AND us.skill_id = $3
+    WHERE u.uid IN ($1, $2) AND us.skill_id = $3
     ORDER BY last_name
   `;
 

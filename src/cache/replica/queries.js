@@ -7,7 +7,7 @@ export function selectTableMeta(origin, tables) {
   return `SELECT json_agg(_.*) FROM (
   SELECT
     t.oid::bigint,
-    pg_catalog.pg_current_xact_id()::text::json AS xid,
+    pg_catalog.pg_snapshot_xmin(pg_catalog.pg_current_snapshot())::text::json AS xid,
     bool_and(t.logged) AS "isLogged",
     bool_and(t.ordinary) AS "isOrdinary",
     bool_and(p.oid IS NOT NULL) AS "isPub",

@@ -1,3 +1,5 @@
+import { isSpecSymbol } from './parser.js';
+
 export function addCondition(context, sql) {
   if (sql.includes(' = ')) {
     context.conditions.add(sql.slice(1, -1));
@@ -8,8 +10,8 @@ function setByIndex({ values }, result) {
   this.column.addTag(values[this.index], result);
 }
 
-function setByArray(task, result) {
-  const array = task.values[this.index];
+function setByArray({ values }, result) {
+  const array = values[this.index];
 
   for (let i = 0; i < array.length; i++) {
     this.column.addTag(array[i], result);
@@ -27,7 +29,7 @@ function setConditionVariable(context, { table, column }, index) {
     set: setByIndex,
   };
   context.addTag(table, tag);
-  //console.log('CONDITION', table.name + '.' + column.name + ' = $' + index);
+  console.log('CONDITION', table.name + '.' + column.name + ' = $' + index);
 }
 
 function setConditionArray(context, { table, column }, index) {
@@ -47,14 +49,17 @@ function setConditionArray(context, { table, column }, index) {
   // );
 }
 
-function sliceMatchSQL(sql, meta) {
-  if (sql.startsWith(meta.pattern)) {
-    return sql.slice(meta.pattern.length);
-  } else if (sql.startsWith(meta.patternType)) {
-    return sql.slice(sql.indexOf(' ') + 1);
-  }
+function sliceMatchSQL(sql, { name }) {
+  const pos = sql.indexOf(name);
+  const end = pos + name.length;
+  const spc = sql.indexOf(' ', end);
 
-  return '';
+  return pos !== -1 &&
+    spc !== -1 &&
+    isSpecSymbol(sql[pos - 1]) &&
+    isSpecSymbol(sql[end])
+    ? sql.slice(spc + 1)
+    : '';
 }
 
 export function setConditions(context) {
@@ -62,13 +67,10 @@ export function setConditions(context) {
 
   for (const [alias, table] of context.aliases) {
     for (let i = 0; i < table.keys.length; i++) {
-      const name = alias + '.' + table.keys[i].name;
-
       keys.push({
         table,
         column: table.keys[i].cache,
-        pattern: name + ' ',
-        patternType: '(' + name + ')::',
+        name: alias + '.' + table.keys[i].name,
       });
     }
   }
@@ -86,6 +88,8 @@ export function setConditions(context) {
           );
         } else if (txt.startsWith('= ANY ($')) {
           setConditionArray(context, keys[i], parseInt(txt.slice(8), 10) - 1);
+        } else if (txt.startsWith('= ANY (ARRAY[')) {
+          console.log(sql);
         }
         break;
       }
