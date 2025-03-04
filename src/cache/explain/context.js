@@ -1,6 +1,6 @@
 import { CacheOrigin } from '../nodes/origin.js';
 import { setRelations } from './relations.js';
-import { setConditions } from './conditions.js';
+import { setConditions } from './parser.js';
 import { setTablesPublications } from '../replica/publication.js';
 import { reportNoCache } from './report.js';
 
@@ -44,6 +44,12 @@ export class CacheContext {
       this.query.isTagged = true;
     }
     this.tables.get(table).add(tag);
+    console.log(
+      'CONDITION',
+      table.name + '.' + tag.column.name,
+      '=',
+      tag.index
+    );
   }
 
   static async analyze(task, query) {

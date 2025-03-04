@@ -13,16 +13,22 @@ export class Slot {
   async create() {
     this.name ||= getRandomString(this.client.options.ns);
 
-    const { consistent_point } = await this.client
-      .prepare()
-      .asObject()
-      .execute(
-        `CREATE_REPLICATION_SLOT "${this.name}" TEMPORARY LOGICAL pgoutput (SNAPSHOT 'nothing')`
-      );
+    try {
+      const { consistent_point } = await this.client
+        .prepare()
+        .asObject()
+        .execute(
+          `CREATE_REPLICATION_SLOT "${this.name}" TEMPORARY LOGICAL pgoutput (SNAPSHOT 'nothing')`
+        );
 
-    if (!this.lsn) {
-      this.lsn = consistent_point;
-      this.client.lsn.setFromString(this.lsn);
+      if (!this.lsn) {
+        this.lsn = consistent_point;
+        this.client.lsn.setFromString(this.lsn);
+      }
+    } catch (error) {
+      if (error.code !== '42710') {
+        throw error;
+      }
     }
   }
 

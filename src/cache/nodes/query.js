@@ -22,11 +22,9 @@ export class CacheQuery extends Map {
 
   unsetAll() {
     if (this.isTagged) {
-      for (const result of this.values()) {
-        for (let i = 0; result.tags.length > i; i++) {
+      for (const result of this.values())
+        for (let i = 0; result.tags.length > i; i++)
           result.tags[i].unset(result);
-        }
-      }
     }
     this.clear();
   }

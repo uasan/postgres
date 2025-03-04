@@ -1,4 +1,4 @@
-import { addCondition } from './conditions.js';
+import { addCondition } from './parser.js';
 import {
   KEY_PLAN,
   KEY_PLANS,
