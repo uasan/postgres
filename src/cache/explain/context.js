@@ -91,7 +91,10 @@ export async function createCache(task, query) {
 
   if (context.noCaches.length) {
     context.noCaches.forEach(reportNoCache);
-  } else if (context.table) {
+    return;
+  }
+
+  if (context.table) {
     setColumns(context);
     setConditions(context);
 
@@ -100,7 +103,7 @@ export async function createCache(task, query) {
         cache.add(query);
       }
     }
-
-    task.statement.cache = query;
   }
+
+  task.statement.cache = query;
 }
