@@ -5,7 +5,7 @@ const db = new PostgresClient({
   port: 5432,
   username: 'postgres',
   password: 'pass',
-  database: 'smartapps',
+  database: 'develop',
   cache: {
     subscribe: {
       username: 'postgres',
@@ -28,19 +28,33 @@ async function test() {
   // }
 
   const sql1 = `
-    SELECT
-      us.skill_id,
-      u.first_name,
-      sk.skill_name
-    FROM ludicloud.users AS u
-    --JOIN ludicloud.users_locations AS ul ON (ul.uid = u.uid)
-    JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
-    --JOIN smartpeople.import_data_skills AS ds ON (us.uid = u.uid)
-    LEFT JOIN smartlibrary.skills AS sk USING(skill_id)
-    JOIN smartlibrary.jobs_access AS ja USING(catalog_id)
-    WHERE (u.uid = $1 OR u.uid = $2) AND us.skill_id = $3
-    ORDER BY last_name
+    WITH ins AS (
+      INSERT INTO ludicloud.users_roles (uid, role)
+      VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user')
+      ON CONFLICT DO NOTHING
+      RETURNING uid
+    )
+    SELECT array_agg(uid)
+    FROM ludicloud.users AS _
+    --JOIN ins USING(uid)
+    --JOIN smartpeople.users_skills AS us USING(uid)
+    WHERE is_public
   `;
+
+  // const sql1 = `
+  //   SELECT
+  //     us.skill_id,
+  //     u.first_name,
+  //     sk.skill_name
+  //   FROM ludicloud.users AS u
+  //   --JOIN ludicloud.users_locations AS ul ON (ul.uid = u.uid)
+  //   JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
+  //   --JOIN smartpeople.import_data_skills AS ds ON (us.uid = u.uid)
+  //   LEFT JOIN smartlibrary.skills AS sk USING(skill_id)
+  //   JOIN smartlibrary.jobs_access AS ja USING(catalog_id)
+  //   WHERE (u.uid = $1 OR u.uid = $2) AND us.skill_id = $3
+  //   ORDER BY last_name
+  // `;
 
   const sql2 = `
     SELECT *
@@ -70,11 +84,11 @@ async function test() {
 
   for (let i = 0; i < 10; i++) {
     await db.prepare().useCache().execute(sql1, [id1, id1, id1]);
-    await db
-      .prepare()
-      .useCache()
-      .execute(sql2, [[id1], 'smartpeople_hr']);
-    await db.prepare().useCache().execute(sql3, [id1]);
+    // await db
+    //   .prepare()
+    //   .useCache()
+    //   .execute(sql2, [[id1], 'smartpeople_hr']);
+    // await db.prepare().useCache().execute(sql3, [id1]);
 
     if (i === 0) {
       await {
@@ -90,7 +104,8 @@ async function test() {
     BEGIN;
     
     INSERT INTO ludicloud.users_roles (uid, role)
-    VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user');
+    VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user')
+    ON CONFLICT DO NOTHING;
 
     DELETE FROM smartpeople.users_skills WHERE uid = 'c9a2af07-f4ba-4097-bf56-19abe720aa4c';
 

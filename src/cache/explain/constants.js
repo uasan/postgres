@@ -4,6 +4,7 @@ export const KEY_ALIAS = 'Alias';
 export const KEY_SCHEMA = 'Schema';
 export const KEY_OUTPUT = 'Output';
 export const KEY_NODE_TYPE = 'Node Type';
+export const KEY_OPERATION = 'Operation';
 export const KEY_REL_NAME = 'Relation Name';
 export const KEY_FUNCTION_NAME = 'Function Name';
 

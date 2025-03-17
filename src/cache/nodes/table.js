@@ -19,7 +19,7 @@ export class CacheTable extends Set {
     this.version = xid;
 
     for (const query of this) {
-      query.unsetAll();
+      query.purge();
     }
   }
 }

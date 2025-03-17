@@ -1,17 +1,20 @@
-import { CacheOrigin } from '../nodes/origin.js';
-import { setRelations } from './relations.js';
-import { setConditions } from './parser.js';
-import { setTablesPublications } from '../replica/publication.js';
+import { explain } from './analyze.js';
 import { reportNoCache } from './report.js';
+import { CacheOrigin } from '../nodes/origin.js';
+import { setColumns, setConditions } from './parser.js';
+import { setTablesPublications } from '../replica/publication.js';
 
-export class CacheContext {
+class CacheContext {
   query = null;
   origin = null;
-  tables = new Map();
+  table = null;
+
+  isModifyTable = false;
 
   unTables = [];
   noCaches = [];
 
+  tables = new Map();
   aliases = new Map();
   outputs = new Set();
   conditions = new Set();
@@ -26,14 +29,25 @@ export class CacheContext {
     const table = this.origin.getTable(schema, name);
 
     if (this.tables.has(table) === false) {
+      this.table ??= table;
+
       if (!table.oid && !this.unTables.includes(table)) {
         this.unTables.push(table);
       }
 
-      this.tables.set(table, new Set());
+      this.tables.set(table, {
+        ors: new Set(),
+        ands: new Set(),
+        columns: new Set(),
+        conditions: new Set(),
+      });
     }
 
     this.aliases.set(alias, table);
+  }
+
+  addCondition(sql) {
+    this.conditions.add(sql.slice(1, -1));
   }
 
   addTag(table, tag) {
@@ -43,49 +57,50 @@ export class CacheContext {
       this.query.tags = [tag];
       this.query.isTagged = true;
     }
-    this.tables.get(table).add(tag);
-    console.log(
-      'CONDITION',
-      table.name + '.' + tag.column.name,
-      '=',
-      tag.index
-    );
+    this.tables.get(table).conditions.add(tag);
+    // console.log(
+    //   'CONDITION',
+    //   table.name + '.' + tag.column.name,
+    //   '=',
+    //   tag.index
+    // );
   }
+}
 
-  static async analyze(task, query) {
-    const context = new this(task.client, query);
+export async function createCache(task, query) {
+  const context = new CacheContext(task.client, query);
 
-    const plans = await task.client
+  explain(
+    context,
+    await task.client
       .prepare()
       .asValue()
       .execute(
         'EXPLAIN (VERBOSE true, FORMAT JSON, COSTS false, GENERIC_PLAN true)' +
           task.sql
-      );
+      )
+  );
 
-    setRelations(context, plans);
+  if (context.isModifyTable) {
+    return;
+  }
 
-    if (context.unTables.length && context.noCaches.length === 0) {
-      await setTablesPublications(context);
-    }
+  if (context.unTables.length && context.noCaches.length === 0) {
+    await setTablesPublications(context);
+  }
 
-    if (context.noCaches.length) {
-      context.noCaches.forEach(reportNoCache);
-    } else {
-      setConditions(context);
+  if (context.noCaches.length) {
+    context.noCaches.forEach(reportNoCache);
+  } else if (context.table) {
+    setColumns(context);
+    setConditions(context);
 
-      for (const [{ cache }, tags] of context.tables) {
-        if (tags.size === 0) {
-          cache.add(query);
-        }
+    for (const [{ cache }, { conditions }] of context.tables) {
+      if (conditions.size === 0) {
+        cache.add(query);
       }
-
-      task.statement.cache = query;
     }
 
-    // console.dir(plans, {
-    //   depth: null,
-    //   colors: true,
-    // });
+    task.statement.cache = query;
   }
 }

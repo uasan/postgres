@@ -19,23 +19,8 @@ export class CacheTag extends Set {
   }
 
   invalidate() {
-    this.column.delete(this.key);
-
     for (const result of this) {
-      result.cache.delete(result.key);
-
-      // console.log(
-      //   'INVALIDATE',
-      //   this.column.table.name,
-      //   this.column.name,
-      //   this.key
-      // );
-
-      for (let i = 0; result.tags.length > i; i++) {
-        if (this !== result.tags[i]) {
-          result.tags[i].unset(result);
-        }
-      }
+      result.purge();
     }
   }
 }
