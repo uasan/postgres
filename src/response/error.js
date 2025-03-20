@@ -79,7 +79,11 @@ export class PostgresError extends Error {
     }
 
     if (where) {
-      //message += '\n' + where.trim();
+      if (where.includes('\n')) {
+        message += '\n' + where.slice(0, where.indexOf('\n')).trim();
+      } else {
+        message += '\n' + where.trim();
+      }
     }
 
     if (hint) {
@@ -88,7 +92,7 @@ export class PostgresError extends Error {
 
     if (query) {
       if (internalPosition) {
-        message += '\n' + highlightErrorSQL(query, internalPosition);
+        message += '\nSQL: ' + highlightErrorSQL(query, internalPosition);
       } else {
         message += '\nSQL: ' + shortSQL(query);
       }
@@ -96,7 +100,7 @@ export class PostgresError extends Error {
       sql = String(sql);
 
       if (position) {
-        message += '\n' + highlightErrorSQL(sql, position);
+        message += '\nSQL: ' + highlightErrorSQL(sql, position);
       } else {
         message += '\nSQL: ' + shortSQL(sql);
       }
