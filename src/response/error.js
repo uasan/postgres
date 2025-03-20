@@ -79,7 +79,7 @@ export class PostgresError extends Error {
     }
 
     if (where) {
-      message += '\n' + where.trim();
+      //message += '\n' + where.trim();
     }
 
     if (hint) {
