@@ -61,7 +61,7 @@ export function highlightErrorSQL(sql, position) {
   }
 
   return (
-    left + right + '\n' + ' '.repeat(left.length) + red('^'.repeat(length))
+    left + right + '\n' + ' '.repeat(left.length + 5) + red('^'.repeat(length))
   );
 }
 
