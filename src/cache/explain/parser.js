@@ -1,18 +1,3 @@
-import { TagArray, TagVariable } from './tags.js';
-
-function tagByValue(context, meta, value) {
-  switch (value[0]) {
-    case '$':
-      TagVariable.add(context, meta, parseInt(value.slice(1), 10));
-  }
-}
-
-function tagByValues(context, meta, values) {
-  for (let i = 0; i < values.length; i++) {
-    tagByValue(context, meta, values[i]);
-  }
-}
-
 function isSpecSymbol(char) {
   switch (char) {
     case ' ':
@@ -28,7 +13,7 @@ function isSpecSymbol(char) {
   }
 }
 
-function sliceMatchSQL(sql, { name }) {
+export function sliceMatchSQL(sql, name) {
   const pos = sql.indexOf(name);
   const end = pos + name.length;
   const spc = sql.indexOf(' ', end);
@@ -41,58 +26,25 @@ function sliceMatchSQL(sql, { name }) {
     : '';
 }
 
-export function setConditions(context) {
-  const metaKeys = [];
+export function stringToIndex(context, sql) {
+  let index = 0;
+  let query = '';
+  let isValue = false;
 
-  for (const [alias, table] of context.aliases) {
-    for (let i = 0; i < table.keys.length; i++) {
-      metaKeys.push({
-        table,
-        column: table.keys[i].cache,
-        name: alias + '.' + table.keys[i].name,
-      });
+  const parts = sql.split("'");
+
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i] === '' && ++i < parts.length) {
+      context.strings.set(index, context.strings.get(index) + "'" + parts[i]);
+    } else if (isValue) {
+      isValue = false;
+      query += "'" + ++index + "'";
+      context.strings.set(index, parts[i]);
+    } else {
+      isValue = true;
+      query += parts[i];
     }
   }
 
-  for (let sql of context.conditions) {
-    for (let i = 0; i < metaKeys.length; i++) {
-      let txt = '';
-
-      while ((txt = sliceMatchSQL(sql, metaKeys[i]))) {
-        if (txt.startsWith('= $')) {
-          TagVariable.add(context, metaKeys[i], parseInt(txt.slice(3), 10));
-          sql = txt.slice(txt.indexOf(' ', 4) + 1);
-        } else if (txt.startsWith('= ANY ($')) {
-          TagArray.add(context, metaKeys[i], parseInt(txt.slice(8), 10));
-          sql = txt.slice(txt.indexOf(' ', 9) + 1);
-        } else if (txt.startsWith('= ANY (ARRAY[')) {
-          tagByValues(context, metaKeys[i], txt.slice(13, -2).split(', '));
-          sql = txt.slice(txt.indexOf('])', 14) + 3);
-        } else {
-          break;
-        }
-      }
-    }
-  }
-}
-
-export function setColumns(context) {
-  for (let name of context.outputs) {
-    let { table } = context;
-    const pos = name.indexOf('.');
-
-    if (pos !== -1) {
-      table = context.aliases.get(name.slice(0, pos));
-
-      if (table) {
-        name = name.slice(pos + 1);
-      } else continue;
-    }
-
-    if (table.columns.has(name)) {
-      context.tables.get(table).columns.add(table.columns.get(name));
-    } else if (name === '*') {
-      context.tables.get(table).columns.add(table.columns.values());
-    }
-  }
+  return query;
 }

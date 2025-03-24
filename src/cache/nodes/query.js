@@ -10,8 +10,10 @@ export const readOnlyCache = {
 };
 
 export class CacheQuery extends Map {
-  tags = nullArray;
   isTagged = false;
+
+  tags = nullArray;
+  resultTags = nullArray;
 
   unset(result) {
     this.delete(result.key);

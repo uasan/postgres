@@ -1,3 +1,4 @@
+import { addCondition } from './conditions.js';
 import {
   KEY_PLAN,
   KEY_PLANS,
@@ -42,29 +43,29 @@ function setContext(context, plan) {
   }
 
   if (plan[KEY_OUTPUT]) {
-    for (const name of plan[KEY_OUTPUT]) {
-      context.outputs.add(name);
+    for (let i = 0; i < plan[KEY_OUTPUT].length; i++) {
+      context.outputs.add(plan[KEY_OUTPUT][i]);
     }
   }
 
   if (plan[KEY_FILTER]) {
-    context.addCondition(plan[KEY_FILTER]);
+    addCondition(context, plan[KEY_FILTER]);
   }
 
   if (plan[KEY_HASH_COND]) {
-    context.addCondition(plan[KEY_HASH_COND]);
+    addCondition(context, plan[KEY_HASH_COND]);
   }
 
   if (plan[KEY_INDEX_COND]) {
-    context.addCondition(plan[KEY_INDEX_COND]);
+    addCondition(context, plan[KEY_INDEX_COND]);
   }
 
   if (plan[KEY_JOIN_FILTER]) {
-    context.addCondition(plan[KEY_JOIN_FILTER]);
+    addCondition(context, plan[KEY_JOIN_FILTER]);
   }
 
   if (plan[KEY_RECHECK_COND]) {
-    context.addCondition(plan[KEY_RECHECK_COND]);
+    addCondition(context, plan[KEY_RECHECK_COND]);
   }
 
   if (plan[KEY_PLAN]) {

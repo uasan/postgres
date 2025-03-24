@@ -16,8 +16,8 @@ export class CacheResult {
     if (cache.isTagged) {
       this.tags = [];
 
-      for (let i = 0; cache.tags.length > i; i++) {
-        cache.tags[i].set(meta.task, this);
+      for (let i = 0; cache.resultTags.length > i; i++) {
+        cache.resultTags[i].set(meta.task, this);
       }
     }
   }

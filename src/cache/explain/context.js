@@ -1,7 +1,8 @@
 import { explain } from './analyze.js';
 import { reportNoCache } from './report.js';
 import { CacheOrigin } from '../nodes/origin.js';
-import { setColumns, setConditions } from './parser.js';
+import { setColumns } from './columns.js';
+import { setConditions } from './conditions.js';
 import { setTablesPublications } from '../replica/publication.js';
 
 class CacheContext {
@@ -17,6 +18,7 @@ class CacheContext {
   tables = new Map();
   aliases = new Map();
   outputs = new Set();
+  strings = new Map();
   conditions = new Set();
 
   constructor({ origin, options }, query) {
@@ -28,7 +30,9 @@ class CacheContext {
   setAlias(alias, schema, name) {
     const table = this.origin.getTable(schema, name);
 
-    if (this.tables.has(table) === false) {
+    if (this.tables.has(table)) {
+      this.tables.get(table).aliases.push(alias);
+    } else {
       this.table ??= table;
 
       if (!table.oid && !this.unTables.includes(table)) {
@@ -36,34 +40,16 @@ class CacheContext {
       }
 
       this.tables.set(table, {
-        ors: new Set(),
-        ands: new Set(),
+        table,
+        column: null,
+        context: this,
+        aliases: [alias],
         columns: new Set(),
-        conditions: new Set(),
+        conditions: new Map(),
       });
     }
 
     this.aliases.set(alias, table);
-  }
-
-  addCondition(sql) {
-    this.conditions.add(sql.slice(1, -1));
-  }
-
-  addTag(table, tag) {
-    if (this.query.isTagged) {
-      this.query.tags.push(tag);
-    } else {
-      this.query.tags = [tag];
-      this.query.isTagged = true;
-    }
-    this.tables.get(table).conditions.add(tag);
-    // console.log(
-    //   'CONDITION',
-    //   table.name + '.' + tag.column.name,
-    //   '=',
-    //   tag.index
-    // );
   }
 }
 
@@ -97,12 +83,6 @@ export async function createCache(task, query) {
   if (context.table) {
     setColumns(context);
     setConditions(context);
-
-    for (const [{ cache }, { conditions }] of context.tables) {
-      if (conditions.size === 0) {
-        cache.add(query);
-      }
-    }
   }
 
   task.statement.cache = query;

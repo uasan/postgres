@@ -6,13 +6,20 @@ export class TagVariable {
     this.column.addTag(task.values[this.index], result);
   }
 
-  static add(context, meta, index) {
-    const tag = new this();
+  static getKey(meta, index) {
+    return meta.column.cache.getFullName() + ' = $' + index;
+  }
 
-    tag.index = index - 1;
-    tag.column = meta.column;
+  static add(meta, index) {
+    const key = this.getKey(meta, index);
 
-    context.addTag(meta.table, tag);
+    if (meta.conditions.has(key) === false) {
+      const tag = new this();
+
+      tag.index = index - 1;
+      tag.column = meta.column.cache;
+      meta.conditions.set(key, tag);
+    }
   }
 }
 
@@ -23,5 +30,9 @@ export class TagArray extends TagVariable {
     for (let i = 0; i < array.length; i++) {
       this.column.addTag(array[i], result);
     }
+  }
+
+  static getKey(meta, index) {
+    return meta.column.cache.getFullName() + ' = ANY($' + index + ')';
   }
 }

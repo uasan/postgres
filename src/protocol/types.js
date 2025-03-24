@@ -24,6 +24,10 @@ export class Type {
     return String(value);
   }
 
+  deserialize(value) {
+    return value;
+  }
+
   quote(value) {
     return "'" + value.replaceAll("'", "''") + "'";
   }

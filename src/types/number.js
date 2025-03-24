@@ -41,6 +41,9 @@ function encodeFloat8(writer, value) {
 const serializeBigInt = value => BigInt(value).toString();
 const serializeNumber = value => ensureFinite(Number(value)).toString();
 
+const deserializeBigInt = BigInt;
+const deserializeNumber = Number;
+
 export const serializeLSN = value =>
   slashLSN(BigInt(value).toString(16).toUpperCase());
 
@@ -55,6 +58,7 @@ types
     decode: decodeInt8,
     encode: encodeInt8,
     serialize: serializeBigInt,
+    deserialize: deserializeBigInt,
   })
   .addType({
     id: 21,
@@ -64,6 +68,7 @@ types
     decode: decodeInt2,
     encode: encodeInt2,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 22,
@@ -71,6 +76,7 @@ types
     name: 'int2vector',
     decode: decodeInt2,
     encode: encodeInt2,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 23,
@@ -80,6 +86,7 @@ types
     decode: decodeInt4,
     encode: encodeInt4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 24,
@@ -89,6 +96,7 @@ types
     decode: decodeUint4,
     encode: encodeUint4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 26,
@@ -98,6 +106,7 @@ types
     decode: decodeUint4,
     encode: encodeUint4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 28,
@@ -107,6 +116,7 @@ types
     decode: decodeUint4,
     encode: encodeUint4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 5069,
@@ -116,6 +126,7 @@ types
     decode: decodeUint8,
     encode: encodeUint8,
     serialize: serializeBigInt,
+    deserialize: deserializeBigInt,
   })
   .addType({
     id: 29,
@@ -125,6 +136,7 @@ types
     decode: decodeUint4,
     encode: encodeUint4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 30,
@@ -132,6 +144,7 @@ types
     name: 'oidvector',
     decode: decodeUint4,
     encode: decodeUint4,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 700,
@@ -141,6 +154,7 @@ types
     decode: decodeFloat4,
     encode: encodeFloat4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 701,
@@ -150,6 +164,7 @@ types
     decode: decodeFloat8,
     encode: encodeFloat8,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 709,
@@ -158,6 +173,7 @@ types
     decode: decodeInt8,
     encode: encodeInt8,
     serialize: serializeBigInt,
+    deserialize: deserializeBigInt,
   })
   .addType({
     id: 2205,
@@ -167,6 +183,7 @@ types
     decode: decodeUint4,
     encode: encodeUint4,
     serialize: serializeNumber,
+    deserialize: deserializeNumber,
   })
   .addType({
     id: 3220,
@@ -176,4 +193,5 @@ types
     decode: decodeUint8,
     encode: encodeUint8,
     serialize: serializeLSN,
+    deserialize: deserializeLSN,
   });

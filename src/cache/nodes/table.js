@@ -4,11 +4,12 @@ export class CacheTable extends Set {
   name = '';
   version = 0;
 
-  constructor({ name, keys }, xid) {
+  constructor({ schema, name, keys }, xid) {
     super();
 
-    this.name = name;
     this.version = xid;
+
+    this.name = schema + '.' + name;
 
     for (let i = 0; i < keys.length; i++) {
       keys[i].cache = new CacheColumn(this, keys[i]);

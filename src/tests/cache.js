@@ -28,17 +28,18 @@ async function test() {
   // }
 
   const sql1 = `
-    WITH ins AS (
-      INSERT INTO ludicloud.users_roles (uid, role)
-      VALUES ('c9a2af07-f4ba-4097-bf56-19abe720aa4c', 'smartpeople_user')
-      ON CONFLICT DO NOTHING
-      RETURNING uid
-    )
-    SELECT array_agg(uid)
-    FROM ludicloud.users AS _
-    --JOIN ins USING(uid)
-    --JOIN smartpeople.users_skills AS us USING(uid)
-    WHERE is_public
+    SELECT
+      us.skill_id,
+      u.first_name,
+      sk.skill_name
+    FROM ludicloud.users AS u
+    --JOIN ludicloud.users_locations AS ul ON (ul.uid = u.uid)
+    LEFT JOIN smartpeople.users_skills AS us ON (us.uid = u.uid)
+    --JOIN smartpeople.import_data_skills AS ds ON (us.uid = u.uid)
+    LEFT JOIN smartlibrary.skills AS sk USING(skill_id)
+    --JOIN smartlibrary.jobs_access AS ja USING(catalog_id)
+    WHERE (u.uid = $1 OR u.uid = $2) AND us.skill_id = 'c9a2af07-f4ba-4097-bf56-19abe720aa4c'
+    ORDER BY last_name
   `;
 
   // const sql1 = `
@@ -83,7 +84,7 @@ async function test() {
   // )`;
 
   for (let i = 0; i < 10; i++) {
-    await db.prepare().useCache().execute(sql1, [id1, id1, id1]);
+    await db.prepare().useCache().execute(sql1, [id1]);
     // await db
     //   .prepare()
     //   .useCache()

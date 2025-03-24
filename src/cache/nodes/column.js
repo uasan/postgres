@@ -10,18 +10,22 @@ export class CacheColumn extends Map {
     this.table = table;
   }
 
-  addTag(key, result) {
+  getFullName() {
+    return this.table.name + '.' + this.name;
+  }
+
+  addTag(key, node) {
     if (this.has(key)) {
       const tag = this.get(key);
 
-      if (tag.has(result) === false) {
-        result.tags.push(tag.add(result));
+      if (tag.has(node) === false) {
+        node.tags.push(tag.add(node));
       }
     } else {
       const tag = new CacheTag(this, key);
 
       this.set(key, tag);
-      result.tags.push(tag.add(result));
+      node.tags.push(tag.add(node));
     }
     //console.log('ADD TAG', this.table.name, this.name, key);
   }
