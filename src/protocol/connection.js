@@ -60,8 +60,6 @@ export class Connection {
     if (this.error) {
       if (this.client.task) {
         this.client.cancelTasks(this.error, isFinally);
-      } else {
-        console.error(new PostgresError(this.error));
       }
       this.error = null;
     } else if (this.client.task?.isSent) {
@@ -78,10 +76,9 @@ export class Connection {
 
   onTimeout(error) {
     if (this.client.isKeepAlive()) {
-      this.error = error;
+      console.error(new PostgresError(error));
     } else {
       this.isEnded = true;
-      this.client.stream.end();
     }
   }
 

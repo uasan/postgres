@@ -157,10 +157,6 @@ export class PostgresError extends Error {
 export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
-  if (PostgresError.isFatal(error)) {
-    connection.error = error;
-  }
-
   if (task) {
     if (task.sql) {
       error.sql ??= task.sql;
@@ -168,7 +164,9 @@ export function errorResponse({ pid, task, reader, connection }) {
     task.error(error);
   } else if (PostgresError.isTimeout(error)) {
     connection.onTimeout(error);
-  } else if (connection.error === null) {
+  } else if (PostgresError.isFatal(error)) {
+    connection.error = error;
+  } else {
     connection.disconnect(error);
   }
 }

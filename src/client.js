@@ -19,7 +19,7 @@ import {
   TRANSACTION_ERROR,
   TRANSACTION_INACTIVE,
 } from './constants.js';
-import { stringify } from './utils/string.js';
+import { listenSQL, notifySQL, unlistenSQL } from './utils/listen.js';
 
 export class PostgresClient extends BaseClient {
   pid = 0;
@@ -254,25 +254,15 @@ export class PostgresClient extends BaseClient {
   }
 
   async listen(name, action) {
-    if (typeof action !== 'function') {
-      throw PostgresError.of('Listening handler must be function');
-    }
-
-    this.listeners.set(name, action);
-    await this.query(`LISTEN ${name}`);
+    await this.query(listenSQL(this, name, action));
   }
 
   async unlisten(name) {
-    if (this.listeners.delete(name)) {
-      await this.query(`UNLISTEN ${name}`);
-    }
+    await this.query(unlistenSQL(this, name));
   }
 
   async notify(name, value) {
-    await this.query('SELECT pg_catalog.pg_notify($1::text, $2::text)', [
-      name,
-      value === undefined ? undefined : stringify(value),
-    ]);
+    await notifySQL(this, name, value);
   }
 
   async disconnect(error) {
