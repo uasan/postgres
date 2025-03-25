@@ -7,13 +7,11 @@ export const BUFFER_LENGTH = 131072;
 export const BUFFER_MAX_LENGTH = 268435456;
 
 export const DEFAULT_PARAMS = {
-  // compute_query_id: 'auto',
-  // client_connection_check_interval: 10000,
   datestyle: 'iso',
   intervalstyle: 'iso_8601',
   tcp_keepalives_count: '3',
-  tcp_keepalives_idle: '10min',
-  tcp_keepalives_interval: '10s',
+  tcp_keepalives_idle: '5min',
+  tcp_keepalives_interval: '1s',
   client_min_messages: 'WARNING',
 };
 

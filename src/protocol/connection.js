@@ -123,7 +123,7 @@ export class Connection {
       this.onConnect
     )
       .setNoDelay(true)
-      .setKeepAlive(true, 600000)
+      .setKeepAlive(true, 300000)
       .on('error', this.onError)
       .once('close', this.onClose);
 

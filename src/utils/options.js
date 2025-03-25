@@ -31,3 +31,10 @@ export const normalizeOptions = ({
     ...parameters,
   },
 });
+
+export function setOptionsToReplicaClient(options) {
+  options = normalizeOptions(options);
+  options.parameters.idle_session_timeout = '10min';
+
+  return options;
+}
