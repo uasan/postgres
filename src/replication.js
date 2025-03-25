@@ -49,9 +49,9 @@ export class PostgresReplication extends BaseClient {
 
     this.client = new PostgresClient(options);
 
-    this.options.timeout = 0;
     this.options.cache = null;
     this.options.parameters.replication = 'database';
+    this.options.parameters.idle_session_timeout = '0';
     this.options.parameters.session_replication_role = 'replica';
 
     this.wal.init(this);

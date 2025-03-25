@@ -114,7 +114,24 @@ export class PostgresError extends Error {
   }
 
   static isFatal(error) {
-    return error.severity === 'FATAL' && error.code !== '57P03';
+    switch (error.code) {
+      case '57P03':
+      case '57P05':
+        return false;
+
+      default:
+        return error.severity === 'FATAL';
+    }
+  }
+
+  static isTimeout(error) {
+    switch (error.code) {
+      case '57P05':
+        return true;
+
+      default:
+        return false;
+    }
   }
 
   static of(message) {
@@ -149,9 +166,10 @@ export function errorResponse({ pid, task, reader, connection }) {
       error.sql ??= task.sql;
     }
     task.error(error);
-  } else {
+  } else if (PostgresError.isTimeout(error)) {
+    connection.onTimeout(error);
+  } else if (connection.error === null) {
     connection.disconnect(error);
-    console.error(new PostgresError(error));
   }
 }
 

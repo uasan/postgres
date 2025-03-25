@@ -7,7 +7,6 @@ const db = new PostgresPool({
   username: 'postgres',
   password: 'pass',
   database: 'postgres',
-  timeout: 3000,
 });
 
 async function test() {

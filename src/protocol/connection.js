@@ -58,7 +58,11 @@ export class Connection {
     this.client.options.signal?.removeEventListener('abort', this.onAbort);
 
     if (this.error) {
-      this.client.cancelTasks(this.error, isFinally);
+      if (this.client.task) {
+        this.client.cancelTasks(this.error, isFinally);
+      } else {
+        console.error(new PostgresError(this.error));
+      }
       this.error = null;
     } else if (this.client.task?.isSent) {
       this.client.cancelTasks(PostgresError.of('Connection close'), isFinally);
@@ -72,16 +76,14 @@ export class Connection {
     }
   };
 
-  onTimeout = () => {
+  onTimeout(error) {
     if (this.client.isKeepAlive()) {
-      this.client.stream.setTimeout(
-        this.client.options.timeout,
-        this.onTimeout
-      );
+      this.error = error;
     } else {
-      this.disconnect();
+      this.isEnded = true;
+      this.client.stream.end();
     }
-  };
+  }
 
   onError = error => {
     this.error ??= error;
@@ -125,8 +127,7 @@ export class Connection {
     )
       .setNoDelay(true)
       .on('error', this.onError)
-      .once('close', this.onClose)
-      .setTimeout(this.client.options.timeout, this.onTimeout);
+      .once('close', this.onClose);
 
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();
@@ -143,7 +144,6 @@ export class Connection {
 
     try {
       await this.connecting.promise;
-
       this.isReady = true;
 
       if (this.retries) {
