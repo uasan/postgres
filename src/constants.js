@@ -11,6 +11,9 @@ export const DEFAULT_PARAMS = {
   // client_connection_check_interval: 10000,
   datestyle: 'iso',
   intervalstyle: 'iso_8601',
+  tcp_keepalives_count: '3',
+  tcp_keepalives_idle: '10min',
+  tcp_keepalives_interval: '10s',
   client_min_messages: 'WARNING',
 };
 
