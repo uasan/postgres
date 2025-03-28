@@ -59,7 +59,7 @@ export class PostgresError extends Error {
     internalPosition,
     [isPostgresError]: isPostgres,
     ...fields
-  }) {
+  } = {}) {
     super(message);
 
     if (isPostgres && severity) {

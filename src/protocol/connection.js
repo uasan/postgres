@@ -161,7 +161,7 @@ export class Connection {
         PostgresError.isFatal(e)
       ) {
         this.error = e;
-        throw new PostgresError(e);
+        throw e && new PostgresError(e);
       } else {
         await this.connected.promise;
       }
