@@ -13,6 +13,11 @@ export function listenSQL({ listeners, options }, name, action) {
     : `LISTEN ${name}`;
 }
 
+export const restoreListenSQL = ({ listeners }) =>
+  'LISTEN ' +
+  [...listeners.keys()].join(';LISTEN ') +
+  "; SET idle_session_timeout = '0'";
+
 export function unlistenSQL({ listeners, options }, name) {
   listeners.delete(name);
 

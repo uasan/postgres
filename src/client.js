@@ -19,7 +19,12 @@ import {
   TRANSACTION_ERROR,
   TRANSACTION_INACTIVE,
 } from './constants.js';
-import { listenSQL, notifySQL, unlistenSQL } from './utils/listen.js';
+import {
+  listenSQL,
+  notifySQL,
+  restoreListenSQL,
+  unlistenSQL,
+} from './utils/listen.js';
 
 export class PostgresClient extends BaseClient {
   pid = 0;
@@ -249,7 +254,7 @@ export class PostgresClient extends BaseClient {
 
   async onReconnected() {
     if (this.listeners.size) {
-      await this.query('LISTEN ' + [...this.listeners.keys()].join(';LISTEN '));
+      await this.query(restoreListenSQL(this));
     }
   }
 
