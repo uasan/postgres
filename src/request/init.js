@@ -60,9 +60,9 @@ export function parameterStatus(client) {
 
   switch (name.toLowerCase()) {
     case 'server_version':
-      if (+value < 14)
+      if (+value < 17)
         client.abort(
-          PostgresError.of(`Minimum supported version PostgreSQL 14`)
+          PostgresError.of(`Minimum supported version PostgreSQL 17`)
         );
       break;
 
