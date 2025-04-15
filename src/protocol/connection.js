@@ -58,9 +58,8 @@ export class Connection {
     this.client.options.signal?.removeEventListener('abort', this.onAbort);
 
     if (this.error) {
-      if (this.client.task) {
-        this.client.cancelTasks(this.error, isFinally);
-      }
+      this.client.cancelTasks(this.error, isFinally);
+
       this.error = null;
     } else if (this.client.task?.isSent) {
       this.client.cancelTasks(PostgresError.of('Connection close'), isFinally);
