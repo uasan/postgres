@@ -112,7 +112,7 @@ export class Task {
     this.resolve = resolve;
 
     if (this.client.stream === null) {
-      this.client.connection.connect().catch(console.error);
+      this.client.connection.connect().catch(noop);
     }
 
     if (!this.isSent && this.client.task === this) {

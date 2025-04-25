@@ -12,6 +12,7 @@ import '../types/net.js';
 import '../types/json.js';
 import '../types/tsquery.js';
 import '../types/tsvector.js';
+import '../types/vector.js';
 import '../types/record/type.js';
 
 import { Task } from '../task.js';

@@ -8,6 +8,7 @@ import { serializeArray } from '../types/array/serialize.js';
 export class Type {
   id = 0;
   name = '';
+  extension = '';
 
   type = null;
   array = null;
@@ -60,28 +61,28 @@ export class TypesMap extends Map {
     }
 
     if (type.id) {
-      return this.set(type.id, type);
+      this.set(type.id, type);
+    } else if (type.extension) {
+      names.set(type.extension + ':' + type.name, type);
     } else {
       names.set('pg_catalog.' + type.name, type);
-      return this;
     }
+    return this;
   }
 
   setType(data) {
     const type = this.factory(data.oid);
 
-    if (type.name) {
-      return;
-    }
+    if (type.name === '') {
+      type.name = data.name;
 
-    type.name = data.name;
+      if (names.has(data.ext ?? type.name)) {
+        assign(type, names.get(data.ext ?? type.name)).id = data.oid;
+      }
 
-    if (names.has(type.name)) {
-      assign(type, names.get(type.name)).id = data.oid;
-    }
-
-    if (data.array) {
-      this.setArrayType(type, data.array);
+      if (data.array) {
+        this.setArrayType(type, data.array);
+      }
     }
   }
 

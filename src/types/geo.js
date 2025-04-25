@@ -56,12 +56,14 @@ types
   .addType({
     id: NaN,
     name: 'cube',
+    extension: 'cube',
     decode: decodeGeo,
     encode: noop,
   })
   .addType({
     id: NaN,
     name: 'earth',
+    extension: 'earthdistance',
     decode: decodeGeo,
     encode: noop,
   });
