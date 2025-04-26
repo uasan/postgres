@@ -5,6 +5,8 @@ import { serializeArray } from '../types/array/serialize.js';
 
 //https://github.com/npgsql/doc/blob/main/dev/types.md/#L1
 
+const names = new Map();
+
 export class Type {
   id = 0;
   name = '';
@@ -34,7 +36,6 @@ export class Type {
   }
 }
 
-const names = new Map();
 export class TypesMap extends Map {
   factory(id) {
     return this.get(id) ?? this.create(id);
@@ -60,13 +61,14 @@ export class TypesMap extends Map {
       this.setArrayType(type, array);
     }
 
-    if (type.id) {
+    if (type.id || type.id === 0) {
       this.set(type.id, type);
     } else if (type.extension) {
       names.set(type.extension + ':' + type.name, type);
-    } else {
-      names.set('pg_catalog.' + type.name, type);
+    } else if (type.name) {
+      names.set(type.name, type);
     }
+
     return this;
   }
 
