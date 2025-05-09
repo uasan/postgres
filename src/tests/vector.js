@@ -14,6 +14,7 @@ async function test() {
     await db.sql`
       SELECT
         ${[1, 2, 3]}::vector(3) AS vector,
+        ${[1, 2, 3]}::halfvec(3) AS halfvec,
         ${new SparseVector(5).set(0, 1.25)}::sparsevec AS sparsevec
   `.asObject()
   );
