@@ -3,7 +3,6 @@ import { Queue } from './utils/queue.js';
 import { Reader } from './protocol/reader.js';
 import { Writer } from './protocol/writer.js';
 import { Connection } from './protocol/connection.js';
-import { normalizeOptions } from './utils/options.js';
 import { TRANSACTION_INACTIVE } from './constants.js';
 import { Slot } from './replica/slot.js';
 import { Origin } from './store/origin.js';
@@ -12,6 +11,10 @@ import { WAL } from './replica/wal.js';
 import { LSN } from './replica/lsn.js';
 import { PostgresClient } from './client.js';
 import { BaseClient } from './protocol/client.js';
+import {
+  normalizeOptions,
+  setOptionsToReplicaClient,
+} from './utils/options.js';
 
 export class PostgresReplication extends BaseClient {
   pid = 0;
@@ -47,11 +50,11 @@ export class PostgresReplication extends BaseClient {
     this.origin = Origin.get(this.options);
     this.types = this.origin.types;
 
-    this.client = new PostgresClient(options);
+    this.client = new PostgresClient(setOptionsToReplicaClient(options));
 
-    this.options.timeout = 0;
     this.options.cache = null;
     this.options.parameters.replication = 'database';
+    this.options.parameters.idle_session_timeout = '0';
     this.options.parameters.session_replication_role = 'replica';
 
     this.wal.init(this);

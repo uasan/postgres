@@ -33,7 +33,7 @@ export const shortSQL = sql =>
   sql.replace(/\s+/g, ' ').trimStart().slice(0, 320);
 
 export function highlightErrorSQL(sql, position) {
-  const max = 64;
+  const max = 80;
 
   let left = sql
     .slice(0, position - 1)
@@ -61,7 +61,7 @@ export function highlightErrorSQL(sql, position) {
   }
 
   return (
-    left + right + '\n' + ' '.repeat(left.length) + red('^'.repeat(length))
+    left + right + '\n' + ' '.repeat(left.length + 5) + red('^'.repeat(length))
   );
 }
 

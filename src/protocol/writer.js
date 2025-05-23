@@ -91,6 +91,11 @@ export class Writer {
     return this;
   }
 
+  setLength(value) {
+    this.view.setUint32(this.alloc(4), value);
+    return this.alloc(value);
+  }
+
   setBytes(value) {
     this.bytes.set(value, this.alloc(value.length));
     return this;

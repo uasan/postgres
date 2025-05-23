@@ -59,6 +59,7 @@ export class Connection {
 
     if (this.error) {
       this.client.cancelTasks(this.error, isFinally);
+
       this.error = null;
     } else if (this.client.task?.isSent) {
       this.client.cancelTasks(PostgresError.of('Connection close'), isFinally);
@@ -72,16 +73,13 @@ export class Connection {
     }
   };
 
-  onTimeout = () => {
+  onTimeout(error) {
     if (this.client.isKeepAlive()) {
-      this.client.stream.setTimeout(
-        this.client.options.timeout,
-        this.onTimeout
-      );
+      console.error(new PostgresError(error));
     } else {
-      this.disconnect();
+      this.isEnded = true;
     }
-  };
+  }
 
   onError = error => {
     this.error ??= error;
@@ -124,9 +122,9 @@ export class Connection {
       this.onConnect
     )
       .setNoDelay(true)
+      .setKeepAlive(true, 300000)
       .on('error', this.onError)
-      .once('close', this.onClose)
-      .setTimeout(this.client.options.timeout, this.onTimeout);
+      .once('close', this.onClose);
 
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();
@@ -143,7 +141,6 @@ export class Connection {
 
     try {
       await this.connecting.promise;
-
       this.isReady = true;
 
       if (this.retries) {
@@ -163,7 +160,7 @@ export class Connection {
         PostgresError.isFatal(e)
       ) {
         this.error = e;
-        throw new PostgresError(e);
+        throw e && new PostgresError(e);
       } else {
         await this.connected.promise;
       }

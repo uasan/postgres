@@ -9,7 +9,6 @@ export const normalizeOptions = ({
   path = '',
   port = 5432,
   host = '127.0.0.1',
-  timeout = 1_000_000,
   database = 'postgres',
   username = 'postgres',
   password = '',
@@ -22,7 +21,6 @@ export const normalizeOptions = ({
   path,
   cache,
   signal,
-  timeout,
   database,
   username,
   password,
@@ -33,3 +31,10 @@ export const normalizeOptions = ({
     ...parameters,
   },
 });
+
+export function setOptionsToReplicaClient(options) {
+  options = normalizeOptions(options);
+  options.parameters.idle_session_timeout = '10min';
+
+  return options;
+}

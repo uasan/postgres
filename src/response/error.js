@@ -59,7 +59,7 @@ export class PostgresError extends Error {
     internalPosition,
     [isPostgresError]: isPostgres,
     ...fields
-  }) {
+  } = {}) {
     super(message);
 
     if (isPostgres && severity) {
@@ -79,7 +79,11 @@ export class PostgresError extends Error {
     }
 
     if (where) {
-      message += '\n' + where.trim();
+      if (where.includes('\n')) {
+        message += '\n' + where.slice(0, where.indexOf('\n')).trim();
+      } else {
+        message += '\n' + where.trim();
+      }
     }
 
     if (hint) {
@@ -88,7 +92,7 @@ export class PostgresError extends Error {
 
     if (query) {
       if (internalPosition) {
-        message += '\n' + highlightErrorSQL(query, internalPosition);
+        message += '\nSQL: ' + highlightErrorSQL(query, internalPosition);
       } else {
         message += '\nSQL: ' + shortSQL(query);
       }
@@ -96,7 +100,7 @@ export class PostgresError extends Error {
       sql = String(sql);
 
       if (position) {
-        message += '\n' + highlightErrorSQL(sql, position);
+        message += '\nSQL: ' + highlightErrorSQL(sql, position);
       } else {
         message += '\nSQL: ' + shortSQL(sql);
       }
@@ -110,7 +114,24 @@ export class PostgresError extends Error {
   }
 
   static isFatal(error) {
-    return error.severity === 'FATAL' && error.code !== '57P03';
+    switch (error.code) {
+      case '57P03':
+      case '57P05':
+        return false;
+
+      default:
+        return error.severity === 'FATAL';
+    }
+  }
+
+  static isTimeout(error) {
+    switch (error.code) {
+      case '57P05':
+        return true;
+
+      default:
+        return false;
+    }
   }
 
   static of(message) {
@@ -136,18 +157,17 @@ export class PostgresError extends Error {
 export function errorResponse({ pid, task, reader, connection }) {
   const error = makeError(pid, reader);
 
-  if (PostgresError.isFatal(error)) {
-    connection.error = error;
-  }
-
   if (task) {
     if (task.sql) {
       error.sql ??= task.sql;
     }
     task.error(error);
+  } else if (PostgresError.isTimeout(error)) {
+    connection.onTimeout(error);
+  } else if (PostgresError.isFatal(error)) {
+    connection.error = error;
   } else {
     connection.disconnect(error);
-    console.error(new PostgresError(error));
   }
 }
 
