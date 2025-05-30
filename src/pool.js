@@ -27,8 +27,8 @@ export class PostgresPool extends Array {
       this[i] = new PostgresClient(options, this);
   }
 
-  connect() {
-    return this[0].connect();
+  async connect() {
+    await this[0].connect();
   }
 
   getClient() {
@@ -84,7 +84,11 @@ export class PostgresPool extends Array {
     return false;
   }
 
-  disconnect() {
-    return Promise.all(this.map(client => client.disconnect()));
+  async reset(options) {
+    await Promise.all(this.map(client => client.reset(options)));
+  }
+
+  async disconnect() {
+    await Promise.all(this.map(client => client.disconnect()));
   }
 }
