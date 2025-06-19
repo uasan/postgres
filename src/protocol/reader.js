@@ -41,7 +41,7 @@ export class Reader {
       }
 
       if (this.offset) {
-        this.bytes.set(new Uint8Array(this.buffer, this.offset, this.length));
+        this.bytes.copyWithin(0, this.offset, this.offset + this.length);
         this.offset = 0;
       }
 
