@@ -19,8 +19,8 @@ async function test() {
 
   const tnx = await db.begin();
 
-  await tnx.sql`SET LOCAL transaction_timeout = '3s'`;
-  await tnx.sql`SELECT pg_sleep(5)`;
+  await tnx.query(`SET LOCAL transaction_timeout = '3s'`);
+  await tnx.query`SELECT pg_sleep(5)`;
 }
 
 await test().catch(console.error);
