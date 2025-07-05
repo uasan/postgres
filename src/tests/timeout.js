@@ -8,20 +8,19 @@ const db = new PostgresPool({
   password: 'pass',
   database: 'postgres',
   parameters: {
-    idle_session_timeout: '3s',
+    idle_session_timeout: '300s',
   },
 });
 
 async function test() {
-  //let index = 0;
-
   await db.query(`SELECT 1`);
   await db.listen(`name`, console.log);
   await db.unlisten(`name`);
 
-  // setInterval(() => {
-  //   db.query(`SELECT 1`, []);
-  // }, 500);
+  const tnx = await db.begin();
+
+  await tnx.sql`SET LOCAL transaction_timeout = '3s'`;
+  await tnx.sql`SELECT pg_sleep(5)`;
 }
 
 await test().catch(console.error);
