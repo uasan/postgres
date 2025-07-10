@@ -1,7 +1,8 @@
 export interface PostgresClient {
-  query(string: string, values?: any[], mode?: number): Promise<any>;
+  query(sql: string, values?: any[]): Promise<unknown>;
+  isTransaction(): boolean;
 }
 
-export interface PostgresPool {
-  query(string: string, values?: any[], mode?: number): Promise<any>;
+export interface PostgresPool extends PostgresClient {
+
 }
