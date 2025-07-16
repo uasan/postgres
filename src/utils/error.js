@@ -24,7 +24,7 @@ export function makeErrorEncodeParameter(task, index) {
   const { name } = task.statement.encoders[index];
 
   const position = sql.indexOf('$' + (index + 1)) + 1;
-  const message = `Invalid value param $${index + 1}::${name} = ${stringify(task.values[index])}`;
+  const message = `Invalid value for parameter $${index + 1}::${name} = ${stringify(task.values[index])}`;
 
   return { status: 422, sql, position, message };
 }
