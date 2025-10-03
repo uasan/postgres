@@ -81,7 +81,7 @@ export class PostgresClient extends BaseClient {
   }
 
   sql(source, ...values) {
-    return new SQL(source, values, this);
+    return new SQL(this).set(source, values);
   }
 
   async ready() {
