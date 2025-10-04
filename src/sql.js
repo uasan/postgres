@@ -188,4 +188,8 @@ export class SQLBuilder extends SQL {
 
     return this;
   }
+
+  builder() {
+    return new SQLBuilder(this.client);
+  }
 }
