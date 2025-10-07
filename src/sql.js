@@ -113,6 +113,10 @@ export class SQL {
     for (let i = 1; i < source.length; i++) text += '$' + i + source[i];
     return text;
   }
+
+  [Symbol.asyncIterator]() {
+    return this.getTask().iterate(this.toString(), this.values);
+  }
 }
 
 class Parts extends Array {
