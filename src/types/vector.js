@@ -24,7 +24,7 @@ function encodeVector(writer, array) {
 }
 
 function decodeHalfVector({ view, offset }) {
-  const array = new Float16Array(view.getUint16(offset));
+  const array = new Array(view.getUint16(offset)); //new Float16Array(view.getUint16(offset));
   offset += 4;
 
   for (let i = 0; i < array.length; i++) {
