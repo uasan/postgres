@@ -92,8 +92,22 @@ class Parser {
       this.pos = i + 1;
       word += "'" + this.getWordFromQuote(text);
     } else if (text[i - 1] === '\\') {
+      let slashes = '';
+
+      for (let s = i - 1; s >= 0; s--) {
+        if (text[s] === '\\') {
+          slashes += '\\';
+        } else break;
+      }
+
       this.pos = i;
-      word = word.slice(0, -1) + "'" + this.getWordFromQuote(text);
+
+      if (slashes.length % 2) {
+        word = word.slice(0, -1) + "'" + this.getWordFromQuote(text);
+      } else {
+        word = word.slice(0, -(slashes.length / 2));
+        this.pos = i + 1;
+      }
     } else {
       this.pos = i + 1;
     }
