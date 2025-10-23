@@ -47,7 +47,7 @@ export class PostgresPool extends Array {
   }
 
   sql(source, ...values) {
-    return new SQL(source, values, this);
+    return new SQL(this).set(source, values);
   }
 
   prepare() {
