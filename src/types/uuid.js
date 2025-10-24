@@ -39,21 +39,16 @@ function encodeUUID(writer, uuid) {
     bytes.set(uuid, i + 4);
   } else {
     let v = 0;
-
     bytes[i + 4] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
     bytes[i + 5] = (v >>> 16) & 0xff;
     bytes[i + 6] = (v >>> 8) & 0xff;
     bytes[i + 7] = v & 0xff;
-
     bytes[i + 8] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
     bytes[i + 9] = v & 0xff;
-
     bytes[i + 10] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
     bytes[i + 11] = v & 0xff;
-
     bytes[i + 12] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
     bytes[i + 13] = v & 0xff;
-
     bytes[i + 14] =
       ((v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000) & 0xff;
     bytes[i + 15] = (v / 0x100000000) & 0xff;
