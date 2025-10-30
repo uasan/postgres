@@ -60,6 +60,6 @@ export async function* Iterator(task) {
   } catch (error) {
     throw new PostgresError(error);
   } finally {
-    task.statement.end(task);
+    task.statement?.end(task);
   }
 }
