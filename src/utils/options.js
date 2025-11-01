@@ -1,11 +1,11 @@
 import { noop } from '#native';
 import { DEFAULT_PARAMS } from '../constants.js';
 
-export const normalizeOptions = ({
-  ns = '_',
-  signal,
+export function normalizeOptions({
   cache,
+  signal,
   parameters,
+  ns = '_',
   path = '',
   port = 5432,
   host = '127.0.0.1',
@@ -14,23 +14,25 @@ export const normalizeOptions = ({
   password = '',
   onMessage = noop,
   maxConnections = 1,
-} = {}) => ({
-  ns,
-  port,
-  host,
-  path,
-  cache,
-  signal,
-  database,
-  username,
-  password,
-  onMessage,
-  maxConnections,
-  parameters: {
-    ...DEFAULT_PARAMS,
-    ...parameters,
-  },
-});
+} = {}) {
+  return {
+    ns,
+    port,
+    host,
+    path,
+    cache,
+    signal,
+    database,
+    username,
+    password,
+    onMessage,
+    maxConnections,
+    parameters: {
+      ...DEFAULT_PARAMS,
+      ...parameters,
+    },
+  };
+}
 
 export function setOptionsToReplicaClient(options) {
   options = normalizeOptions(options);
