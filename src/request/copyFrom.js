@@ -13,6 +13,7 @@ import {
 class UnderlyingSink {
   task = null;
   writer = null;
+  promise = Promise.resolve();
 
   constructor(task, writer) {
     this.task = task;
@@ -24,7 +25,8 @@ class UnderlyingSink {
   }
 
   write(chunk) {
-    return this.writer.type(MESSAGE_COPY_DATA).setBytes(chunk).end().promise;
+    this.writer.type(MESSAGE_COPY_DATA).setBytes(chunk).end();
+    return this.promise;
   }
 
   async abort(reason = 'Abort') {
@@ -154,6 +156,6 @@ export function copyInResponse({ task, writer }) {
   task.resolve(
     task.copy
       ? new Writer(task, writer)
-      : new WritableStream(new UnderlyingSink(task, writer))
+      : new WritableStream(new UnderlyingSink(task, writer)),
   );
 }

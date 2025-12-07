@@ -8,22 +8,23 @@
   "type": "module",
   "typings": "index.d.ts",
   "engines": {
-    "node": ">=21.1.0"
+    "node": ">=25.1.0"
   },
   "main": "./index.js",
   "imports": {
     "#native": "./src/utils/native.js"
   },
-  "scripts": {},
+  "scripts": {
+    "lint": "biome lint .",
+    "lint:fix": "biome lint . --write",
+    "format": "biome format .",
+    "format:fix": "biome format . --write"
+  },
   "dependencies": {
     "temporal-polyfill": "latest"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "latest",
-    "eslint": "latest",
-    "eslint-config-prettier": "latest",
-    "eslint-plugin-import": "latest",
-    "eslint-plugin-node": "latest",
-    "eslint-plugin-prettier": "latest"
+    "@biomejs/biome": "latest",
+    "@types/node": "latest"
   }
 }
