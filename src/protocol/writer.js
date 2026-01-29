@@ -51,7 +51,9 @@ export class Writer {
   };
 
   async write() {
-    do {
+    await promiseImmediate;
+
+    while (this.ending !== this.length) {
       //console.log('WRITING', this.offset, this.ending, this.length);
 
       const begin = this.ending;
@@ -66,9 +68,7 @@ export class Writer {
       } catch {
         break;
       }
-
-      await promiseImmediate;
-    } while (this.ending !== this.length);
+    }
 
     this.length = 0;
     this.offset = 0;
