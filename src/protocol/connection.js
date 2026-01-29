@@ -1,4 +1,4 @@
-import { createConnection } from 'net';
+import { createConnection } from 'node:net';
 import { handshake } from '../request/init.js';
 import { randomTimeout } from '#native';
 import { MESSAGE_TERMINATE } from './messages.js';
@@ -95,7 +95,7 @@ export class Connection {
 
       this.client.cancelTasks(
         PostgresError.abortTransaction(this.client),
-        true
+        true,
       );
     }
 
@@ -119,12 +119,13 @@ export class Connection {
         host: this.client.options.host,
         port: this.client.options.port,
       },
-      this.onConnect
+      this.onConnect,
     )
       .setNoDelay(true)
       .setKeepAlive(true, 300000)
       .on('error', this.onError)
-      .once('close', this.onClose);
+      .once('close', this.onClose)
+      .on('drain', this.client.writer.onDrain);
 
     this.connected ??= Promise.withResolvers();
     this.connecting = Promise.withResolvers();

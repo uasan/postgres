@@ -23,6 +23,12 @@ export const //
 
 export const now = () => BigInt(Date.now() - 946684800000) * 1000n;
 
+export const promiseImmediate = {
+  then(resolve) {
+    resolve();
+  },
+};
+
 export const randomTimeout = {
   then(resolve) {
     const delay = ceil(500 + random() * 5000);

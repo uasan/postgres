@@ -1,4 +1,4 @@
-import { noop } from '#native';
+import { noop, promiseImmediate } from '#native';
 import { textEncoder } from '../utils/string.js';
 import { MESSAGE_FLUSH, MESSAGE_SYNC } from './messages.js';
 import { BUFFER_LENGTH, BUFFER_MAX_LENGTH } from '../constants.js';
@@ -8,6 +8,7 @@ export class Writer {
   offset = 0;
   ending = 0;
   reject = noop;
+  resolve = noop;
   client = null;
   promise = null;
 
@@ -36,42 +37,46 @@ export class Writer {
     return length;
   }
 
+  onDrain = () => {
+    this.resolve();
+    this.reject = noop;
+    this.resolve = noop;
+  };
+
   promisify = {
     then: (resolve, reject) => {
-      this.client.stream.write(
-        this.bytes.subarray(this.ending, this.length),
-        null,
-        resolve
-      );
-
       this.reject = reject;
-      this.ending = this.length;
+      this.resolve = resolve;
     },
   };
 
   async write() {
     do {
+      //console.log('WRITING', this.offset, this.ending, this.length);
+
+      const begin = this.ending;
+      this.ending =
+        this.length - begin > BUFFER_LENGTH
+          ? begin + BUFFER_LENGTH
+          : this.length;
+
       try {
-        //console.log('A', this.offset, this.ending, this.length);
-        await this.promisify;
-        // console.log('B', this.offset, this.ending, this.length);
-        // console.log();
+        if (!this.client.stream.write(this.bytes.subarray(begin, this.ending)))
+          await this.promisify;
       } catch {
         break;
       }
-    } while (this.ending !== this.length);
 
-    //71079
-    //70878
-    //590727
+      await promiseImmediate;
+    } while (this.ending !== this.length);
 
     this.length = 0;
     this.offset = 0;
     this.ending = 0;
 
-    this.reject = noop;
     this.promise = null;
     //this.buffer.resize(BUFFER_LENGTH);
+    //console.log('WRITED', this.offset, this.ending, this.length);
   }
 
   clear() {
@@ -110,7 +115,7 @@ export class Writer {
 
     this.length += textEncoder.encodeInto(
       value,
-      this.bytes.subarray(this.length)
+      this.bytes.subarray(this.length),
     ).written;
 
     return this;

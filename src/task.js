@@ -256,7 +256,7 @@ export class Task {
 
   async copyFrom(table, options) {
     this.copy = await new Task(this.client).describe(
-      getDescribeTable(table, options?.columns)
+      getDescribeTable(table, options?.columns),
     );
     return await this.execute(makeCopyFromSQL(table, options), nullArray);
   }
