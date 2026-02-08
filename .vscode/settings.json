@@ -13,5 +13,7 @@
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": "explicit"
-  }
+  },
+  "biome.requireConfiguration": true,
+  "biome.lsp.bin": "./node_modules/.bin/biome"
 }
