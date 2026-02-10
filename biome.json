@@ -26,7 +26,8 @@
         "noThisInStatic": "off"
       },
       "suspicious": {
-        "noThenProperty": "off"
+        "noThenProperty": "off",
+        "noAssignInExpressions": "off"
       },
       "correctness": {
         "noConstantCondition": "off"

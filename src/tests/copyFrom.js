@@ -15,7 +15,7 @@ async function test() {
     await db.query('TRUNCATE ludicloud.import_data_users');
 
     const writer = await db.prepare().copyFrom('ludicloud.import_data_users', {
-      columns: ['_index', '_task_id', 'location_queries'],
+      columns: ['_index', '_task_id', 'username'],
       freeze: true,
     });
 
@@ -36,7 +36,7 @@ async function test() {
       await writer.write({
         _index: i,
         _task_id: i,
-        location_queries: ['AAA'],
+        username: i + 'AAA'.repeat(1024 + i),
       });
     }
 
@@ -49,7 +49,7 @@ async function test() {
     await db.rollback();
   }
 
-  console.log(await db.query(`SELECT 'END'`, []));
+  console.log(await db.query(`SELECT 'END' as status`, []));
   await db.disconnect();
 }
 

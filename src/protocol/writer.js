@@ -63,8 +63,13 @@ export class Writer {
           : this.length;
 
       try {
-        if (!this.client.stream.write(this.bytes.subarray(begin, this.ending)))
+        const isWrited = this.client.stream.write(
+          this.bytes.slice(begin, this.ending),
+        );
+
+        if (isWrited === false) {
           await this.promisify;
+        }
       } catch {
         break;
       }
