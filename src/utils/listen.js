@@ -22,8 +22,8 @@ export function unlistenSQL({ listeners, options }, name) {
   listeners.delete(name);
 
   return listeners.size === 0 && options.parameters.idle_session_timeout
-    ? `LISTEN ${name}; SET idle_session_timeout = '${options.parameters.idle_session_timeout}'`
-    : `LISTEN ${name}`;
+    ? `UNLISTEN ${name}; SET idle_session_timeout = '${options.parameters.idle_session_timeout}'`
+    : `UNLISTEN ${name}`;
 }
 
 export function notifySQL(client, name, value) {
